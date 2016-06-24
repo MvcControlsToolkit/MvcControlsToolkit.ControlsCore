@@ -1,21 +1,16 @@
-﻿{
+{
     "description": "Core code and template for Mvc Controls Toolkit controls definition",
     "version": "1.0.0-rc2-final",
     "authors": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
     "packOptions": {
-        "requireLicenseAcceptance":  true,
+        "requireLicenseAcceptance": true,
+        "releaseNotes": "First public release",
+        "iconUrl": "https://avatars2.githubusercontent.com/u/15634526?v=3&s=200",
         "owners": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
         "licenseUrl": "https://github.com/MvcControlsToolkit/Home/blob/master/LICENSE.txt",
         "repository": {
             "type": "git",
             "url": "git://github.com/MvcControlsToolkit/MvcControlsToolkit.ControlsCore.git"
-        },
-        "files": {
-            "mappings": {
-                "Views/Shared/": "Views/Shared/*.cshtml",
-                "tasks/": "tasks/*.js",
-                "wwwroot/startupjs/": "wwwroot/startupjs/*.js"
-            }
         },
         "tags": [
             "aspnetcore",
@@ -24,29 +19,17 @@
     },
     "frameworks": {
         "net451": {
-            "frameworkAssemblies": {
-                "System.ComponentModel.DataAnnotations": "",
-                "System.Dynamic.Runtime": ""
-            }
+            
         },
         "netstandard1.5": {
             "imports": [
                 "dotnet5.6",
                 "dnxcore50",
                 "portable-net45+win8"
-            ],
-            "dependencies": {
-                "NETStandard.Library": "1.5.0-rc2-24027",
-                "System.ComponentModel.Annotations": "4.1.0-rc2-24027",
-                "System.ComponentModel.TypeConverter": "4.0.1-rc2-24027",
-                "System.Reflection.TypeExtensions": "4.1.0-rc2-24027",
-                "Microsoft.CSharp": "4.0.1-rc2-24027",
-                "System.Dynamic.Runtime": "4.0.11-rc2-24027"
-            }
+            ]
         }
     },
     "dependencies": {
-        "Microsoft.EntityFrameworkCore": "1.0.0-rc2-final"
-
+        "MvcControlsToolkit.Core": "1.0.0-rc2-final"
     }
 }
