@@ -2,7 +2,7 @@
     "title": " Mvc Controls Toolkit controls definitions",
     "copyright": "Mvc Controls Toolkit Team",
     "description": "Core code for Mvc Controls Toolkit controls definitions",
-    "version": "1.0.0-rc2-final",
+    "version": "1.0.0",
     "authors": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
     "packOptions": {
         "projectUrl": "https://github.com/MvcControlsToolkit/MvcControlsToolkit.Core",
@@ -24,7 +24,7 @@
         "net451": {
 
         },
-        "netstandard1.5": {
+        "netstandard1.6": {
             "imports": [
                 "dotnet5.6",
                 "dnxcore50",
@@ -33,6 +33,6 @@
         }
     },
     "dependencies": {
-        "MvcControlsToolkit.Core": "1.0.0-rc2-final"
+        "MvcControlsToolkit.Core": "1.0.0"
     }
 }
