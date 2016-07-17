@@ -2,12 +2,12 @@
     "title": " Mvc Controls Toolkit controls definitions",
     "copyright": "Mvc Controls Toolkit Team",
     "description": "Core code for Mvc Controls Toolkit controls definitions",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "authors": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
     "packOptions": {
         "projectUrl": "https://github.com/MvcControlsToolkit/MvcControlsToolkit.Core",
         "requireLicenseAcceptance": true,
-        "releaseNotes": "First public release",
+        "releaseNotes": "Bug fix release",
         "iconUrl": "https://avatars2.githubusercontent.com/u/15634526?v=3&s=200",
         "owners": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
         "licenseUrl": "https://github.com/MvcControlsToolkit/Home/blob/master/LICENSE.txt",
@@ -33,6 +33,6 @@
         }
     },
     "dependencies": {
-        "MvcControlsToolkit.Core": "1.0.0"
+        "MvcControlsToolkit.Core": "1.0.1"
     }
 }
