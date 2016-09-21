@@ -12,8 +12,10 @@ using MvcControlsToolkit.Core.Templates;
 
 namespace MvcControlsToolkit.Controllers
 {
-     
-    public abstract class ServerCrudController<VMD, VMS, D> : Controller
+    public abstract class ServerCrudController : Controller
+    {
+    }
+    public abstract class ServerCrudController<VMD, VMS, D> : ServerCrudController
     {
         private RowType row;
         private Functionalities requiredFunctionalities;
@@ -30,7 +32,7 @@ namespace MvcControlsToolkit.Controllers
             row = ControllerHelpers.GetRowType(this.GetType());
             requiredFunctionalities=row.RequiredFunctionalities(User);
             this.factory = factory;
-            if (factory != null) localizer = factory.Create("ServerCrudController", null);
+            if (factory != null) localizer = factory.Create(typeof(ServerCrudController));
         }
         private string localize(string x)
         {
@@ -53,6 +55,7 @@ namespace MvcControlsToolkit.Controllers
                 {
                     ViewData.TemplateInfo.HtmlFieldPrefix = prefix+"[_" + Guid.NewGuid().ToString("N")+"]";
                 }
+                ViewData.ModelExplorer = row.For.ModelExplorer.GetExplorerForModel(model);
                 return PartialView(template.TemplateName, model);
             }
             else if (template.Type == Core.TagHelpers.TemplateType.ViewComponent)
@@ -76,7 +79,10 @@ namespace MvcControlsToolkit.Controllers
         public ICRUDRepository Repository { get; protected set; }
         public virtual bool DetailFull{get{ return false; }}
         public virtual bool InLineFull { get { return false; } }
-        public abstract string DeatailView  { get; }
+        public virtual bool UseAntiForgery { get { return false; } }
+        public virtual string DeatailView  { get { return "DefaultServerItemDetail"; } }
+        public virtual string DeatailTitle { get { return "Item detail"; } }
+        public virtual string DeatailKeyName { get { return null; } }
         protected IEnumerable<ModelError> PackErrors(ModelStateDictionary ms)
         {
             return ms
@@ -177,11 +183,26 @@ namespace MvcControlsToolkit.Controllers
             else if (key == null && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             
             if (!ModelState.IsValid) return Content("#"+ErrorMessage(0), "text/plain");
-            if (key == null) return PartialView();
+            if (key == null)
+            {
+                ViewData.ModelExplorer = row.For.ModelExplorer.GetExplorerForExpression(typeof(VMD), null);
+                ViewData["id"] = "_" + Guid.NewGuid().ToString("N");
+                ViewData["localizer"] = new Func<string, string>(localize);
+                ViewData["title"] = DeatailTitle;
+                ViewData["KeyName"] = DeatailKeyName;
+                
+                ViewBag.ReadOnly = false;
+                return PartialView(DeatailView);
+            }
             try
             {
                 var res = await Repository.GetById<VMD, D>(key);
                 if (res == null) return Content("#"+ ErrorMessage(2), "text/plain");
+                ViewData.ModelExplorer = row.For.ModelExplorer.GetExplorerForExpression(typeof(VMD), res);
+                ViewData["id"] = "_" + Guid.NewGuid().ToString("N");
+                ViewData["localizer"] = new Func<string, string>(localize);
+                ViewData["title"]=DeatailTitle;
+                ViewData["KeyName"] = DeatailKeyName;
                 ViewBag.ReadOnly = readOnly.HasValue && readOnly.Value;
                 return PartialView(DeatailView, res);
             }

@@ -16,11 +16,11 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
     public class DefaultServerControlsTagHelpersProvider : ITagHelpersProvider
     {
         private const string buttonTemplate = @"
-<button data-operation='{0} {1}' class='btn {2}' aria-label='{3}' title='{3}'>
+<button data-operation='{0} {1}' class='btn {2}' aria-label='{3}' title='{3}' type='{5}'>
 <span class='glyphicon {4}' aria-hidden='true'></span>
 </button>";
         private const string buttonTemplateWithText = @"
-<button data-operation='{0} {1}' class='btn {2}' title='{3}'>
+<button data-operation='{0} {1}' class='btn {2}' title='{3}' type='{5}'>
 <span class='glyphicon {4}' aria-hidden='true'></span> {3}
 </button>";
         protected class ButtonProperties
@@ -298,7 +298,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                     ShowText = "sort descending"
                 });
         }
-        public  IHtmlContent RenderButton(StandardButtons buttonType, string arguments, string cssClass, ContextualizedHelpers helpers, IStringLocalizer localizer, bool visibleText=false)
+        public  IHtmlContent RenderButton(StandardButtons buttonType, string arguments, string cssClass, ContextualizedHelpers helpers, IStringLocalizer localizer, bool visibleText=false, bool isSubmit=false)
         {
             ButtonProperties currentButton = null;
             allButtonProperties.TryGetValue(buttonType, out currentButton);

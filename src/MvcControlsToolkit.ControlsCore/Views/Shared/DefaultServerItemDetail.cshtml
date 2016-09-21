@@ -1,0 +1,39 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+
+    var id = ViewData["id"] as string;
+    var factory = ViewData["localizer"] as Func<string, string>;
+    var title = ViewData["title"] as string;
+    var ReadOnly = (bool)ViewData["ReadOnly"];
+    var KeyName = ViewData["KeyName"] as string;
+    
+}
+<div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="@(id+"_label")">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="@(id+"_label")">@title</h4>
+            </div>
+            <div class="modal-body">
+                <detail-form 
+                    all-properties="@true" 
+                    localization-type="@typeof(MvcControlsToolkit.Controllers.ServerCrudController)" 
+                    key="@KeyName"
+                    FormMethod="Post"
+                    FormAction="@Url.Action("EditDetail")"
+                    edit-mode-default="@(!ReadOnly)"
+                />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

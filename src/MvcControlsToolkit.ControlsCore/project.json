@@ -37,6 +37,6 @@
     },
     "dependencies": {
         "Microsoft.Extensions.FileProviders.Embedded": "1.0.0",
-        "MvcControlsToolkit.Core": "1.1.0.35"
+        "MvcControlsToolkit.Core": "1.1.0.37"
     }
 }

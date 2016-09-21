@@ -1,0 +1,78 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+    var options = ViewData["Options"] as DefaultServerDetailLayoutOptions;
+    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var currProvider = ViewContext.TagHelperProvider();
+    var row = options.Rows[0];
+    var localizer = row.GetLocalizer(helpers.LocalizerFactory);
+}
+@if (options.EditMode)
+{
+    bool maibarFound = false;
+    
+    <form @(options.Id != null ? "id='"+options.Id+"'" : "")
+          class="@(options.CssClass??"form-horizontal")"
+          action="@(options.FormAction??string.Empty)"
+          method="@(options.FormMethod??"POST")"
+          asp-antiforgery="@options.Antiforgery">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @foreach (var bar in options.Toolbars)
+        {
+            if (bar.Key == "header-edit" || bar.Key == "header-both")
+            {
+                @bar.Value
+            }
+
+        }
+        @options.MainContent
+        @foreach (var bar in options.Toolbars)
+        {
+            if (bar.Key == "submit-bar")
+            {
+                maibarFound = true;
+                @bar.Value
+            }
+            else if (bar.Key == "footer-edit" || bar.Key == "footer-both")
+            {
+                @bar.Value
+            }
+
+        }
+        @if (!maibarFound)
+        {
+            <div class="form-group">
+                @currProvider.RenderButton(StandardButtons.Save, null, "btn-primary", helpers, localizer, true, true)
+            </div>
+        }
+          
+    </form>
+}
+else
+{
+    <div @(options.Id != null ? "id='"+options.Id+"'": "")
+         class="@(options.CssClass??"form-horizontal")">
+        @foreach (var bar in options.Toolbars)
+        {
+            if (bar.Key == "header-display" || bar.Key == "header-both")
+            {
+                @bar.Value
+            }
+
+        }
+        @options.MainContent
+        @foreach (var bar in options.Toolbars)
+        {
+            if (bar.Key == "footer-display" || bar.Key == "footer-both")
+            {
+                @bar.Value
+            }
+        }
+    </div>
+}
+
+

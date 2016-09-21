@@ -6,8 +6,8 @@
 @using System.Globalization
 @{
     var options = ViewData["Options"] as DefaultServerPagerLayoutOptions;
-    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, );
     var factory = ViewData["LocalizerFactory"] as IStringLocalizerFactory;
+
     var localizer = options.GetLocalizerFunction(factory);
 }
 @if (options.HasPages)
