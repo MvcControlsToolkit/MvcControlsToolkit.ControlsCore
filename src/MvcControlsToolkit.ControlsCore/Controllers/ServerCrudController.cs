@@ -81,6 +81,7 @@ namespace MvcControlsToolkit.Controllers
         public virtual bool InLineFull { get { return false; } }
         public virtual bool UseAntiForgery { get { return false; } }
         public virtual string DeatailView  { get { return "DefaultServerItemDetail"; } }
+        public virtual string DeatailColumnAdjustView { get { return null; } }
         public virtual string DeatailTitle { get { return "Item detail"; } }
         public virtual string DeatailKeyName { get { return null; } }
         protected IEnumerable<ModelError> PackErrors(ModelStateDictionary ms)
@@ -190,7 +191,7 @@ namespace MvcControlsToolkit.Controllers
                 ViewData["localizer"] = new Func<string, string>(localize);
                 ViewData["title"] = DeatailTitle;
                 ViewData["KeyName"] = DeatailKeyName;
-                
+                ViewData["ColumnAdjust"] = DeatailColumnAdjustView;
                 ViewBag.ReadOnly = false;
                 return PartialView(DeatailView);
             }
@@ -203,6 +204,7 @@ namespace MvcControlsToolkit.Controllers
                 ViewData["localizer"] = new Func<string, string>(localize);
                 ViewData["title"]=DeatailTitle;
                 ViewData["KeyName"] = DeatailKeyName;
+                ViewData["ColumnAdjust"] = DeatailColumnAdjustView;
                 ViewBag.ReadOnly = readOnly.HasValue && readOnly.Value;
                 return PartialView(DeatailView, res);
             }
