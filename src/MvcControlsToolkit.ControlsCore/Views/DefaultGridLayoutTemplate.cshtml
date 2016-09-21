@@ -1,0 +1,60 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+    var options = ViewData["Options"] as DefaultServerGridLayoutOptions;
+    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var headerTemplate = options.SubTemplates.FirstOrDefault();
+}
+<table @options.RenderTopContainerAttributes() @Html.Raw(options.CssClass != null ? "class='"+options.CssClass+"'" : "")>
+    @if(!string.IsNullOrEmpty(options.Caption))
+    {
+        <caption>@options.Caption</caption>
+    }
+    <thead>
+        @if(options.Toolbars!= null)
+        {
+            foreach (var tb in options.Toolbars)
+            {
+                if(tb.Key== LayoutStandardPlaces.Header)
+                {
+                    <tr class="header-toolbar" colspan="@options.VisibleColumns.ToString(CultureInfo.InvariantCulture)">
+                        @tb.Value
+                    </tr>
+                }
+            }
+
+        }
+        @if(headerTemplate != null)
+        {
+            foreach (var row in options.Rows)
+            {
+                options.CurrentRow = row;
+                @headerTemplate.Invoke(new ModelExpression(string.Empty, ViewData.ModelExplorer), options, helpers)
+            }
+        }
+        
+    </thead>
+    <tfoot>
+        @if (options.Toolbars != null)
+        {
+            foreach (var tb in options.Toolbars)
+            {
+                if (tb.Key == LayoutStandardPlaces.Footer)
+                {
+                    <tr class="footer-toolbar" colspan="@options.VisibleColumns.ToString(CultureInfo.InvariantCulture)">
+                        @tb.Value
+                    </tr>
+                }
+            }
+        }
+    </tfoot>
+    <tbody @options.RenderRowsContainerAttributes()>
+        @options.MainContent
+    </tbody>
+</table>
+
+

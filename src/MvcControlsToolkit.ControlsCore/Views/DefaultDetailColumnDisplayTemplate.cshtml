@@ -1,0 +1,64 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using Microsoft.Extensions.Options
+@using System.Text
+@using System.Globalization
+@{
+    var metaData = ViewData.ModelMetadata;
+    var col = ViewData["Options"] as Column;
+
+    var cssClass= col.ColumnCssClass??(metaData.UnderlyingOrModelType == typeof(bool) ? "checkbox" : "form-group");
+    if (col.DisplayDetailWidths != null && col.DisplayDetailWidths.Length > 0)
+    {
+        var toBuild = new StringBuilder();
+        toBuild.Append(cssClass);
+        var allStyles = new string[] { "col-xs-", "col-sm-", "col-md-", "col-lg-" };
+        for (int i = 0; i < Math.Min(allStyles.Length, col.EditDetailWidths.Length); i++)
+        {
+            if (col.DisplayDetailWidths[i] == 0 || (i != 0 && col.DisplayDetailWidths[i] == col.DisplayDetailWidths[i - 1]))
+            {
+                continue;
+            }
+            toBuild.Append(" ");
+            toBuild.Append(allStyles[i]);
+            toBuild.Append(col.DisplayDetailWidths[i].ToString(CultureInfo.InvariantCulture));
+
+        }
+        cssClass = toBuild.ToString();
+    }
+    else
+    {
+        cssClass += " col-xs-12";
+    }
+}
+<div class="@cssClass">
+    @if (metaData.UnderlyingOrModelType == typeof(bool))
+    {
+        <label asp-for="@Model">
+            <input disabled asp-for="@Model" type="checkbox" @Html.Raw(col.CheckboxCssClass != null ? "class='" + col.CheckboxCssClass + "'" : "") />
+        </label>
+
+    }
+    else
+    {
+        <label class="control-label">@col.For.Metadata.GetDisplayName()</label>
+        <p  @Html.Raw("class='" + (col.InputCssClass != null ? col.InputCssClass : "form-control-static") + "'") >
+            @if(Model == null)
+            {
+                @(col.NullDisplayText??string.Empty)
+
+            }
+            else if (Model is IFormattable && !string.IsNullOrEmpty(col.DisplayFormat))
+            {
+                @((Model as IFormattable).ToString(col.DisplayFormat, CultureInfo.CurrentCulture))
+            }
+            else
+            {
+                @Html.Display(string.Empty)
+            }
+        </p>
+        
+    }
+</div>
+
+

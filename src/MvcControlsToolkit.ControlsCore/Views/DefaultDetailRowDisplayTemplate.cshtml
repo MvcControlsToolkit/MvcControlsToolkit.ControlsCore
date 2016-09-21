@@ -1,0 +1,23 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+    var row = ViewData["Options"] as RowType;
+    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    row.ComputeWidths(false, 12);
+}
+@foreach(var col in row.Columns)
+{
+    if (col.EditOnly)
+    {
+        continue;
+    }
+    @row.RenderColumn(Model,col,false,helpers)
+}
+    
+
+
+

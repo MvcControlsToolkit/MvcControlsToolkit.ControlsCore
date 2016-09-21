@@ -1,0 +1,58 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+    var row = ViewData["Options"] as RowType;
+    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    bool hiddensToRender = true;
+}
+<tr @row.RenderRowAttributes(Model)>
+    @if (row.MustAddButtonColumn(helpers, true))
+    {
+        var buttons = row.RequiredFunctionalities(User);
+        var currProvider = ViewContext.TagHelperProvider();
+        var localizer = row.GetLocalizer(helpers.LocalizerFactory);
+        <td class="grid-buttons">
+            @if ((buttons & Functionalities.ShowDetail) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.ShowDetail, null, "btn-default btn-xs", helpers, localizer)
+            }
+            @if ((buttons & Functionalities.EditDetail) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.EditDetail, null, "btn-default btn-xs", helpers, localizer)
+            }
+            
+            @if ((buttons & Functionalities.AddBefore) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.AddBefore, null, "btn-default btn-xs", helpers, localizer)
+            }
+            @if ((buttons & Functionalities.AddAfter) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.AddAfter, null, "btn-default btn-xs", helpers, localizer)
+            }
+            @if ((buttons & Functionalities.Delete) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.Delete, null, "btn-default btn-xs", helpers, localizer)
+            }
+        </td>
+    }
+    @foreach(var col in row.Columns)
+    {
+            <td @Html.Raw(col.ColumnCssClass != null ? "class='" +col.ColumnCssClass+"'": "")
+                @Html.Raw(col.ColSpan.HasValue ? "colspan='"+col.ColSpan.Value.ToString(CultureInfo.InvariantCulture)+"'" : "")>
+                @row.RenderColumn(Model,col,!col.ReadOnly,helpers)
+                @if (hiddensToRender)
+                {
+                    hiddensToRender = false;
+                    @row.RenderHiddens(helpers, Model)
+
+                }
+            </td>
+     }
+    
+</tr>
+
+

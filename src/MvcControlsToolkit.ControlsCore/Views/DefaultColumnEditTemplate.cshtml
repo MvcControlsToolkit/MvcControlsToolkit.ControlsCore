@@ -1,0 +1,57 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@{
+    var metaData = ViewData.ModelMetadata;
+    var col = ViewData["Options"] as Column;
+}
+@if (col.ColumnConnection != null)
+{
+    if (col.ColumnConnection is ColumnConnectionInfosStatic)
+    {
+        var infos = col.ColumnConnection as ColumnConnectionInfosStatic;
+        <select asp-for="@Model" asp-items="@(new SelectList(await infos.ItemsSelector(User), infos.ItemsValueProperty, infos.ItemsDisplayProperty))" 
+                @Html.Raw("class='" + (col.InputCssClass != null ? col.InputCssClass : "full-cell") + "'")>
+            @if (col.PlaceHolder != null)
+            {
+                <option value="">@col.PlaceHolder</option>
+            }
+        </select>
+    }
+    else
+    {
+        var infos = col.ColumnConnection as ColumnConnectionInfosOnLine;
+        <autocomplete asp-for="@col.For.Metadata.PropertyGetter(Model)"
+                      display-property="@infos.DisplayProperty.Metadata.PropertyGetter(Model)"
+                      for-expression-override="@col.For.Name"
+                      display-expression-override="@infos.DisplayProperty.Name"
+                      items-display-property="@infos.ItemsDisplayProperty"
+                      items-value-property="@infos.ItemsValueProperty"
+                      items-url="@infos.ItemsUrl"
+                      url-token="@infos.UrlToken"
+                      dataset-name="@infos.DataSetName"
+                      max-results="@infos.MaxResults"
+
+                      @Html.Raw("class='" + (col.InputCssClass != null ? col.InputCssClass : "full-cell") + "'")
+                         />
+    }
+
+}
+else if (metaData.UnderlyingOrModelType == typeof(bool))
+{
+    <input asp-for="@Model" type="checkbox" @Html.Raw(col.CheckboxCssClass != null?"class='"+ col.CheckboxCssClass + "'" : "") />
+}
+else if (metaData.IsEnum)
+{
+    <select asp-for="@Model" asp-items="@Html.GetEnumSelectList(metaData.ModelType)" @Html.Raw("class='" + (col.InputCssClass != null?col.InputCssClass : "full-cell") + "'")>
+        @if(col.PlaceHolder != null)
+        {
+            <option value="">@col.PlaceHolder</option>
+        }
+    </select>
+}
+else
+{
+    <input asp-for="@Model" placeholder="@col.PlaceHolder" @Html.Raw("class='" + (col.InputCssClass != null?col.InputCssClass : "full-cell") + "'")/>
+}
+
+

@@ -1,0 +1,31 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+
+    var options = ViewData["Options"] as DefaultServerGridLayoutOptions;
+    var row = options.CurrentRow;
+    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+}
+<tr >
+    @if(row.MustAddButtonColumn(helpers))
+    {
+       
+        <th class="grid-buttons">
+            
+        </th>
+        foreach (var col in row.Columns)
+        {
+            var width = col.Widths != null && col.Widths.Length > 0 ? "style='width: " + col.Widths[0].ToString(CultureInfo.InvariantCulture) + "%;'" : "";
+            <th @Html.Raw(width) @Html.Raw(col.ColumnCssClass != null ? "class='" +col.ColumnCssClass+"'": "")
+                @Html.Raw(col.ColSpan.HasValue ? "colspan='"+col.ColSpan.Value.ToString(CultureInfo.InvariantCulture)+"'" : "")>
+                @col.ColumnTitle
+            </th>
+        }
+    }
+</tr>
+
+
