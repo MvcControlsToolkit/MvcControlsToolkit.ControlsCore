@@ -59,8 +59,8 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 rowType = options.Rows[rowIndex];
             }
             else rowType = options.GetServerRow(model);
-            if (mode) res = rowType.InvokeEdit(model, basePrefix, helpers);
-            else res = rowType.InvokeDisplay(model, basePrefix, helpers);
+            if (mode) res = await rowType.InvokeEdit(model, basePrefix, helpers);
+            else res = await rowType.InvokeDisplay(model, basePrefix, helpers);
 
             //Create Layout options
             var layoutOptions = new DefaultServerDetailLayoutOptions(
@@ -80,7 +80,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 tag.Antiforgery
                 );
             //Invoke Layout
-            var fres = options.LayoutTemplate.Invoke(tag.For, layoutOptions, helpers);
+            var fres = await options.LayoutTemplate.Invoke(tag.For, layoutOptions, helpers);
             output.TagName = string.Empty;
             output.Content.SetHtmlContent(fres);
         }

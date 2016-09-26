@@ -32,7 +32,7 @@
                 >
                     @if(DeatailColumnAdjustView!= null)
                     {
-                        @Html.Partial(DeatailColumnAdjustView, Model)
+                        @await Html.PartialAsync(DeatailColumnAdjustView, Model)
                         <import-settings asp-for="@Model" view-name="DeatailColumnAdjustView"/>
                     }
                 </detail-form>

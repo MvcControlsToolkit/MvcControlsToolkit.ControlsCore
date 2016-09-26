@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
+using MvcControlsToolkit.Controllers;
+using MvcControlsToolkit.Core.Filters;
 using MvcControlsToolkit.Core.OptionsParsing;
 using MvcControlsToolkit.Core.TagHelpers.Internals;
 using MvcControlsToolkit.Core.Templates;
@@ -46,6 +48,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("error-messages")]
         public GridErrorMessages ErrorMessages { get; set; }
 
+        [HtmlAttributeName("rows-cache-key")]
+        public string RowsCacheKey { get; set; }
+
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -80,12 +85,31 @@ namespace MvcControlsToolkit.Core.TagHelpers
             //
 
             //get row definitions
-            var nc = new ReductionContext(TagTokens.RowContainer, 0,defaultTemplates);
+            IList<RowType> rows = string.IsNullOrEmpty(RowsCacheKey) ?
+                null :
+                RowType.GetRowsCollection(RowsCacheKey);
+            var nc = new ReductionContext(TagTokens.RowContainer, 0,defaultTemplates, rows != null);
             context.SetChildrenReductionContext(nc);
             await output.GetChildContentAsync();
             var collector = new RowContainerCollector(nc);
             var res= collector.Process(this, defaultTemplates) as Tuple<IList<RowType>, IList<KeyValuePair<string, IHtmlContent>>>;
-            var rows = res.Item1;
+            if (rows == null)
+            {
+                rows = res.Item1;
+                if (!string.IsNullOrEmpty(RowsCacheKey))
+                    RowType.CacheRowGroup(RowsCacheKey, rows, httpAccessor.HttpContext);
+                foreach(var row in rows)
+                {
+                    if(row.ControllerType != null)
+                    {
+                        Action action = () =>
+                        {
+                            ControllerHelpers.DeclareServerRowtype(row.ControllerType, row);
+                        };
+                        CacheViewPartsFilter.AddAction(httpAccessor.HttpContext, action);
+                    }
+                }
+            }
             var toolbars = res.Item2;
             //
 

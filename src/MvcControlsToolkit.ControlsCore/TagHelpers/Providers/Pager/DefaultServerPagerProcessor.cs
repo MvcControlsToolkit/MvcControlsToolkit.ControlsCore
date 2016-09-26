@@ -57,7 +57,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 tag.CssClass,
                 options.LayoutTemplate
                 );
-            var fres = options.LayoutTemplate.Invoke(tag.CurrentPage, layoutOptions, helpers);
+            var fres = await options.LayoutTemplate.Invoke(tag.CurrentPage, layoutOptions, helpers);
             output.TagName = string.Empty;
             output.Content.SetHtmlContent(fres);
 

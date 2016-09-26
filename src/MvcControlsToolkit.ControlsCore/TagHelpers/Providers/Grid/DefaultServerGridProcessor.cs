@@ -96,9 +96,9 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                     var rowType = options.GetServerRow(row);
                     if (rowType == null) continue;
                     if (options.Type == GridType.Immediate)
-                        sb.Append(rowType.InvokeDisplay(row, RowPrefix(i, rowType), helpers));
+                        sb.Append(await rowType.InvokeDisplay(row, RowPrefix(i, rowType), helpers));
                     else
-                        sb.Append(rowType.InvokeEdit(row, RowPrefix(i, rowType), helpers));
+                        sb.Append(await rowType.InvokeEdit(row, RowPrefix(i, rowType), helpers));
                     i++;
                 }
                 res = new HtmlString(sb.ToString());
@@ -123,7 +123,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             //
 
             //Invoke Layout
-            var fres = options.LayoutTemplate.Invoke(tag.For, layoutOptions, helpers);
+            var fres = await options.LayoutTemplate.Invoke(tag.For, layoutOptions, helpers);
             output.TagName = string.Empty;
             output.Content.SetHtmlContent(fres);
 

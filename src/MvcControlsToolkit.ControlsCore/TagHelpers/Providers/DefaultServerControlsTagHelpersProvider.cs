@@ -16,12 +16,20 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
     public class DefaultServerControlsTagHelpersProvider : ITagHelpersProvider
     {
         private const string buttonTemplate = @"
-<button data-operation='{0} {1}' class='btn {2}' aria-label='{3}' title='{3}' type='{5}'>
+<button data-operation='{0} {1}' class='btn {2}' aria-label='{3}' title='{3}' type='button'>
 <span class='glyphicon {4}' aria-hidden='true'></span>
 </button>";
         private const string buttonTemplateWithText = @"
-<button data-operation='{0} {1}' class='btn {2}' title='{3}' type='{5}'>
+<button data-operation='{0} {1}' class='btn {2}' title='{3}' type='button'>
 <span class='glyphicon {4}' aria-hidden='true'></span> {3}
+</button>";
+        private const string buttonTemplateSubmit = @"
+<button  class='btn {0}' aria-label='{1}' title='{1}' type='submit'>
+<span class='glyphicon {2}' aria-hidden='true'></span>
+</button>";
+        private const string buttonTemplateWithTextSubmit = @"
+<button  class='btn {0}' title='{1}' type='submit'>
+<span class='glyphicon {2}' aria-hidden='true'></span> {1}
 </button>";
         protected class ButtonProperties
         {
@@ -48,7 +56,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                         else if (o is IFormattable && !string.IsNullOrEmpty(col.DisplayFormat))
                             return new HtmlString(helpers.Html.Encode((o as IFormattable).ToString(col.DisplayFormat, CultureInfo.CurrentCulture)));
                         return helpers.Html.Display(helpers.Html.CurrentScope<object>().FatherPrefix);
-                    });
+                    }, null);
         static DefaultServerControlsTagHelpersProvider()
         {
             allTagProcessors["grid-batch"] =
@@ -303,14 +311,22 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             ButtonProperties currentButton = null;
             allButtonProperties.TryGetValue(buttonType, out currentButton);
             if(currentButton == null) return new HtmlString(string.Empty);
-            return new HtmlString(string.Format(visibleText ? buttonTemplateWithText: buttonTemplate,
-                currentButton.OperationName,
-                arguments??string.Empty,
-                cssClass??string.Empty,
-                localizer != null ?
-                    localizer[currentButton.ShowText] : currentButton.ShowText,
-                currentButton.IconClass
-                ));
+            if(isSubmit)
+                return new HtmlString(string.Format(visibleText ? buttonTemplateWithTextSubmit: buttonTemplateSubmit,
+                    cssClass??string.Empty,
+                    localizer != null ?
+                        localizer[currentButton.ShowText] : currentButton.ShowText,
+                    currentButton.IconClass
+                    ));
+            else
+                return new HtmlString(string.Format(visibleText ? buttonTemplateWithText : buttonTemplate,
+                    currentButton.OperationName,
+                    arguments ?? string.Empty,
+                    cssClass ?? string.Empty,
+                    localizer != null ?
+                        localizer[currentButton.ShowText] : currentButton.ShowText,
+                    currentButton.IconClass
+                    ));
         }
         public bool GenerateNames
         {

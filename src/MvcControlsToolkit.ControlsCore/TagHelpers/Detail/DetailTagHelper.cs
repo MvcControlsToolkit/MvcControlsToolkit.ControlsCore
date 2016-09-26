@@ -11,6 +11,8 @@ using Microsoft.Extensions.Localization;
 using MvcControlsToolkit.Core.Views;
 using MvcControlsToolkit.Core.OptionsParsing;
 using MvcControlsToolkit.ControlsCore;
+using MvcControlsToolkit.Core.Templates;
+
 namespace MvcControlsToolkit.Core.TagHelpers
 {
     [HtmlTargetElement(TagName, Attributes = ForAttributeName + "," + TypeAttributeName)]
@@ -53,6 +55,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("asp-antiforgery")]
         public bool? Antiforgery { get; set; }
 
+        [HtmlAttributeName("rows-cache-key")]
+        public string RowsCacheKey { get; set; }
+
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -94,12 +99,20 @@ namespace MvcControlsToolkit.Core.TagHelpers
             //
 
             //get row definitions
-            var nc = new Core.OptionsParsing.ReductionContext(Core.OptionsParsing.TagTokens.RowContainer, 0, defaultTemplates);
+            IList<RowType> rows = string.IsNullOrEmpty(RowsCacheKey) ?
+               null :
+               RowType.GetRowsCollection(RowsCacheKey);
+            var nc = new Core.OptionsParsing.ReductionContext(Core.OptionsParsing.TagTokens.RowContainer, 0, defaultTemplates, rows != null);
             context.SetChildrenReductionContext(nc);
             await output.GetChildContentAsync();
             var collector = new Core.OptionsParsing.RowContainerCollector(nc);
             var res = collector.Process(this, defaultTemplates) as Tuple<IList<Core.Templates.RowType>, IList<KeyValuePair<string, Microsoft.AspNetCore.Html.IHtmlContent>>>;
-            var rows = res.Item1;
+            if (rows == null)
+            {
+                rows = res.Item1;
+                if (!string.IsNullOrEmpty(RowsCacheKey))
+                    RowType.CacheRowGroup(RowsCacheKey, rows, httpAccessor.HttpContext);
+            }
             var toolbars = res.Item2;
             //Prepare detail options
             var options = new Core.TagHelpers.Internals.GridOptions(rows, toolbars, GridType.Batch, id, fullName)

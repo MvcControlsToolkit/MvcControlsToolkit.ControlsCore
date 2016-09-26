@@ -33,7 +33,7 @@
             foreach (var row in options.Rows)
             {
                 options.CurrentRow = row;
-                @headerTemplate.Invoke(new ModelExpression(string.Empty, ViewData.ModelExplorer), options, helpers)
+                @await headerTemplate.Invoke(new ModelExpression(string.Empty, ViewData.ModelExplorer), options, helpers)
             }
         }
         

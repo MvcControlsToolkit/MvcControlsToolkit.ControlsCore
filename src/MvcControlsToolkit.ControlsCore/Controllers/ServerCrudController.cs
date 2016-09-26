@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Localization;
 using MvcControlsToolkit.ControlsCore;
 using MvcControlsToolkit.Core.Business.Utilities;
@@ -21,24 +23,26 @@ namespace MvcControlsToolkit.Controllers
         private Functionalities requiredFunctionalities;
         private IStringLocalizerFactory factory;
         private IStringLocalizer localizer;
+        private IHttpContextAccessor accessor;
         private static string[] defaultMessages = new string[] {
             "wrong call",
             "internal server error",
             "item not found",
             "unauthorized"
         };
-        public ServerCrudController(IStringLocalizerFactory factory)
+        public ServerCrudController(IStringLocalizerFactory factory, IHttpContextAccessor accessor)
         {
             row = ControllerHelpers.GetRowType(this.GetType());
             requiredFunctionalities=row.RequiredFunctionalities(User);
             this.factory = factory;
             if (factory != null) localizer = factory.Create(typeof(ServerCrudController));
+            this.accessor = accessor;
         }
         private string localize(string x)
         {
             return localizer != null ? localizer[x] : null;
         }
-        protected IActionResult Invoke(object model, bool edit, string prefix=null)
+        protected async Task<IActionResult> Invoke(object model, bool edit, string prefix=null)
         {
             
             Template<RowType> template = edit ? row.EditTemplate : row.DisplayTemplate;
@@ -69,6 +73,20 @@ namespace MvcControlsToolkit.Controllers
                     modelState = this.ModelState,
                     localizerFactory=factory
                 });
+            }
+            else if(template.Type == Core.TagHelpers.TemplateType.InLine)
+            {
+                var content = (await template.Invoke(new ModelExpression(row.For.Name, row.For.ModelExplorer.GetExplorerForModel(model)),
+                    row, 
+                    //just pass the HttpContext accessor that is the only 
+                    //helper needed by the in-line template, 
+                    //since all other helpers are available in the original page
+                    new ContextualizedHelpers(null, null, accessor, null, null, null),
+                    edit ?
+                        (prefix == null ? string.Empty : prefix + "[_" + Guid.NewGuid().ToString("N") + "]")
+                        : "_" + Guid.NewGuid().ToString("N")
+                    )).ToString();
+                return Content(content, "text/html");
             }
             else
             {
@@ -140,12 +158,12 @@ namespace MvcControlsToolkit.Controllers
             if (key != null && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             else if (key == null && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             if (!ModelState.IsValid) return Content("#"+ ErrorMessage(0), "text/plain");
-            if (key == null) return Invoke(null, true, prefix);
+            if (key == null) return await Invoke(null, true, prefix);
             try
             {
                 var res = await Repository.GetById<VMS, D>(key);
                 if (res == null) return Content("#"+ ErrorMessage(2), "text/plain");
-                return Invoke(res, true, prefix);
+                return await Invoke(res, true, prefix);
             }
             catch
             {
@@ -167,7 +185,7 @@ namespace MvcControlsToolkit.Controllers
                         Repository.Update(InLineFull, vm);
                     await Repository.SaveChanges();
                     ViewBag.ReadOnly = false;
-                    return Invoke(vm, false);
+                    return await Invoke(vm, false);
                 }
                 catch
                 {
@@ -227,7 +245,7 @@ namespace MvcControlsToolkit.Controllers
                     else
                         Repository.Update(DetailFull, vm);
                     await Repository.SaveChanges();
-                    return Invoke(vm, false);
+                    return await Invoke(vm, false);
                 }
                 catch
                 {

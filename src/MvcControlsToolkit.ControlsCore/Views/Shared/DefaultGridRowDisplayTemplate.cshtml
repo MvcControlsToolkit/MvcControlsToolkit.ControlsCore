@@ -45,7 +45,7 @@
     {
         <td @Html.Raw(col.ColumnCssClass != null ? "class='" +col.ColumnCssClass+"'": "")
                 @Html.Raw(col.ColSpan.HasValue ? "colspan='"+col.ColSpan.Value.ToString(CultureInfo.InvariantCulture)+"'" : "")>
-            @row.RenderColumn(Model,col,false,helpers)
+            @await row.RenderColumn(Model,col,false,helpers)
         </td>
     }
     
