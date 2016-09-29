@@ -1,0 +1,24 @@
+﻿@model AutocompleteTestViewModel
+@{
+    ViewData["Title"] = "Autocomplete test";
+}
+
+<h2>@ViewData["Title"].</h2>
+<form asp-controller="Home" asp-action="AutocompleteTest"  method="post" class="form-horizontal">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="SelectedId" class="col-md-2 control-label"></label>
+        <div class="col-md-10">
+            <autocomplete asp-for="SelectedId"
+                          display-property="SelectedDisplay"
+                          dataset-name="test"
+                          max-results="20"
+                          items-url="/test/autocomplete?search=_zzz_"
+                          url-token="_zzz_"
+                          items-value-property="value"
+                          items-display-property="display" class="form-control" />
+            <span asp-validation-for="SelectedId" class="text-danger"></span>
+        </div>
+    </div>
+</form>
+

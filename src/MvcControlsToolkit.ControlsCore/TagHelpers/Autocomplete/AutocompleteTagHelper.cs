@@ -23,15 +23,15 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("for-expression-override")]
         public string ForExpressionOverride { get; set; }
         [HtmlAttributeName("display-expression-override")]
-        public ModelExpression DisplayPropertyExpressionOverride { get; set; }
+        public string DisplayPropertyExpressionOverride { get; set; }
         [HtmlAttributeName("items-display-property")]
         public string ItemsDisplayProperty { get; set; }
         [HtmlAttributeName("items-value-property")]
         public string ItemsValueProperty { get; set; }
         [HtmlAttributeName("items-url")]
-        public string ItemsUrl { get; private set; }
+        public string ItemsUrl { get;  set; }
         [HtmlAttributeName("url-token")]
-        public string UrlToken { get; private set; }
+        public string UrlToken { get;  set; }
         [HtmlAttributeName("dataset-name")]
         public string DataSetName { get; set; }
         [HtmlAttributeName("max-results")]

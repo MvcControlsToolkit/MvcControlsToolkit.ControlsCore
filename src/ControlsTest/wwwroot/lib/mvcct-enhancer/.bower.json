@@ -1,0 +1,41 @@
+{
+  "name": "mvcct-enhancer",
+  "version": "1.0.0",
+  "homepage": "https://github.com/MvcControlsToolkit/mvcct-enhancer",
+  "description": "a javascript package to handle standard html enhancements",
+  "main": [
+    "mvcct.enhancer.js"
+  ],
+  "ignore": [
+    "**/.*",
+    "*.json",
+    "*.md",
+    "*.txt",
+    "!LICENSE.txt",
+    "gulpfile.js"
+  ],
+  "keywords": [
+    "html",
+    "enhancement",
+    "html5",
+    "polyfill"
+  ],
+  "authors": [
+    "Mvc Controls Toolkit Team",
+    "Francesco Abbruzzese"
+  ],
+  "license": "https://github.com/MvcControlsToolkit/mvcct-enhancer/blob/master/LICENSE.txt",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/MvcControlsToolkit/mvcct-enhancer.git"
+  },
+  "_release": "1.0.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.0.0",
+    "commit": "6ca3effa2d97adaeafc1e48ff6cd7655475cdb79"
+  },
+  "_source": "https://github.com/MvcControlsToolkit/mvcct-enhancer.git",
+  "_target": ">=1.0.0",
+  "_originalSource": "mvcct-enhancer"
+}

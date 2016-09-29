@@ -1,0 +1,10 @@
+{
+	"version": "1.0.0",
+	"name": "asp.net",
+	"private": true,
+    "devDependencies": {
+        "cldr-data": ">=29.0.2",
+        "globalize": ">=1.1.1",
+        "mvcct-templates": ">=1.1.1"
+    }
+}

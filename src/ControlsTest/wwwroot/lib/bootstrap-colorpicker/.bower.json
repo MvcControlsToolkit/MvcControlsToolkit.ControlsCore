@@ -1,0 +1,32 @@
+{
+  "name": "bootstrap-colorpicker",
+  "main": [
+    "dist/css/bootstrap-colorpicker.css",
+    "dist/js/bootstrap-colorpicker.js"
+  ],
+  "dependencies": {
+    "jquery": ">=1.10",
+    "bootstrap": ">=2"
+  },
+  "ignore": [
+    "\\.*",
+    "/index.html",
+    "/package.json",
+    "/composer.json",
+    "/Gruntfile.js",
+    "/.travis.yml",
+    "/travis.sh",
+    "/server.js"
+  ],
+  "homepage": "https://github.com/itsjaviaguilar/bootstrap-colorpicker",
+  "version": "2.3.5",
+  "_release": "2.3.5",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.3.5",
+    "commit": "57f0614ac5144b506ca4a966049014de2a54f68c"
+  },
+  "_source": "https://github.com/itsjaviaguilar/bootstrap-colorpicker.git",
+  "_target": ">=2.3.3",
+  "_originalSource": "bootstrap-colorpicker"
+}
