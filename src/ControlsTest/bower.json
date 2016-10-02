@@ -7,6 +7,8 @@
         "jquery-validation": "1.14.0",
         "jquery-validation-unobtrusive": "3.2.6",
         "jquery-validation-unobtrusive-extensions": ">=1.0.0",
-        "bootstrap-html5-fallback": ">=1.0.1"
+        "bootstrap-html5-fallback": ">=1.0.1",
+        "corejs-typeahead": ">=0.11.1",
+        "awesomplete": "1.1.1"
     }
 }

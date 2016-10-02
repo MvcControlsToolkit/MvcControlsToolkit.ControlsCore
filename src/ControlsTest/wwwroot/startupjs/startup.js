@@ -1,6 +1,11 @@
 /// <reference path="../lib/mvcct-enhancer/mvcct.enhancer.js" />
 (function () {
     var options = {};
+    options.serverWidgets = {
+        autocompleteBootstrap: {
+            removeDiacritics: true
+        }
+    };
     options.browserSupport = {
         cookie: "_browser_basic_capabilities",
         forms: null,

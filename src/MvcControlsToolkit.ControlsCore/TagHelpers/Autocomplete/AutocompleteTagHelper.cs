@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Options;
 using MvcControlsToolkit.Core.TagHelpers.Internals;
 using MvcControlsToolkit.Core.Views;
+using Newtonsoft.Json.Serialization;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
@@ -36,6 +39,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public string DataSetName { get; set; }
         [HtmlAttributeName("max-results")]
         public uint MaxResults { get; set; }
+        [HtmlAttributeName("min-chars")]
+        public uint MinChars { get; set; }
+        [HtmlAttributeName("default-to-empty")]
+        public bool DefaultToempty { get; set; }
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -43,10 +50,11 @@ namespace MvcControlsToolkit.Core.TagHelpers
         
 
         private IHtmlGenerator generator;
-
-        public AutocompleteTagHelper(IHtmlGenerator generator)
+        private MvcJsonOptions jsonOptions;
+        public AutocompleteTagHelper(IHtmlGenerator generator, IOptions<MvcJsonOptions> jsonOptions)
         {
             this.generator = generator;
+            this.jsonOptions = jsonOptions.Value;
         }
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
@@ -56,13 +64,17 @@ namespace MvcControlsToolkit.Core.TagHelpers
             if (string.IsNullOrWhiteSpace(ItemsValueProperty)) new ArgumentNullException("items-value-property");
             if (string.IsNullOrWhiteSpace(ItemsUrl)) new ArgumentNullException("items-url");
             if (string.IsNullOrWhiteSpace(UrlToken)) new ArgumentNullException("url-token");
-            if (string.IsNullOrWhiteSpace(DataSetName)) new ArgumentNullException("max-results");
+            if (string.IsNullOrWhiteSpace(DataSetName)) new ArgumentNullException("dataset-name");
+            if (MaxResults == 0) MaxResults=20;
+            if (MinChars == 0) MinChars = 3;
             var currProvider = ViewContext.TagHelperProvider();
+            var resolver = jsonOptions.SerializerSettings.ContractResolver as DefaultContractResolver;
             var options = new AutocompleteOptions
             {
-                Generator = generator
+                Generator = generator,
+                PropertyResolver = resolver != null ? resolver.GetResolvedPropertyName : new Func<string, string>(x => x)
 
-            };
+        };
             await currProvider.GetTagProcessor(TagName)(context, output, this, options, null);
         }
     }

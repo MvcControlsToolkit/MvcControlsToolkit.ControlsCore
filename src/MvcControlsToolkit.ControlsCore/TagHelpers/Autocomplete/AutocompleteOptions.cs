@@ -13,6 +13,6 @@ namespace MvcControlsToolkit.Core.TagHelpers.Internals
 
         }
         public IHtmlGenerator Generator { get; set; }
-        
+        public Func<string, string > PropertyResolver { get; set; }
     }
 }

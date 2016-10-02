@@ -10,15 +10,35 @@
         <label asp-for="SelectedId" class="col-md-2 control-label"></label>
         <div class="col-md-10">
             <autocomplete asp-for="SelectedId"
+                          default-to-empty="false"
                           display-property="SelectedDisplay"
                           dataset-name="test"
                           max-results="20"
-                          items-url="/test/autocomplete?search=_zzz_"
-                          url-token="_zzz_"
-                          items-value-property="value"
-                          items-display-property="display" class="form-control" />
+                          items-url="@(Url.Action("AutocompleteItems", "Home", new { search = "_zzz_" }))"
+            url-token="_zzz_"
+                          items-value-property="Value"
+                          items-display-property="Display" class="form-control" />
             <span asp-validation-for="SelectedId" class="text-danger"></span>
         </div>
     </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-default">Submit</button>
+        </div>
+    </div>
 </form>
+
+@section Scripts {
+@*<link href="~/lib/mvcct-controls-server/modules-bootstrap/typeaheadjs3.css" rel="stylesheet" />
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script src="~/lib/corejs-typeahead/dist/typeahead.bundle.js"></script>
+<script src="~/lib/mvcct-controls-server/mvcct.controls.server.js"></script>
+<script src="~/lib/mvcct-controls-server/modules-bootstrap/mvcct.controls.server.autocomplete.js"></script>*@
+
+<link href="~/lib/awesomplete/awesomplete.css" rel="stylesheet" />
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+<script src="~/lib/awesomplete/awesomplete.min.js"></script>
+<script src="~/lib/mvcct-controls-server/mvcct.controls.server.js"></script>
+<script src="~/lib/mvcct-controls-server/modules/mvcct.controls.server.autocomplete.js"></script>
+}
 

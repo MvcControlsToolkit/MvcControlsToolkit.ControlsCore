@@ -33,13 +33,15 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             }
             infos.Add("data-url", tag.ItemsUrl);
             infos.Add("data-url-token", tag.UrlToken);
-            infos.Add("data-operation", string.Format("autocomplete {0} {1} {2} {3}",
-                tag.ItemsValueProperty,
-                tag.ItemsDisplayProperty,
+            infos.Add("data-operation", string.Format("autocomplete {0} {1} {2} {3} {4} {5}",
+                options.PropertyResolver(tag.ItemsValueProperty),
+                options.PropertyResolver(tag.ItemsDisplayProperty),
                 tag.DataSetName,
-                tag.MaxResults.ToString(CultureInfo.InvariantCulture)
+                tag.MaxResults.ToString(CultureInfo.InvariantCulture),
+                tag.MinChars.ToString(CultureInfo.InvariantCulture),
+                tag.DefaultToempty ? "true" : "false"
                 ));
-            
+            infos.Add("autocomplete", "off");
             var hidden = options.Generator.GenerateHidden(
                 tag.ViewContext,
                 tag.For.ModelExplorer,
