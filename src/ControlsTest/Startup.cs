@@ -46,6 +46,7 @@ namespace ControlsTest
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
+            services.AddLocalization();
             services.AddApplicationInsightsTelemetry(Configuration);
 
             services.AddDbContext<ApplicationDbContext>(options =>

@@ -33,7 +33,10 @@ namespace MvcControlsToolkit.Controllers
         public ServerCrudController(IStringLocalizerFactory factory, IHttpContextAccessor accessor)
         {
             row = ControllerHelpers.GetRowType(this.GetType());
-            requiredFunctionalities=row.RequiredFunctionalities(User);
+            if (row != null)
+            {
+                requiredFunctionalities = row.RequiredFunctionalities(User);
+            }
             this.factory = factory;
             if (factory != null) localizer = factory.Create(typeof(ServerCrudController));
             this.accessor = accessor;
