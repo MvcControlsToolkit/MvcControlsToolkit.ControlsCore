@@ -22,7 +22,7 @@
                 var options;
                 function processOptions(o) {
                     o = o["serverWidgets"] || {};
-                    options = o['autocompleteBootstrap'] || {};
+                    options = o['autocomplete'] || {};
                 };
                 
                 function onChanged(hidden) {
@@ -36,6 +36,7 @@
                     var validator = jhidden.closest('form').validate();
                     if (validator) validator.element(jhidden);
                 }
+                var dict = {};
                 function attach(infos) {
                     var el = infos['target'];
                     var args = infos['args'];
@@ -59,8 +60,6 @@
                         tOptions['removeDiacritics'] ? serverControls['removeDiacritics'] :
                         function (x) { return x;}
                     var safeRemoveDiacritics = serverControls['removeDiacritics'];
-                    var dict = $(document).data('Bloodhound');
-                    if (!dict) $(document).data('Bloodhound', dict = {});
                     var engine = dict[args[2]];
                     if (!engine) {
                         var boptions = {
@@ -100,13 +99,6 @@
                     })];
                     
                     var mainHandler = function (evt) {
-                        //if (evt.type == "keypress") {
-                        //    if (evt.which != 9) {
-                        //        return;
-
-                        //    }
-                        //    else evt.preventDefault();
-                        //}
                         if (init) {
                             init = false;
                             return;

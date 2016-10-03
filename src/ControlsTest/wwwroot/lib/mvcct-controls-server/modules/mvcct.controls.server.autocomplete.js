@@ -22,7 +22,7 @@
                 var options;
                 function processOptions(o) {
                     o = o["serverWidgets"] || {};
-                    options = o['autocompleteBootstrap'] || {};
+                    options = o['autocomplete'] || {};
                 };
                 
                 function onChanged(hidden) {
@@ -36,6 +36,7 @@
                     var validator = jhidden.closest('form').validate();
                     if (validator) validator.element(jhidden);
                 }
+                var dict = {};
                 function attach(infos) {
                     var el = infos['target'];
                     var args = infos['args'];
@@ -53,15 +54,23 @@
                     var defaultEmpty = args[5] == "true";
                     var tOptions = typeof options === 'function' ? options(target) : options;
                     var lastData;
-                    //var removeDiacritics=
-                    //    tOptions['removeDiacritics'] ? serverControls['removeDiacritics'] :
-                    //    function (x) { return x;}
+                    var removeDiacritics=
+                        tOptions['removeDiacritics'] ? serverControls['removeDiacritics'] :
+                        function (x) { return x;}
                     var safeRemoveDiacritics = serverControls['removeDiacritics'];
-                    var awesomplete=new Awesomplete(el, {
-                        minChars: parseInt(args[4]),
-                        maxItems: parseInt(args[3]),
+                    var engine = dict[args[2]];
+                    var minChars = parseInt(args[4]);
+                    var maxItems = parseInt(args[3]);
+                    if (!engine) {
+                        dict[args[2]] = engine = new serverControls['searchDictionary'](args[0], minChars, maxItems)
+                    }
+                    var awesomplete = new Awesomplete(el, {
+                        minChars: minChars,
+                        maxItems: maxItems,
                         filter: function (x, y) {
-                            return true;
+                            x = removeDiacritics(x).toLowerCase();
+                            y = removeDiacritics(y).toLowerCase();
+                            return x.indexOf(y) >=0;
                         },
                         data: function (item, input) {
                             return { label: item[args[1]], value: item[args[1]] };
@@ -74,7 +83,7 @@
                     
                     var mainHandler = function (evt) {
                         if (evt.type == "keydown") {
-                            if (evt.keyCode != 9) {
+                            if ((evt.keyCode || evt.which) != 9) {
                                 return;
 
                             }
@@ -125,13 +134,26 @@
                     el.addEventListener('blur', mainHandler, false);
                     el.addEventListener('keydown', mainHandler, false);
                     el.addEventListener('awesomplete-selectcomplete', mainHandler, false);
+                    
                     el.addEventListener('keyup', function (evt) {
                         if (el.value.length < awesomplete.minChars) return;
+                        var code = evt.keyCode || evt.which;
+                        if (code == 9 || code == 37 || code == 38 || code == 39 || code == 40 || code === 27 || code === 13) {
+                            return;
+                        }
+                        var lastCall = removeDiacritics(el.value).toLowerCase();
+                        var res = engine['get'](lastCall);
+                        if (res) {
+                            awesomplete.list = lastData = res;
+                            return;
+                        }
                         var ajax = new XMLHttpRequest();
+                        
                         ajax.open("GET", el.getAttribute('data-url').replace(el.getAttribute('data-url-token'), el.value), true);
                         ajax.onload = function () {
-                            awesomplete.list = lastData=JSON.parse(ajax.responseText);
-                        };
+                            awesomplete.list = lastData = JSON.parse(ajax.responseText);
+                            engine['add'](lastCall, lastData);
+                            };
                         ajax.send();
                     }, false);
                     

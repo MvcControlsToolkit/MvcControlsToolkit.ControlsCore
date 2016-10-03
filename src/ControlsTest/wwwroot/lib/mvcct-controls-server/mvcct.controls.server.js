@@ -18,6 +18,13 @@
         }(
 
             (function (serverExports) {
+
+                var serverControls = typeof serverExports !== 'undefined' ? serverExports : {};
+                //Start actual code
+
+                //UTILITIES
+
+                //1 Text normalization
                 var replacementList = [
                   {
                       base: ' ',
@@ -322,9 +329,39 @@
                         diacriticsMap[chars[j]] = replacementList[i].base;
                     }
                 }
+                serverControls['removeDiacritics'] = function (str) {
+                    return str.replace(/[^\u0000-\u007e]/g, function (c) {
+                        return diacriticsMap[c] || c;
+                    });
+                }
+                //2 search dictionary
+                function searchDictionary(idProp, minLen, maxLen) {
+                    var ids = {};
+                    var words = {};
+                    var closed = {};
+                    this["add"] = function (word, list) {
+                        words[word] = list.map(function (item) { return item[idProp] });
+                        list.forEach(function (item) {
+                            ids[item[idProp]] = item;
+                        });
+                        if (list.length < maxLen) closed[word] = true;
+                    }
+                    this["get"] = function (word) {
+                        var res = words[word];
+                        if(!res){
+                            for (; !closed[word] && word.length > minLen; word = word.slice(0, -1));
+                            res = words[word];
+                        }
+                        if (res) return res.map(function (id) { return ids[id] });
+                        return null;
+                    };
+                }
+                serverControls['searchDictionary'] = searchDictionary;
+
                 var operationAttribute = "data-operation";
-                var serverControls = typeof serverExports !== 'undefined' ? serverExports : {};
-                //Start actual code
+                
+
+                //object passed to argument processor
                 function operationArgs(target, operation, args) {
                     this['target'] = target;
                     this['operation'] = operation;
@@ -332,7 +369,7 @@
                     var currentLocation = target.parentNode;
                     var attValue;
                     
-                    this.find = function (attr) {
+                    this["find"] = function (attr) {
                         for(;  currentLocation; currentLocation=currentLocation.parentNode){
                             attValue = currentLocation.getAttribute(attr);
                             if (attValue) return {
@@ -344,11 +381,8 @@
                     };
                     
                 }
-                serverControls['removeDiacritics'] = function (str) {
-                    return str.replace(/[^\u0000-\u007e]/g, function (c) {
-                        return diacriticsMap[c] || c;
-                    });
-                }
+                
+                //operation handlers dictionary
                 var dictionary = {};
                 serverControls['addOperation'] = function (name, handler) {
                     dictionary[name] = handler;
@@ -356,6 +390,7 @@
                 serverControls['removeOperation'] = function (name) {
                     delete dictionary[name];
                 }
+                //prepare argument for operation handler
                 function dispatcher(operation, target) {
                     if (operation && target) {
                         var args = operation.split(' ');
@@ -368,6 +403,7 @@
                     }
                     return false;
                 }
+                //events operations may be attached to.
                 document.addEventListener("click", function (evt) {
                     var target = evt.target;
                     var val = target.getAttribute(operationAttribute);

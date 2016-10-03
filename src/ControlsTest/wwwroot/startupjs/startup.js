@@ -2,7 +2,7 @@
 (function () {
     var options = {};
     options.serverWidgets = {
-        autocompleteBootstrap: {
+        autocomplete: {
             removeDiacritics: true
         }
     };
