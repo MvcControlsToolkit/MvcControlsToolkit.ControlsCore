@@ -62,7 +62,7 @@
                     var minChars = parseInt(args[4]);
                     var maxItems = parseInt(args[3]);
                     if (!engine) {
-                        dict[args[2]] = engine = new serverControls['searchDictionary'](args[0], minChars, maxItems)
+                        dict[args[2]] = engine = new serverControls['searchDictionary'](args[0], minChars, maxItems, tOptions["maxCacheSize"])
                     }
                     var awesomplete = new Awesomplete(el, {
                         minChars: minChars,

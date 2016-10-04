@@ -335,16 +335,25 @@
                     });
                 }
                 //2 search dictionary
-                function searchDictionary(idProp, minLen, maxLen) {
+                function searchDictionary(idProp, minLen, maxLen, maxSize) {
+                    maxSize = maxSize || 40;
+                    var size = 0;
                     var ids = {};
                     var words = {};
                     var closed = {};
                     this["add"] = function (word, list) {
+                        if (size > maxSize) {
+                            size = 0;
+                            ids = {};
+                            words = {};
+                            closed = {};
+                        }
                         words[word] = list.map(function (item) { return item[idProp] });
                         list.forEach(function (item) {
                             ids[item[idProp]] = item;
                         });
                         if (list.length < maxLen) closed[word] = true;
+                        size++;
                     }
                     this["get"] = function (word) {
                         var res = words[word];
