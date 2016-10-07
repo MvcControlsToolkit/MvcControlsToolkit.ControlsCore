@@ -8,9 +8,10 @@ using ControlsTest.Data;
 namespace ControlsTest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20161005155402_business1")]
+    partial class business1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.0-rtm-21431")
@@ -77,48 +78,14 @@ namespace ControlsTest.Data.Migrations
                     b.Property<string>("Description")
                         .HasAnnotation("MaxLength", 256);
 
-                    b.Property<int?>("MaintenanceId");
-
                     b.Property<string>("Name")
                         .HasAnnotation("MaxLength", 128);
 
                     b.Property<decimal>("Price");
 
-                    b.Property<int?>("TypeId");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("MaintenanceId")
-                        .IsUnique();
-
-                    b.HasIndex("TypeId");
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("ControlsTest.Models.ProductType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Name")
-                        .HasAnnotation("MaxLength", 128);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProductTypes");
-                });
-
-            modelBuilder.Entity("ControlsTest.Models.ProductWithMaintenance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<decimal>("YearlyRate");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProductsWithMaintenance");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole", b =>
@@ -226,18 +193,6 @@ namespace ControlsTest.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("ControlsTest.Models.Product", b =>
-                {
-                    b.HasOne("ControlsTest.Models.ProductWithMaintenance", "Maintenance")
-                        .WithOne("Base")
-                        .HasForeignKey("ControlsTest.Models.Product", "MaintenanceId");
-
-                    b.HasOne("ControlsTest.Models.ProductType", "Type")
-                        .WithMany("Products")
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>

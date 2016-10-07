@@ -15,15 +15,17 @@
         <caption>@options.Caption</caption>
     }
     <thead>
-        @if(options.Toolbars!= null)
+        @if (options.Toolbars != null)
         {
             foreach (var tb in options.Toolbars)
             {
-                if(tb.Key== LayoutStandardPlaces.Header)
+                if (tb.Key == LayoutStandardPlaces.Header)
                 {
-                    <tr class="header-toolbar" colspan="@options.VisibleColumns.ToString(CultureInfo.InvariantCulture)">
-                        @tb.Value
-                    </tr>
+                <tr>
+                    <th class="header-toolbar" colspan="@options.VisibleColumns.ToString(CultureInfo.InvariantCulture)">
+                        @Html.Raw(tb.Value)
+                    </th>
+                </tr>
                 }
             }
 
@@ -45,8 +47,10 @@
             {
                 if (tb.Key == LayoutStandardPlaces.Footer)
                 {
-                    <tr class="footer-toolbar" colspan="@options.VisibleColumns.ToString(CultureInfo.InvariantCulture)">
-                        @tb.Value
+                    <tr>
+                        <th class="footer-toolbar" colspan="@options.VisibleColumns.ToString(CultureInfo.InvariantCulture)">
+                            @Html.Raw(tb.Value)
+                        </th>
                     </tr>
                 }
             }

@@ -33,7 +33,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public DefaultServerGridLayoutOptions(
             ContextualizedHelpers helpers,
             IList<RowType> rows,
-            IList<KeyValuePair<string, IHtmlContent>> toolbars,
+            IList<KeyValuePair<string, string>> toolbars,
             Template<LayoutTemplateOptions> layoutTemplate,
             IEnumerable<Template<LayoutTemplateOptions>> subTemplates, 
             IHtmlContent mainContent,

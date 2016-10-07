@@ -106,7 +106,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             context.SetChildrenReductionContext(nc);
             await output.GetChildContentAsync();
             var collector = new Core.OptionsParsing.RowContainerCollector(nc);
-            var res = collector.Process(this, defaultTemplates) as Tuple<IList<Core.Templates.RowType>, IList<KeyValuePair<string, Microsoft.AspNetCore.Html.IHtmlContent>>>;
+            var res = collector.Process(this, defaultTemplates) as Tuple<IList<Core.Templates.RowType>, IList<KeyValuePair<string, string>>>;
             if (rows == null)
             {
                 rows = res.Item1;

@@ -11,21 +11,22 @@
     var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
 }
 <tr >
-    @if(row.MustAddButtonColumn(helpers))
+    @if (row.MustAddButtonColumn(helpers))
     {
-       
+
         <th class="grid-buttons">
             
         </th>
-        foreach (var col in row.Columns)
-        {
-            var width = col.Widths != null && col.Widths.Length > 0 ? "style='width: " + col.Widths[0].ToString(CultureInfo.InvariantCulture) + "%;'" : "";
+    }
+    @foreach (var col in row.Columns)
+    {
+        var width = col.Widths != null && col.Widths.Length > 0 ? "style='width: " + col.Widths[0].ToString(CultureInfo.InvariantCulture) + "%;'" : "";
             <th @Html.Raw(width) @Html.Raw(col.ColumnCssClass != null ? "class='" +col.ColumnCssClass+"'": "")
                 @Html.Raw(col.ColSpan.HasValue ? "colspan='"+col.ColSpan.Value.ToString(CultureInfo.InvariantCulture)+"'" : "")>
                 @col.ColumnTitle
             </th>
-        }
-    }
+      }
+    
 </tr>
 
 

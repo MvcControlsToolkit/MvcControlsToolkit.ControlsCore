@@ -8,9 +8,13 @@ namespace ControlsTest.Models
 {
     public enum Currency
     {
+        [Display(Name = "$")]
         Dollar,
+        [Display(Name = "€")]
         Euro,
+        [Display(Name = "£")]
         Pound,
+        [Display(Name = "¥")]
         Yen
     };
     public class Product
@@ -22,5 +26,20 @@ namespace ControlsTest.Models
         public string Name { get; set; }
         public decimal Price { get; set; }
         public Currency ChosenCurrency { get; set; }
+        public bool Available { get; set; }
+
+        public int? TypeId { get; set; }
+        public virtual ProductType Type { get; set; }
+        public virtual ProductWithMaintenance Maintenance{get; set;}
+
+        public int? MaintenanceId { get; set; }
+    }
+
+    public class ProductWithMaintenance
+    {
+        public int Id { get; set; }
+        public decimal YearlyRate { get; set; }
+
+        public virtual Product Base { get; set; }
     }
 }

@@ -37,6 +37,20 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             public string OperationName;
             public string IconClass;
         }
+        //workaround forr issue https://github.com/aspnet/Mvc/issues/2430
+        private static string getEnumDisplayName(Type type, string o, IHtmlHelper h)
+        {
+            string displayName = null;
+            
+            foreach (SelectListItem item in h.GetEnumSelectList(type))
+            {
+                if (o == item.Value)
+                {
+                    displayName = item.Text ?? item.Value;
+                }
+            }
+            return displayName;
+        }
         protected static IDictionary<string, Func<TagHelperContext, TagHelperOutput, TagHelper, TagProcessorOptions, ContextualizedHelpers, Task>> allTagProcessors =
             new Dictionary<string, Func<TagHelperContext, TagHelperOutput, TagHelper, TagProcessorOptions, ContextualizedHelpers, Task>>();
         protected static IDictionary<string, DefaultTemplates> allTagDefaultTemplates = new Dictionary<string, DefaultTemplates>();
@@ -46,7 +60,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                     {
                         if (col.For.Metadata.IsNullableValueType && col.For.Metadata.UnderlyingOrModelType == typeof(bool))
                             return new HtmlString(
-                                o==null || !((bool)o) ?
+                                o == null || !((bool)o) ?
                                 "<input class='check-box' disabled='disabled' type='checkbox'>"
                                 :
                                 "<input class='check-box' disabled='disabled' type='checkbox' checked>"
@@ -54,7 +68,8 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                         else if (o == null)
                             return new HtmlString(helpers.Html.Encode(col.NullDisplayText ?? string.Empty));
                         else if (o is IFormattable && !string.IsNullOrEmpty(col.DisplayFormat))
-                            return new HtmlString(helpers.Html.Encode((o as IFormattable).ToString(col.DisplayFormat, CultureInfo.CurrentCulture)));
+                            return new HtmlString(helpers.Html.Encode(string.Format(CultureInfo.CurrentCulture, col.DisplayFormat, (o as IFormattable)) ));
+                        else if (col.For.Metadata.IsEnum) return new HtmlString(getEnumDisplayName(col.For.Metadata.UnderlyingOrModelType, ((int)o).ToString(CultureInfo.CurrentCulture), helpers.Html));
                         return helpers.Html.Display(helpers.Html.CurrentScope<object>().FatherPrefix);
                     }, null);
         static DefaultServerControlsTagHelpersProvider()

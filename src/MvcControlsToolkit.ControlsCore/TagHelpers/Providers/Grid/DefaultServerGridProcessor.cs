@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -89,16 +91,16 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             else
             {
                 int i = 0;
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringWriter();
                  
                 foreach (var row in model)
                 {
                     var rowType = options.GetServerRow(row);
                     if (rowType == null) continue;
                     if (options.Type == GridType.Immediate)
-                        sb.Append(await rowType.InvokeDisplay(row, RowPrefix(i, rowType), helpers));
+                        (await rowType.InvokeDisplay(row, RowPrefix(i, rowType), helpers)).WriteTo(sb, HtmlEncoder.Default);
                     else
-                        sb.Append(await rowType.InvokeEdit(row, RowPrefix(i, rowType), helpers));
+                        (await rowType.InvokeEdit(row, RowPrefix(i, rowType), helpers)).WriteTo(sb, HtmlEncoder.Default);
                     i++;
                 }
                 res = new HtmlString(sb.ToString());

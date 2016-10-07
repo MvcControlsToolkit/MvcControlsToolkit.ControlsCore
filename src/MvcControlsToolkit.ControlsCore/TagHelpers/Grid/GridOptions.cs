@@ -9,14 +9,14 @@ namespace MvcControlsToolkit.Core.TagHelpers.Internals
 {
     public class GridOptions: TagProcessorOptions
     {
-        public GridOptions(IList<RowType> rows, IList<KeyValuePair<string, IHtmlContent>> toolbars, GridType type, string id, string fullName): base(rows)
+        public GridOptions(IList<RowType> rows, IList<KeyValuePair<string, string>> toolbars, GridType type, string id, string fullName): base(rows)
         {
             Toolbars = toolbars;
             Type = type;
             Id = id;
             FullName = fullName;
         }
-        public IList<KeyValuePair<string, IHtmlContent>> Toolbars { get; private set; }
+        public IList<KeyValuePair<string, string>> Toolbars { get; private set; }
         private IEnumerable<RowType> _ReverseRows=null;
         public IEnumerable<RowType> ReverseRows
         {

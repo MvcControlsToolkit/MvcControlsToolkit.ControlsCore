@@ -8,9 +8,10 @@ using ControlsTest.Data;
 namespace ControlsTest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20161005202500_business2")]
+    partial class business2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.0-rtm-21431")
@@ -77,8 +78,6 @@ namespace ControlsTest.Data.Migrations
                     b.Property<string>("Description")
                         .HasAnnotation("MaxLength", 256);
 
-                    b.Property<int?>("MaintenanceId");
-
                     b.Property<string>("Name")
                         .HasAnnotation("MaxLength", 128);
 
@@ -87,9 +86,6 @@ namespace ControlsTest.Data.Migrations
                     b.Property<int?>("TypeId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MaintenanceId")
-                        .IsUnique();
 
                     b.HasIndex("TypeId");
 
@@ -107,18 +103,6 @@ namespace ControlsTest.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ProductTypes");
-                });
-
-            modelBuilder.Entity("ControlsTest.Models.ProductWithMaintenance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<decimal>("YearlyRate");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProductsWithMaintenance");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole", b =>
@@ -230,10 +214,6 @@ namespace ControlsTest.Data.Migrations
 
             modelBuilder.Entity("ControlsTest.Models.Product", b =>
                 {
-                    b.HasOne("ControlsTest.Models.ProductWithMaintenance", "Maintenance")
-                        .WithOne("Base")
-                        .HasForeignKey("ControlsTest.Models.Product", "MaintenanceId");
-
                     b.HasOne("ControlsTest.Models.ProductType", "Type")
                         .WithMany("Products")
                         .HasForeignKey("TypeId")

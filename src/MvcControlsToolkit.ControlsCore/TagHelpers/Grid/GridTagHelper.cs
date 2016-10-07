@@ -80,7 +80,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             string fullName = ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(For.Name);
             string id = OverrideId ?? TagBuilder.CreateSanitizedId(fullName, IdAttributeDotReplacement);
             var currProvider = ViewContext.TagHelperProvider();
-            var defaultTemplates = currProvider.GetDefaultTemplates(TagName);
+            var actTagName = TagName + (Type == GridType.Batch ? "-batch" : "-immediate");
+            var defaultTemplates = currProvider.GetDefaultTemplates(actTagName);
             var ctx = new ContextualizedHelpers(ViewContext, html, httpAccessor, component, urlHelperFactory, factory);
             //
 
@@ -92,7 +93,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             context.SetChildrenReductionContext(nc);
             await output.GetChildContentAsync();
             var collector = new RowContainerCollector(nc);
-            var res= collector.Process(this, defaultTemplates) as Tuple<IList<RowType>, IList<KeyValuePair<string, IHtmlContent>>>;
+            var res= collector.Process(this, defaultTemplates) as Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>;
             if (rows == null)
             {
                 rows = res.Item1;
@@ -124,7 +125,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 SubTemplates=defaultTemplates.GetLayoutParts(LayoutParts)
             };
             //finally process!
-            await currProvider.GetTagProcessor(TagName+(Type== GridType.Batch ? "-batch" : "-immediate"))(context, output, this, options, ctx);
+            await currProvider.GetTagProcessor(actTagName)(context, output, this, options, ctx);
         }
     }
 }

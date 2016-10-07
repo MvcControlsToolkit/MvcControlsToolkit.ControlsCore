@@ -8,9 +8,10 @@ using ControlsTest.Data;
 namespace ControlsTest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20161006082819_business3")]
+    partial class business3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.0-rtm-21431")
@@ -77,8 +78,6 @@ namespace ControlsTest.Data.Migrations
                     b.Property<string>("Description")
                         .HasAnnotation("MaxLength", 256);
 
-                    b.Property<int?>("MaintenanceId");
-
                     b.Property<string>("Name")
                         .HasAnnotation("MaxLength", 128);
 
@@ -87,9 +86,6 @@ namespace ControlsTest.Data.Migrations
                     b.Property<int?>("TypeId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MaintenanceId")
-                        .IsUnique();
 
                     b.HasIndex("TypeId");
 
@@ -111,12 +107,14 @@ namespace ControlsTest.Data.Migrations
 
             modelBuilder.Entity("ControlsTest.Models.ProductWithMaintenance", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<decimal>("YearlyRate");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
 
                     b.ToTable("ProductsWithMaintenance");
                 });
@@ -230,14 +228,18 @@ namespace ControlsTest.Data.Migrations
 
             modelBuilder.Entity("ControlsTest.Models.Product", b =>
                 {
-                    b.HasOne("ControlsTest.Models.ProductWithMaintenance", "Maintenance")
-                        .WithOne("Base")
-                        .HasForeignKey("ControlsTest.Models.Product", "MaintenanceId");
-
                     b.HasOne("ControlsTest.Models.ProductType", "Type")
                         .WithMany("Products")
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("ControlsTest.Models.ProductWithMaintenance", b =>
+                {
+                    b.HasOne("ControlsTest.Models.Product", "Base")
+                        .WithOne("Maintenance")
+                        .HasForeignKey("ControlsTest.Models.ProductWithMaintenance", "Id")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>

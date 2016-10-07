@@ -35,7 +35,7 @@ namespace MvcControlsToolkit.Core.Extensions
                  {
                      options.FileProviders.Add(
                        new EmbeddedFileProvider(typeof(ControlsDIExtensions).GetTypeInfo().Assembly,
-                       "MvcControlsToolkit.Core"));
+                       "MvcControlsToolkit.ControlsCore"));
                   }
             );
             if (setupAction != null)

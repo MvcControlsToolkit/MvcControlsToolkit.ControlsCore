@@ -3,6 +3,23 @@
 @using Microsoft.Extensions.Options
 @using System.Text
 @using System.Globalization
+
+@functions{
+    //workaround forr issue https://github.com/aspnet/Mvc/issues/2430
+    private  string getEnumDisplayName(Type type, string o, IHtmlHelper h)
+    {
+        string displayName = null;
+
+        foreach (SelectListItem item in h.GetEnumSelectList(type))
+        {
+            if (o == item.Value)
+            {
+                displayName = item.Text ?? item.Value;
+            }
+        }
+        return displayName;
+    }
+}
 @{
     var metaData = ViewData.ModelMetadata;
     var col = ViewData["Options"] as Column;
@@ -52,12 +69,16 @@
             {
                 @((Model as IFormattable).ToString(col.DisplayFormat, CultureInfo.CurrentCulture))
             }
+            else if (ViewData.ModelMetadata.IsEnum)
+            {
+                @Html.Raw(getEnumDisplayName(col.For.Metadata.UnderlyingOrModelType, ((int)Model).ToString(CultureInfo.CurrentCulture), Html))
+            }
             else
             {
                 @Html.Display(string.Empty)
             }
         </p>
-        
+
     }
 </div>
 
