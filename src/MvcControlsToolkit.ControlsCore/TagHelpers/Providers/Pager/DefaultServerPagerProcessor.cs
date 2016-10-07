@@ -33,14 +33,14 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
         {
             //preparing options
             int pageSize = tag.PageSizeDefault;
-            if (tag.PageSize.Model != null && tag.PageSize.Metadata.ModelType == typeof(int))
+            if (tag.PageSize?.Model != null && tag.PageSize.Metadata.ModelType == typeof(int))
                 pageSize = (int)tag.PageSize.Model;
             int page = tag.CurrentPageDefault;
-            if (tag.CurrentPage.Model != null && tag.CurrentPage.Metadata.ModelType == typeof(int))
+            if (tag.CurrentPage?.Model != null && tag.CurrentPage.Metadata.ModelType == typeof(int))
                 page = (int)tag.CurrentPage.Model;
             int totalPages = tag.TotalPagesDefault.HasValue? tag.TotalPagesDefault.Value: int.MaxValue;
-            if (tag.TotalPages.Model != null && tag.TotalPages.Metadata.ModelType == typeof(int))
-                totalPages = (int)tag.CurrentPage.Model;
+            if (tag.TotalPages?.Model != null && tag.TotalPages.Metadata.ModelType == typeof(int))
+                totalPages = (int)tag.TotalPages.Model;
 
 
             var layoutOptions = new DefaultServerPagerLayoutOptions
@@ -50,7 +50,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 Math.Max(1, page - tag.MaxPages),
                 page,
                 Math.Min(page + tag.MaxPages, totalPages),
-                tag.Url.Model as string ?? tag.UrlDefault,
+                tag.Url?.Model as string ?? tag.UrlDefault,
                 tag.SkipUrlToken,
                 tag.TakeUrlToken,
                 tag.LocalizationType,

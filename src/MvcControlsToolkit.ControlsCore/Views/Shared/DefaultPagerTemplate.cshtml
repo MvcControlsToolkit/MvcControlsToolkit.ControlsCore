@@ -14,7 +14,7 @@
 {
     <nav aria-label="@localizer("page navigation")">
         <ul class="@(options.CssClass??"pagination")">
-            <li class="@(options.HasPagesBefore ? "disabled" : "")">
+            <li class="@(options.HasPagesBefore ? "" : "disabled")">
                 <a href="@options.PageUrl(options.CurrentPage-1)" aria-label="@localizer("previous")">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
@@ -24,14 +24,14 @@
                 <li><a href="@options.PageUrl(i)">@i</a></li>
             }
             <li class="active">
-                <a href="@options.PageUrl(options.CurrentPage)">@options.CurrentPage</a>
+                <a href="javascript:void(0)">@options.CurrentPage <span class="sr-only">@localizer("current")</span></a>
             </li>
             @for (int i = options.CurrentPage+1; i <= options.PagesAfterStop; i++)
             {
                 <li><a href="@options.PageUrl(i)">@i</a></li>
             }
-            <li class="@(options.HasPagesAfter ? "disabled" : "")">
-                <a href="@options.PageUrl(options.CurrentPage-1)" aria-label="@localizer("next")">
+            <li class="@(options.HasPagesAfter ? "" : "disabled")">
+                <a href="@options.PageUrl(options.CurrentPage+1)" aria-label="@localizer("next")">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

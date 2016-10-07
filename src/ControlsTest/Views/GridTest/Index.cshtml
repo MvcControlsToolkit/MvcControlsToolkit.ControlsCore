@@ -3,7 +3,9 @@
 @{
     ViewData["Title"] = "Immediate grid test";
 }
-
+<style>
+    tfoot .pagination,  thead .pagination{margin: 0;}
+</style>
 <h2>@ViewData["Title"].</h2>
 
 <grid asp-for="Products.Data" 
@@ -28,9 +30,24 @@
         <column asp-for="Products.Data.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
     </row-type>
     <toolbar zone-name="@LayoutStandardPlaces.Header">
-        this is an header toolbar
+        <pager mode="CustomPages"
+               class="pagination pagination-sm"
+               max-pages="4"
+               current-page="Products.Page"
+               page-size-default="3"
+               total-pages="Products.TotalPages"
+               skip-url-token="_zzz_"
+               url-default="@Url.Action("Index", "GridTest", new {page="_zzz_" })" />
     </toolbar>
     <toolbar zone-name="@LayoutStandardPlaces.Footer">
-        this is a footer toolbar
+        <pager mode="CustomPages"
+               class="pagination pagination-sm"
+               max-pages="4"
+               current-page="Products.Page"
+               page-size-default="3"
+               total-pages="Products.TotalPages"
+               skip-url-token="_zzz_"
+               url-default="@Url.Action("Index", "GridTest", new {page="_zzz_" })" />
     </toolbar>
 </grid>
+

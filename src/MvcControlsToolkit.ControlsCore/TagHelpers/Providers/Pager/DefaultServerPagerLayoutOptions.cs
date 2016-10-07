@@ -36,7 +36,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             HasPages = hasPages;
             PagesBeforeStart = pagesBeforeStart;
             CurrentPage = currentPage;
-            PagesAfterStop = PagesAfterStop;
+            PagesAfterStop = pagesAfterStop;
             Mode = mode;
             PageSize = pageSize;
             this.skipToken = skipToken;
@@ -48,8 +48,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public string PageUrl(int i)
         {
             if (i < PagesBeforeStart || i > PagesAfterStop) return "javascript:void(0)";
-            return url.Replace(skipToken, (Mode == PagerMode.OData ? PageSize * (i - 1) : i).ToString(CultureInfo.InvariantCulture))
-                .Replace(takeToken, PageSize.ToString(CultureInfo.InvariantCulture));
+            var res = url.Replace(skipToken, (Mode == PagerMode.OData ? PageSize * (i - 1) : i).ToString(CultureInfo.InvariantCulture));
+            if(takeToken != null) res= res.Replace(takeToken, PageSize.ToString(CultureInfo.InvariantCulture));
+            return res;
         }
         public bool HasPagesBefore
         {
