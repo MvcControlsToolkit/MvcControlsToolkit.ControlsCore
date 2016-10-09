@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Html;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
@@ -20,6 +21,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         private string skipToken;
         private string takeToken;
         private string url;
+        private string operation;
         public DefaultServerPagerLayoutOptions(
             bool hasPages,
             int pageSize,
@@ -30,7 +32,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             string url, string skipToken, string takeToken,
             Type localizerType,
             string cssClass,
-            Templates.Template<Templates.LayoutTemplateOptions> layoutTemplate
+            Templates.Template<Templates.LayoutTemplateOptions> layoutTemplate,
+            string operation
             ) :base(null, null, layoutTemplate, null, null)
         {
             HasPages = hasPages;
@@ -44,6 +47,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             this.url = url;
             CssClass = cssClass;
             LocalizerType = localizerType;
+            this.operation = operation;
         }
         public string PageUrl(int i)
         {
@@ -52,6 +56,11 @@ namespace MvcControlsToolkit.Core.TagHelpers
             if(takeToken != null) res= res.Replace(takeToken, PageSize.ToString(CultureInfo.InvariantCulture));
             return res;
         }
+        public HtmlString Operation(int i)
+        {
+            if (i < PagesBeforeStart || i > PagesAfterStop) return new HtmlString(string.Empty);
+            return new HtmlString(operation ?? string.Empty);
+        }  
         public bool HasPagesBefore
         {
             get

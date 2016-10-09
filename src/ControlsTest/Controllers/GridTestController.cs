@@ -71,5 +71,21 @@ namespace ControlsTest.Controllers
             
             
         }
+        public async Task<IActionResult> IndexPartial(int? page)
+        {
+            int pg = page.HasValue ? page.Value : 1;
+            if (pg < 1) pg = 1;
+
+            var model = new ProductlistViewModel
+            {
+                Products = await Repository.GetPage<ProductViewModel>(
+                null,
+                q => q.OrderBy(m => m.Name),
+                pg, 3)
+            };
+            return PartialView("_gridIndex", model);
+
+
+        }
     }
 }

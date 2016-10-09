@@ -5,18 +5,18 @@
         (function (factory) {
             if (typeof define === 'function' && define['amd']) {
                 // [1] AMD anonymous module
-                define([DEBUG ? "../mvcct.controls.server" : "../mvcct.controls.server.min", "../../mvcct-enhancer/mvcct.enhancer.min", "../../awesomplete/awesomplete.min"], factory);
+                define([DEBUG ? "../mvcct.controls" : "../mvcct.controls.min", "../../mvcct-enhancer/mvcct.enhancer.min", "jquery", "../../corejs-typeahead/dist/bloodhound", "../../corejs-typeahead/dist/typeahead.jquery"], factory);
             } else if (typeof exports === 'object' && typeof module === 'object') {
                 // [2] CommonJS/Node.js
-                module["exports"] = factory(require(DEBUG ? "../mvcct.controls.server" : "../mvcct.controls.server.min"), require("mvcct-enhancer"), require("awesomplete"));  // module.exports is for Node.js
+                module["exports"] = factory(require(DEBUG ? "../mvcct.controls.server" : "../mvcct.controls.server.min"), require("mvcct-enhancer"), require("jquery"), require("corejs-typeahead/dist/bloodhound"), require("corejs-typeahead/dist/typeahead.jquery"));  // module.exports is for Node.js
             } else {
                 // [3] No module loader (plain <script> tag) - put directly in global namespace
                 var mvcct = window["mvcct"] = window["mvcct"] || {};
-                factory(mvcct['controls']['server'], mvcct['enhancer'], window['Awesomplete']);
+                factory(mvcct['controls']['server'], mvcct['enhancer'], window['jQuery'], window['Bloodhound']);
             }
         }(
 
-            (function (serverControls, enhancer, Awesomplete) {
+            (function (serverControls, enhancer, $, Bloodhound) {
 
                 //Start actual code
                 var options;
@@ -40,6 +40,8 @@
                 function attach(infos) {
                     var el = infos['target'];
                     var args = infos['args'];
+                    var init = true;
+                    
                     if (el.getAttribute('data-enhanced-autocomplete')) {
                         el.value = "";
                         return;
@@ -53,54 +55,55 @@
                     el.value = "";
                     var defaultEmpty = args[5] == "true";
                     var tOptions = typeof options === 'function' ? options(target) : options;
-                    var lastData;
+                    var jel = $(el);
                     var removeDiacritics=
                         tOptions['removeDiacritics'] ? serverControls['removeDiacritics'] :
                         function (x) { return x;}
                     var safeRemoveDiacritics = serverControls['removeDiacritics'];
                     var engine = dict[args[2]];
-                    var minChars = parseInt(args[4]);
-                    var maxItems = parseInt(args[3]);
                     if (!engine) {
-                        dict[args[2]] = engine = new serverControls['searchDictionary'](args[0], minChars, maxItems, tOptions["maxCacheSize"])
+                        var boptions = {
+                            datumTokenizer: function (d) {
+                                return removeDiacritics(d[args[1]]);
+                            },
+                            queryTokenizer: function (x) {
+                                return removeDiacritics(x);
+                            },
+                            identify: function (x) {
+                                return x[args[0]];
+                            },
+                            remote: {
+                                url: el.getAttribute('data-url'),
+                                wildcard: el.getAttribute('data-url-token')
+                            }
+                        };
+                        dict[args[2]]=engine = new Bloodhound(boptions);
                     }
-                    var awesomplete = new Awesomplete(el, {
-                        minChars: minChars,
-                        maxItems: maxItems,
-                        filter: function (x, y) {
-                            x = removeDiacritics(x).toLowerCase();
-                            y = removeDiacritics(y).toLowerCase();
-                            return x.indexOf(y) >=0;
-                        },
-                        data: function (item, input) {
-                            return { label: item[args[1]], value: item[args[1]] };
+                    var ds = [$.extend(tOptions, {
+                        async: true,
+                        display: args[1],
+                        name: args[2],
+                        limit: parseInt(args[3]),
+                        source: function (x, sr, ar) {
+                            var newSr = function (r) {
+                                if(r && r.length >0) jel.data("_lastresults_", r);
+                                sr(r);
+                            };
+                            var newAr = function (r) {
+                                if (r && r.length > 0) jel.data("_lastresults_", r);
+                                ar(r);
+                            };
+                            var en = engine;
+                            en.search(x, newSr, newAr);
                         }
-                    });
-                    el.parentNode.style.display = "block";
-                    var elStyle = style = window.getComputedStyle(el);
-                    if (elStyle.maxWidth) el.parentNode.style.maxWidth = elStyle.maxWidth;
-                    if (elStyle.minWidth) el.parentNode.style.minWidth = elStyle.minWidth;
+                    })];
                     
                     var mainHandler = function (evt) {
-                        if (evt.type == "keydown") {
-                            if ((evt.keyCode || evt.which) != 9) {
-                                return;
-
-                            }
-                            else {
-                                
-                                if (lastData && lastData.length > 0) {
-                                    if (el.value != lastData[0][args[1]]) {
-                                        el.value = lastData[0][args[1]];
-                                        evt.preventDefault();
-                                    }
-                                     
-                                }
-                                
-                            }
+                        if (init) {
+                            init = false;
+                            return;
                         }
-                        
-                        
+                        var lastData = jel.data("_lastresults_");
                         var oldVal = hidden.value;
                         var newVal;
                         if (lastData) {
@@ -114,13 +117,18 @@
                                     return;
                                 }
                             }
+                            
                         }
                         
                         var emptysearch;
-                        var update = (emptysearch = defaultEmpty || !el.value) ?
+                        var update = (emptysearch=defaultEmpty || !el.value) ?
                             function () { el.value = ''; } :
                             function () { el.value = el.getAttribute("data-last-value"); };
+                        
                         update();
+                        setTimeout(function () { update(); }, 0);
+                        
+                        
                         oldVal = hidden.value;
                         newVal = emptysearch ? '' : hidden.getAttribute("data-last-value");
                         hidden.value = newVal;
@@ -130,39 +138,13 @@
                             var validator = jhidden.closest('form').validate();
                             if (validator) validator.element(jhidden);
                         }
-                    }
-                    el.addEventListener('blur', mainHandler, false);
-                    el.addEventListener('keydown', mainHandler, false);
-                    el.addEventListener('awesomplete-selectcomplete', mainHandler, false);
-                    
-                    el.addEventListener('keyup', function (evt) {
-                        if (el.value.length < awesomplete.minChars) return;
-                        var code = evt.keyCode || evt.which;
-                        if (code == 9 || code == 37 || code == 38 || code == 39 || code == 40 || code === 27 || code === 13) {
-                            return;
-                        }
-                        var lastCall = removeDiacritics(el.value).toLowerCase();
-                        var res = engine['get'](lastCall);
-                        if (res) {
-                            awesomplete.list = lastData = res;
-                            return;
-                        }
-                        var ajax = new XMLHttpRequest();
-                        
-                        ajax.open("GET", el.getAttribute('data-url').replace(el.getAttribute('data-url-token'), el.value), true);
-                        ajax.onload = function () {
-                            awesomplete.list = lastData = JSON.parse(ajax.responseText);
-                            engine['add'](lastCall, lastData);
-                            };
-                        ajax.send();
-                    }, false);
-                    
-                    
-                    
+                    };
+                    jel.bind("blur typeahead:autocomplete typeahead:selected", mainHandler);
+                    jel.typeahead({ minLength: parseInt(args[4]) }, ds);
                     el.focus();
                 }
                 enhancer["register"](null, null, processOptions, "server autocomplete", null)
-                serverControls['addOperation']('autocomplete', attach);
+                serverControls['addOperation']('autocomplete_focus', attach);
                 
                 //Finish actual code
                 return serverControls;

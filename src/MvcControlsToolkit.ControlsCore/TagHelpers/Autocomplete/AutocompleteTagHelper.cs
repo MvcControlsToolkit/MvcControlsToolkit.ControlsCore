@@ -13,7 +13,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
-    [HtmlTargetElement(TagName, Attributes = ForAttributeName)]
+    [HtmlTargetElement(TagName, Attributes = ForAttributeName, TagStructure = TagStructure.WithoutEndTag)]
     public class AutocompleteTagHelper : TagHelper
     {
         private const string ForAttributeName = "asp-for";

@@ -371,20 +371,19 @@
                 
 
                 //object passed to argument processor
-                function operationArgs(target, operation, args) {
+                function operationArgs(target, operation, args, row, control) {
                     this['target'] = target;
                     this['operation'] = operation;
                     this['args'] = args;
+                    this['row'] = row;
+                    this['control'] = control;
                     var currentLocation = target.parentNode;
                     var attValue;
                     
                     this["find"] = function (attr) {
                         for(;  currentLocation; currentLocation=currentLocation.parentNode){
                             attValue = currentLocation.getAttribute(attr);
-                            if (attValue) return {
-                                value: attValue,
-                                target: currentLocation
-                            };
+                            if (attValue) return currentLocation;
                         }
                         return null;
                     };
@@ -392,23 +391,61 @@
                 }
                 
                 //operation handlers dictionary
+                
                 var dictionary = {};
-                serverControls['addOperation'] = function (name, handler) {
-                    dictionary[name] = handler;
+                serverControls['addOperation'] = function (name, handler, type) {
+                    if (type) {
+                        dictionary[name] = {
+                            handler: null,
+                            type: true
+                        }
+                        dictionary[name + "_" + type] = {
+                            handler: handler,
+                            type: null
+                        }
+                    }
+                    else
+                        dictionary[name] = {
+                            handler: handler,
+                            type: null
+                        }
                 }
                 serverControls['removeOperation'] = function (name) {
                     delete dictionary[name];
                 }
-                //prepare argument for operation handler
-                function dispatcher(operation, target) {
-                    if (operation && target) {
-                        var args = operation.split(' ');
-                        operation = args[0];
-                        var val = dictionary[operation];
-                        if (val) {
-                            val(new operationArgs(target, operation, args.slice(1)));
+                serverControls['dispatch'] = function (target, operation, args)
+                {
+                    var val = dictionary[operation];
+                    if (val) {
+                        if (val.type) {
+                            var controlType = el.getAttribute('data-control-type');
+                            var row, control;
+                            if (!controlType) {
+                                var d = new operationArgs(target, operation, args);
+                                row = d.find('data-row');
+                                if (!row) return false;
+                                var control = d.find('data-control-type');
+                                if (!control) return false;
+                                controlType = cpntrol.getAttribute('data-control-type');
+                                
+                            }
+                            val = dictionary[operation + "_" + controlType];
+                            if (!val) return false;
+                            val.handler(new operationArgs(target, operation, args, row, control));
                             return true;
                         }
+                        else
+                            val.handler(new operationArgs(target, operation, args));
+                        return true;
+                    }
+                    return false;
+                }
+                //prepare argument for operation handler
+                function dispatcher(operation, target, event) {
+                    if (operation && target) {
+                        var args = operation.split(' ');
+                        operation = args[0]+event;
+                        return serverControls['dispatch'](target, operation, args.slice(1));
                     }
                     return false;
                 }
@@ -419,19 +456,21 @@
                     if (!val && target.parentNode) {
                         target = target.parentNode;
                         val = target.getAttribute(operationAttribute);
-                        if (val) {
-                            var result = dispatcher(val, target);
-                            if (result) {
-                                evt.preventDefault();
-                            }
+                    }
+                    if (val) {
+                        var result = dispatcher(val, target, "_click");
+                        if (result) {
+                            evt.preventDefault();
                         }
                     }
+                    
                 }, false);
                 document.addEventListener("focus", function (evt) {
                     var val = evt.target.getAttribute(operationAttribute);
-                    if (val) dispatcher(val, evt.target);
+                    if (val) dispatcher(val, evt.target, "_focus");
                 }, true);
                 //Finish actual code
+                
             })
         ));
     }());

@@ -16,11 +16,11 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
     public class DefaultServerControlsTagHelpersProvider : ITagHelpersProvider
     {
         private const string buttonTemplate = @"
-<button data-operation='{0} {1}' class='btn {2}' aria-label='{3}' title='{3}' type='button'>
+<button data-operation='{0} {1}' class='btn {2}' aria-label='{3}' title='{3}' type='button' {5}>
 <span class='glyphicon {4}' aria-hidden='true'></span>
 </button>";
         private const string buttonTemplateWithText = @"
-<button data-operation='{0} {1}' class='btn {2}' title='{3}' type='button'>
+<button data-operation='{0} {1}' class='btn {2}' title='{3}' type='button' {5}>
 <span class='glyphicon {4}' aria-hidden='true'></span> {3}
 </button>";
         private const string buttonTemplateSubmit = @"
@@ -321,7 +321,14 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                     ShowText = "sort descending"
                 });
         }
-        public  IHtmlContent RenderButton(StandardButtons buttonType, string arguments, string cssClass, ContextualizedHelpers helpers, IStringLocalizer localizer, bool visibleText=false, bool isSubmit=false)
+        public  IHtmlContent RenderButton(StandardButtons buttonType, 
+            string arguments, 
+            string cssClass, 
+            ContextualizedHelpers helpers, 
+            IStringLocalizer localizer, 
+            bool visibleText=false, 
+            bool isSubmit=false,
+            string controlType = null)
         {
             ButtonProperties currentButton = null;
             allButtonProperties.TryGetValue(buttonType, out currentButton);
@@ -340,7 +347,8 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                     cssClass ?? string.Empty,
                     localizer != null ?
                         localizer[currentButton.ShowText] : currentButton.ShowText,
-                    currentButton.IconClass
+                    currentButton.IconClass,
+                    controlType==null ? string.Empty : "data-control-type='"+ controlType + "'"
                     ));
         }
         public bool GenerateNames

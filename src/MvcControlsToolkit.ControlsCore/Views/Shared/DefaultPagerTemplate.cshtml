@@ -15,23 +15,23 @@
     <nav aria-label="@localizer("page navigation")">
         <ul class="@(options.CssClass??"pagination")">
             <li class="@(options.HasPagesBefore ? "" : "disabled")">
-                <a href="@options.PageUrl(options.CurrentPage-1)" aria-label="@localizer("previous")">
+                <a @options.Operation(options.CurrentPage-1) href="@options.PageUrl(options.CurrentPage-1)" aria-label="@localizer("previous")">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
             @for(int i=options.PagesBeforeStart; i<options.CurrentPage; i++)
             {
-                <li><a href="@options.PageUrl(i)">@i</a></li>
+                <li><a @options.Operation(i) href="@options.PageUrl(i)">@i</a></li>
             }
             <li class="active">
                 <a href="javascript:void(0)">@options.CurrentPage <span class="sr-only">@localizer("current")</span></a>
             </li>
             @for (int i = options.CurrentPage+1; i <= options.PagesAfterStop; i++)
             {
-                <li><a href="@options.PageUrl(i)">@i</a></li>
+                <li><a @options.Operation(i) href="@options.PageUrl(i)">@i</a></li>
             }
             <li class="@(options.HasPagesAfter ? "" : "disabled")">
-                <a href="@options.PageUrl(options.CurrentPage+1)" aria-label="@localizer("next")">
+                <a @options.Operation(options.CurrentPage+1) href="@options.PageUrl(options.CurrentPage+1)" aria-label="@localizer("next")">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

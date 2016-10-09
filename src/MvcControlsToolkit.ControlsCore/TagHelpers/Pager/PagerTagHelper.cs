@@ -15,7 +15,7 @@ using MvcControlsToolkit.Core.Views;
 namespace MvcControlsToolkit.Core.TagHelpers
 {
     public enum PagerMode {OData=0, CustomPages}
-    [HtmlTargetElement(TagName)]
+    [HtmlTargetElement(TagName, TagStructure=TagStructure.WithoutEndTag)]
     public class PagerTagHelper : TagHelper
     {
         private const string TagName = "pager";
@@ -62,6 +62,15 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("localization-type")]
         public Type LocalizationType { get; set; }
 
+        [HtmlAttributeName("copy-html")]
+        public string CopyHtml { get; set; }
+
+        [HtmlAttributeName("ajax-id")]
+        public string AjaxId { get; set; }
+
+        [HtmlAttributeName("ajax-endpoint")]
+        public string AjaxEndpoint { get; set; }
+
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -98,7 +107,12 @@ namespace MvcControlsToolkit.Core.TagHelpers
             if (MaxPages <= 0) MaxPages = 5;
 
             var currProvider = ViewContext.TagHelperProvider();
-            var options = new Internals.PagerOptions(currProvider.GetDefaultTemplates(TagName).LayoutTemplate);
+            string operation = null;
+            if(AjaxId!= null )
+                operation = "data-operation='ajax-html "+ AjaxId + "'";
+            else if(AjaxEndpoint != null)
+                operation = "data-operation='ajax-json " + AjaxEndpoint + "'";
+            var options = new Internals.PagerOptions(currProvider.GetDefaultTemplates(TagName).LayoutTemplate, operation);
             await currProvider.GetTagProcessor(TagName)(context, output, this,  options , ctx);
         }
     }

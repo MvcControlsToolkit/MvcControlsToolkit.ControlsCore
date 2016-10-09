@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using MvcControlsToolkit.Core.Templates;
+using System.Text.Encodings.Web;
 
 namespace MvcControlsToolkit.Core.TagHelpers.Providers
 {
@@ -55,10 +57,20 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 tag.TakeUrlToken,
                 tag.LocalizationType,
                 tag.CssClass,
-                options.LayoutTemplate
+                options.LayoutTemplate,
+                options.Operation
                 );
-            var fres = await options.LayoutTemplate.Invoke(tag.CurrentPage, layoutOptions, helpers);
             output.TagName = string.Empty;
+            var fres = await options.LayoutTemplate.Invoke(tag.CurrentPage, layoutOptions, helpers);
+            if (tag.CopyHtml != null)
+            {
+                var iores = new System.IO.StringWriter();
+                fres.WriteTo(iores, HtmlEncoder.Default);
+                var sres = iores.ToString();
+                helpers.Context.ViewData["copied-html-" + tag.CopyHtml] = sres;
+                output.Content.SetHtmlContent(sres);
+                return;
+            }
             output.Content.SetHtmlContent(fres);
 
         }

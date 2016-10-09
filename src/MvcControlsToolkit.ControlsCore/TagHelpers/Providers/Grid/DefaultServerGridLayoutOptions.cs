@@ -65,8 +65,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
         }
         public IHtmlContent RenderTopContainerAttributes()
         {
-            return new HtmlString(string.Format("id='{0}' class='{1}' data-grid-type='{2}'",
-                Id, CssClass, Type == GridType.Batch ? "batch" : "immediate"));
+            return new HtmlString(string.Format("id='{0}' class='{1}' data-control-type='{2}'",
+                Id, CssClass, Type == GridType.Batch ? "server-batch-grid" : "server-immediate-grid"));
         }
         public IHtmlContent RenderRowsContainerAttributes()
         {

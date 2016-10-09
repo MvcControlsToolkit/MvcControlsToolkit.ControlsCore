@@ -7,47 +7,16 @@
     tfoot .pagination,  thead .pagination{margin: 0;}
 </style>
 <h2>@ViewData["Title"].</h2>
+<div id="grid_container">
+    @Html.Partial("_gridIndex", Model)
+</div>
 
-<grid asp-for="Products.Data" 
-      type="Immediate" 
-      all-properties="true" 
-      mvc-controller="typeof(GridTestController)" 
-      caption="Products"
-      operations="user => Functionalities.ReadOnly"
-      class="table table-condensed table-bordered"
-      
-      >
-    <column asp-for="Products.Data.Element().TypeId" >
-        <external-key-static display-property="Products.Data.Element().TypeName" />
-    </column> />
-    <column asp-for="Products.Data.Element().ChosenCurrency" />
-    <column asp-for="Products.Data.Element().Price" colspan="2" />
-    <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Proto"
-        mvc-controller="typeof(GridTestController)"
-        operations="user => Functionalities.ReadOnly"
-        from-row="0">
-        <column asp-for="Products.Data.Element().Price" colspan="1" />
-        <column asp-for="Products.Data.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
-    </row-type>
-    <toolbar zone-name="@LayoutStandardPlaces.Header">
-        <pager mode="CustomPages"
-               class="pagination pagination-sm"
-               max-pages="4"
-               current-page="Products.Page"
-               page-size-default="3"
-               total-pages="Products.TotalPages"
-               skip-url-token="_zzz_"
-               url-default="@Url.Action("Index", "GridTest", new {page="_zzz_" })" />
-    </toolbar>
-    <toolbar zone-name="@LayoutStandardPlaces.Footer">
-        <pager mode="CustomPages"
-               class="pagination pagination-sm"
-               max-pages="4"
-               current-page="Products.Page"
-               page-size-default="3"
-               total-pages="Products.TotalPages"
-               skip-url-token="_zzz_"
-               url-default="@Url.Action("Index", "GridTest", new {page="_zzz_" })" />
-    </toolbar>
-</grid>
+@section Scripts {
+    <link href="~/lib/awesomplete/awesomplete.css" rel="stylesheet" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    
+    <script src="~/lib/mvcct-controls/mvcct.controls.js"></script>
+    
+<script src="~/lib/mvcct-controls/modules/mvcct.controls.ajax.js"></script>
+}
 
