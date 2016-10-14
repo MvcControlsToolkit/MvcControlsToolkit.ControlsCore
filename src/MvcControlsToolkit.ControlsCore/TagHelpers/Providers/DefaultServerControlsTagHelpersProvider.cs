@@ -13,6 +13,7 @@ using MvcControlsToolkit.Core.Views;
 
 namespace MvcControlsToolkit.Core.TagHelpers.Providers
 {
+     
     public class DefaultServerControlsTagHelpersProvider : ITagHelpersProvider
     {
         private const string buttonTemplate = @"
@@ -136,6 +137,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 null,
                 null
                 );
+            DefineButtonProperies();
         }
         protected static void DefineButtonProperies()
         {

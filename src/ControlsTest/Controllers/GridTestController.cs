@@ -9,6 +9,7 @@ using ControlsTest.Models;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Http;
 using ControlsTest.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ControlsTest.Controllers
 {
@@ -18,42 +19,30 @@ namespace ControlsTest.Controllers
         {
             DefaultCRUDRepository<ApplicationDbContext, Product>
                 .DeclareProjection<ProductViewModel>(
-                    m => m.MaintenanceId.HasValue ?
-                    new ProductMaintenanceViewModel
-                    {
-                        Available = m.Available,
-                        ChosenCurrency = m.ChosenCurrency,
-                        Description = m.Description,
-                        Id = m.Id,
-                        Name = m.Name,
-                        Price = m.Price,
-                        TypeId = m.TypeId,
-                        TypeName = m.Type.Name,
-                        MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate
-                    }
-                    :
+                    m => m.Maintenance == null ?
+                    
                     new ProductViewModel
                     {
-                        Available = m.Available,
-                        ChosenCurrency = m.ChosenCurrency,
-                        Description = m.Description,
-                        Id = m.Id,
-                        Name = m.Name,
-                        Price = m.Price,
-                        TypeId = m.TypeId,
-                        TypeName = m.Type.Name
+                        
 
-                    } 
-                    
+                    } :
+
+                    new ProductMaintenanceViewModel
+                    {
+                        
+                        MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate
+                    }
+
                 );
+
         }
-        private ApplicationDbContext db;
+        
         public GridTestController(Data.ApplicationDbContext db, IStringLocalizerFactory factory, IHttpContextAccessor accessor) :base(factory, accessor)
         {
             //in actual 3 layers applications repository inherit from DefaultCRUDRepository
             //and then it is DI injected
             Repository = DefaultCRUDRepository.Create(db, db.Products);
-            this.db = db;
+            
         }
         public async Task<IActionResult> Index(int? page)
         {
@@ -87,5 +76,100 @@ namespace ControlsTest.Controllers
 
 
         }
+    }
+    public class DetailTestController : Controller
+    {
+        private readonly DefaultCRUDRepository<ApplicationDbContext, Product> Repository;
+        private readonly ICRUDRepository TypesRepository;
+        static DetailTestController()
+        {
+            DefaultCRUDRepository<ApplicationDbContext, Product>
+                .DeclareProjection<ProductViewModelDetail>(
+                    m => m.Maintenance != null ?
+                    new ProductMaintenanceViewModelDetail
+                    {
+                        
+                        MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate
+                    }:
+                    new ProductViewModelDetail
+                    {
+                        
+
+                    }
+
+                );
+            DefaultCRUDRepository<ApplicationDbContext, ProductType>
+                .DeclareProjection<DisplayValue>(
+                    m => new DisplayValue
+                    {
+                        Value=m.Id,
+                        Display=m.Name
+                    });
+        }
+        
+        public DetailTestController(Data.ApplicationDbContext db)
+        {
+            Repository = DefaultCRUDRepository.Create(db, db.Products);
+            TypesRepository = DefaultCRUDRepository.Create(db, db.ProductTypes);
+            
+        }
+        public async Task<ActionResult> Detail(int? id)
+        {
+            if (!id.HasValue) id = 1;
+            var model = await Repository.GetById<ProductViewModelDetail, int>(id.Value);
+            return View(model);
+
+        }
+        [HttpGet]
+        public async Task<ActionResult> Edit(int? id)
+        {
+            if (!id.HasValue) id = 1;
+            var model = await Repository.GetById<ProductViewModelDetail, int>(id.Value);
+           
+            ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
+            return View(model);
+
+        }
+        [HttpGet]
+        public async Task<ActionResult> Create(int? row)
+        {
+            ViewBag.DefaultRow = row.HasValue ? Math.Max(Math.Min(row.Value, 1), 0) :0;
+            ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
+            return View();
+
+        }
+        [HttpPost]
+        public async Task<ActionResult> Create(ProductViewModelDetail model)
+        {
+            
+            if (ModelState.IsValid)
+            {
+                Repository.Add<ProductViewModelDetail>(false, model);
+                await Repository.SaveChanges();
+                return RedirectToAction("Edit", new { id = model.Id });
+            }
+            ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Edit(ProductViewModelDetail model)
+        {
+            ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
+            if (ModelState.IsValid)
+            {
+                Repository.Update<ProductViewModelDetail>(false, model);
+                await Repository.SaveChanges();
+            }
+            return View(model);
+        }
+        [HttpGet]
+        public async Task<ActionResult> GetTypes(string search)
+        {
+            var res = search == null || search.Length<3 ? 
+                new List<DisplayValue>():
+               (await TypesRepository.GetPage<DisplayValue>(m => m.Display.StartsWith(search), m => m.OrderBy(n => n.Display), 1, 10)).Data;
+            return Json(res);
+        }
+
     }
 }

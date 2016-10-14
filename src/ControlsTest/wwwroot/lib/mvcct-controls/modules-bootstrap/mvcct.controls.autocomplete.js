@@ -8,11 +8,11 @@
                 define([DEBUG ? "../mvcct.controls" : "../mvcct.controls.min", "../../mvcct-enhancer/mvcct.enhancer.min", "jquery", "../../corejs-typeahead/dist/bloodhound", "../../corejs-typeahead/dist/typeahead.jquery"], factory);
             } else if (typeof exports === 'object' && typeof module === 'object') {
                 // [2] CommonJS/Node.js
-                module["exports"] = factory(require(DEBUG ? "../mvcct.controls.server" : "../mvcct.controls.server.min"), require("mvcct-enhancer"), require("jquery"), require("corejs-typeahead/dist/bloodhound"), require("corejs-typeahead/dist/typeahead.jquery"));  // module.exports is for Node.js
+                module["exports"] = factory(require(DEBUG ? "../mvcct.controls" : "../mvcct.controls.min"), require("mvcct-enhancer"), require("jquery"), require("corejs-typeahead/dist/bloodhound"), require("corejs-typeahead/dist/typeahead.jquery"));  // module.exports is for Node.js
             } else {
                 // [3] No module loader (plain <script> tag) - put directly in global namespace
                 var mvcct = window["mvcct"] = window["mvcct"] || {};
-                factory(mvcct['controls']['server'], mvcct['enhancer'], window['jQuery'], window['Bloodhound']);
+                factory(mvcct['controls'], mvcct['enhancer'], window['jQuery'], window['Bloodhound']);
             }
         }(
 

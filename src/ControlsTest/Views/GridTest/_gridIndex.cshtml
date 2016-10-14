@@ -11,9 +11,8 @@
     <column asp-for="Products.Data.Element().TypeId">
         <external-key-static display-property="Products.Data.Element().TypeName" />
     </column> />
-    <column asp-for="Products.Data.Element().ChosenCurrency" />
     <column asp-for="Products.Data.Element().Price" colspan="2" />
-    <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Proto"
+    <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Model"
               mvc-controller="typeof(GridTestController)"
               operations="user => Functionalities.ReadOnly"
               from-row="0">

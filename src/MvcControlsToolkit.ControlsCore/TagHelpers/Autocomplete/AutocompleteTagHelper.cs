@@ -13,7 +13,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
-    [HtmlTargetElement(TagName, Attributes = ForAttributeName, TagStructure = TagStructure.WithoutEndTag)]
+    [HtmlTargetElement(TagName, TagStructure = TagStructure.WithoutEndTag)]
     public class AutocompleteTagHelper : TagHelper
     {
         private const string ForAttributeName = "asp-for";
@@ -27,6 +27,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public string ForExpressionOverride { get; set; }
         [HtmlAttributeName("display-expression-override")]
         public string DisplayPropertyExpressionOverride { get; set; }
+        [HtmlAttributeName("for-explorer")]
+        public ModelExplorer ForPropertyExplorer { get; set; }
+        [HtmlAttributeName("display-explorer")]
+        public ModelExplorer DisplayPropertyExplorer { get; set; }
         [HtmlAttributeName("items-display-property")]
         public string ItemsDisplayProperty { get; set; }
         [HtmlAttributeName("items-value-property")]
@@ -59,7 +63,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            if (DisplayProperty == null) new ArgumentNullException("display-property");
+            if (DisplayProperty == null && (DisplayPropertyExplorer == null || DisplayPropertyExpressionOverride==null))
+                new ArgumentNullException("display-property/display-expression-override+display-explorer");
+            if (For == null && (ForPropertyExplorer == null || ForExpressionOverride == null))
+                new ArgumentNullException("asp-for/for-expression-override+for-explorer");
             if (string.IsNullOrWhiteSpace(ItemsDisplayProperty)) new ArgumentNullException("items-display-property");
             if (string.IsNullOrWhiteSpace(ItemsValueProperty)) new ArgumentNullException("items-value-property");
             if (string.IsNullOrWhiteSpace(ItemsUrl)) new ArgumentNullException("items-url");

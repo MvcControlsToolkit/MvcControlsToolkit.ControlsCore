@@ -28,7 +28,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
         protected void AdjustColumns()
         {
             if (!options.NeedsRunTimeTypeCheck) return;
-            var typeInfos = tag.For.Metadata.ElementType.GetTypeInfo();
+            var typeInfos = tag.For.Metadata.ModelType.GetTypeInfo();
             foreach (var row in options.Rows)
             {
                 foreach (var col in row.Columns)
@@ -66,7 +66,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             var layoutOptions = new DefaultServerDetailLayoutOptions(
                 helpers, 
                 options.Rows, 
-                options.Toolbars,
+                options.Toolbars?? new List<KeyValuePair<string, string>>(),
                 options.LayoutTemplate,
                 null,
                 res,
@@ -77,7 +77,8 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 mode,
                 tag.FormAction,
                 tag.FormMethod,
-                tag.Antiforgery
+                tag.Antiforgery,
+                tag.NoSubmit
                 );
             //Invoke Layout
             var fres = await options.LayoutTemplate.Invoke(tag.For, layoutOptions, helpers);

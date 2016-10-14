@@ -13,7 +13,7 @@
                 // [3] No module loader (plain <script> tag) - put directly in global namespace
                 var mvcct = window["mvcct"] = window["mvcct"] || {};
                 var controls = mvcct['controls'] = mvcct['controls'] || {};
-                factory(controls['server'] = {});
+                factory(controls);
             }
         }(
 
@@ -393,11 +393,12 @@
                 //operation handlers dictionary
                 
                 var dictionary = {};
-                serverControls['addOperation'] = function (name, handler, type) {
+                serverControls['addOperation'] = function (name, handler, type, noRow) {
                     if (type) {
                         dictionary[name] = {
                             handler: null,
-                            type: true
+                            type: true,
+                            noRow: noRow
                         }
                         dictionary[name + "_" + type] = {
                             handler: handler,
@@ -422,8 +423,10 @@
                             var row, control;
                             if (!controlType) {
                                 var d = new operationArgs(target, operation, args);
-                                row = d.find('data-row');
-                                if (!row) return false;
+                                if (!val.noRow) {
+                                    row = d.find('data-row');
+                                    if (!row) return false;
+                                }
                                 var control = d.find('data-control-type');
                                 if (!control) return false;
                                 controlType = cpntrol.getAttribute('data-control-type');
@@ -458,6 +461,7 @@
                         val = target.getAttribute(operationAttribute);
                     }
                     if (val) {
+                        if (target.getAttribute("type") == 'submit') return;
                         var result = dispatcher(val, target, "_click");
                         if (result) {
                             evt.preventDefault();

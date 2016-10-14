@@ -1,0 +1,16 @@
+﻿@model ControlsTest.Models.ProductViewModelDetail
+@using ControlsTest.Controllers
+@{
+    ViewData["Title"] = "Detail test";
+}
+<h2>@ViewData["Title"].</h2>
+
+<detail-form asp-for="@Model" all-properties="true" edit-mode-default="false">
+    <column asp-for="TypeId">
+        <external-key-static display-property="TypeName" />
+    </column> />
+    <row-type asp-for="@Model.SubInfo<ProductMaintenanceViewModelDetail>().Model" from-row="0">
+        <column asp-for="Price" detail-widths="new decimal[] {30, 15 }"/>
+        <column asp-for="@((Model as ProductMaintenanceViewModelDetail).MaintenanceYearlyRate)" />
+    </row-type>
+</detail-form>

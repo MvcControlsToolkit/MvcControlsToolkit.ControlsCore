@@ -31,15 +31,15 @@ namespace ControlsTest.Models
         public int? TypeId { get; set; }
         public virtual ProductType Type { get; set; }
         public virtual ProductWithMaintenance Maintenance{get; set;}
+        
 
-        public int? MaintenanceId { get; set; }
     }
 
     public class ProductWithMaintenance
     {
         public int Id { get; set; }
         public decimal YearlyRate { get; set; }
-
+        public int? ProductId { get; set; }
         public virtual Product Base { get; set; }
     }
 }

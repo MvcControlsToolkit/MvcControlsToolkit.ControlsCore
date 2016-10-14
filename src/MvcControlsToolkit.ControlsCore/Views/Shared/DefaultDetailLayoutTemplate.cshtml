@@ -15,15 +15,15 @@
 {
     bool maibarFound = false;
     
-    <form @(options.Id != null ? "id='"+options.Id+"'" : "")
-          class="@(options.CssClass??"form-horizontal")"
+    <form data-control-type="server-detail" id="@options.Id" 
+          class="@(options.CssClass)"
           action="@(options.FormAction??string.Empty)"
           method="@(options.FormMethod??"POST")"
           asp-antiforgery="@options.Antiforgery">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         @foreach (var bar in options.Toolbars)
         {
-            if (bar.Key == "header-edit" || bar.Key == "header-both")
+            if (bar.Key == LayoutStandardPlaces.HeaderEdit || bar.Key == LayoutStandardPlaces.Header)
             {
                 @Html.Raw(bar.Value)
             }
@@ -32,12 +32,12 @@
         @options.MainContent
         @foreach (var bar in options.Toolbars)
         {
-            if (bar.Key == "submit-bar")
+            if (bar.Key == LayoutStandardPlaces.SubmitBar)
             {
                 maibarFound = true;
                 @Html.Raw(bar.Value)
             }
-            else if (bar.Key == "footer-edit" || bar.Key == "footer-both")
+            else if (bar.Key == LayoutStandardPlaces.FooterEdit || bar.Key == LayoutStandardPlaces.Footer)
             {
                 @Html.Raw(bar.Value)
             }
@@ -45,20 +45,20 @@
         }
         @if(!maibarFound)
         {
-            <div class="form-group">
-                @currProvider.RenderButton(StandardButtons.Save, null, "btn-primary", helpers, localizer, true, true)
+            <div class="form-group col-xs-12">
+                @currProvider.RenderButton(StandardButtons.Save, null, "btn-primary", helpers, localizer, true, !options.NoSubmit)
             </div>
         }
-          
+        <div class="clearfix"></div> 
     </form>
 }
 else
 {
-    <div @(options.Id != null ? "id='"+options.Id+"'": "")
-         class="@(options.CssClass??"form-horizontal")">
+    <div data-control-type="server-detail" @Html.Raw(options.Id != null ? "id='"+options.Id+"'": "")
+         class="@(options.CssClass)">
         @foreach (var bar in options.Toolbars)
         {
-            if (bar.Key == "header-display" || bar.Key == "header-both")
+            if (bar.Key == LayoutStandardPlaces.HeaderDisplay || bar.Key == LayoutStandardPlaces.Header)
             {
                 @Html.Raw(bar.Value)
             }
@@ -67,11 +67,12 @@ else
         @options.MainContent
         @foreach (var bar in options.Toolbars)
         {
-            if (bar.Key == "footer-display" || bar.Key == "footer-both")
+            if (bar.Key == LayoutStandardPlaces.FooterDisplay || bar.Key == LayoutStandardPlaces.FooterDisplay)
             {
                 @Html.Raw(bar.Value)
             }
         }
+        <div class="clearfix"></div>
     </div>
 }
 

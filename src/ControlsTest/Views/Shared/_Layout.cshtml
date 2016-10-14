@@ -35,6 +35,16 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="AutocompleteTest">Autocomplete test</a></li>
                     <li><a asp-area="" asp-controller="GridTest" asp-action="Index">Immediate grid test </a></li>
+                    
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Detail tests<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a asp-area="" asp-controller="DetailTest" asp-action="Detail">Display Test </a></li>
+                            <li><a asp-area="" asp-controller="DetailTest" asp-action="Edit">Edit Test </a></li>
+                            <li><a asp-area="" asp-controller="DetailTest" asp-action="Create" asp-route-row="0">Create normal </a></li>
+                            <li><a asp-area="" asp-controller="DetailTest" asp-action="Create"  asp-route-row="1">Create maintenance </a></li>
+                        </ul>
+                    </li>
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>

@@ -6,11 +6,14 @@ using System.ComponentModel.DataAnnotations;
 using MvcControlsToolkit.Core.DataAnnotations;
 using MvcControlsToolkit.Core.Business.Utilities;
 using ControlsTest.Data;
+using System.Security.Claims;
+using System.Collections;
+using MvcControlsToolkit.Core.Business;
 
 namespace ControlsTest.Models
 {
-    
-    public class ProductViewModel
+
+    public class ProductViewModelBase
     {
         
         public int? Id { get; set; }
@@ -19,23 +22,50 @@ namespace ControlsTest.Models
         [DisplayFormat(NullDisplayText = "no description available")]
         public string Description { get; set; }
         [MaxLength(128)]
+        [ColumnLayout(DetailWidthsAsString = "100 60")]
         [Display(Name = "Name", Order = 400)]
         public string Name { get; set; }
+        [ColumnLayout(DetailWidthsAsString = "60 30")]
         [Display(Name = "Price", Order = 300)]
-        [DisplayFormat(DataFormatString ="{0:N3}")]
+        [DisplayFormat(DataFormatString = "{0:N3}")]
         public decimal Price { get; set; }
-        [Display(Name = "Currency", Order = 200)]
-        [ColumnLayout(WidthsAsString = "5")]
+        [Display(Name = "Cur", Order = 280)]
+        [ColumnLayout(WidthsAsString = "5", DetailWidthsAsString = "40 10")]
         public Currency ChosenCurrency { get; set; }
-
+        [ColumnLayout(DetailWidthsAsString = "30")]
+        [Display(Name = "Av", Order = 230)]
         public bool Available { get; set; }
-
+        [Display(Name = "Type", Order = 250)]
         public string TypeName { get; set; }
+        [Display(Name = "Type", Order = 250)]
+        [ColumnLayout(DetailWidthsAsString = "70")]
         public int? TypeId { get; set; }
     }
+    public class ProductViewModel: ProductViewModelBase
+    {
+    }
+    [RunTimeType]
     public class ProductMaintenanceViewModel: ProductViewModel
     {
         [Display(Name = "Price/Year", Order = 299)]
+        
         public decimal MaintenanceYearlyRate { get; set; }
+        
+    }
+    public class ProductViewModelDetail: ProductViewModelBase
+    {
+
+    }
+    [RunTimeType]
+    public class ProductMaintenanceViewModelDetail : ProductViewModelDetail, IUpdateConnections
+    {
+        [Display(Name = "Price/Year", Order = 299)]
+        [ColumnLayout(DetailWidthsAsString = "30 15")]
+        public decimal MaintenanceYearlyRate { get; set; }
+            
+        public bool MayUpdate(string prefix)
+        {
+            return prefix == "Maintenance";
+        }
     }
 }

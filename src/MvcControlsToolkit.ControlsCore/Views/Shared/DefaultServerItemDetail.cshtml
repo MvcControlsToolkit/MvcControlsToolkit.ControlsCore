@@ -22,18 +22,16 @@
             </div>
             <div class="modal-body">
                 <detail-form
-                    asp-for="@Model" 
                     all-properties="@true" 
                     localization-type="@typeof(MvcControlsToolkit.Controllers.ServerCrudController)" 
                     key="@KeyName"
-                    FormMethod="Post"
+                    FormMethod="POST"
                     FormAction="@Url.Action("EditDetail")"
                     edit-mode-default="@(!ReadOnly)"
                 >
                     @if(DeatailColumnAdjustView!= null)
                     {
-                        @await Html.PartialAsync(DeatailColumnAdjustView, Model)
-                        <import-settings asp-for="@Model" view-name="DeatailColumnAdjustView"/>
+                        <import-settings asp-for="@Model" view-name="@DeatailColumnAdjustView"/>
                     }
                 </detail-form>
             </div>

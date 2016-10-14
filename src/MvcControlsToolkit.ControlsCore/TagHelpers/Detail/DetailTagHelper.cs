@@ -15,11 +15,10 @@ using MvcControlsToolkit.Core.Templates;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
-    [HtmlTargetElement(TagName, Attributes = ForAttributeName + "," + TypeAttributeName)]
+    [HtmlTargetElement(TagName, Attributes = ForAttributeName)]
     public class DetailTagHelper : RowTypeTagHelper
     {
         private const string ForAttributeName = "asp-for";
-        private const string TypeAttributeName = "type";
         private const string TagName = "detail-form";
         private const string ModelNullRowName = "model-null-row";
         private const string ModeName = "edit-mode";
@@ -57,6 +56,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
         [HtmlAttributeName("rows-cache-key")]
         public string RowsCacheKey { get; set; }
+
+        [HtmlAttributeName("no-submit")]
+        public bool NoSubmit { get; set; }
+
 
         [HtmlAttributeNotBound]
         [ViewContext]

@@ -37,20 +37,20 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
         }
         public static IHtmlContent RenderHiddenFields(IEnumerable<Column> columns, ContextualizedHelpers helpers, object rowModel)
         {
-            StringBuilder sb = new StringBuilder();
+            StringWriter sb = new StringWriter();
             if (columns != null)
             {
                 foreach (var col in columns)
                 {
                     var o = col.For.Metadata.PropertyGetter(rowModel);
-                    sb.Append(helpers.Html.Hidden(col.For.Name, o, null));
+                    helpers.Html.Hidden(col.For.Name, o, null).WriteTo(sb, HtmlEncoder.Default);
                 }
                 var rowPrefix = helpers.Context.ViewData.TemplateInfo.HtmlFieldPrefix;
                 if(rowPrefix.Length>0 && rowPrefix[rowPrefix.Length - 1] == ']')
                 {
                     var index = rowPrefix.LastIndexOf('[');
-                    sb.Append(helpers.Html.Hidden(combinePrefixes(rowPrefix.Substring(0, index), "index"), 
-                        rowPrefix.Substring(index+1, rowPrefix.Length-index-2), null));
+                    helpers.Html.Hidden(combinePrefixes(rowPrefix.Substring(0, index), "index"), 
+                        rowPrefix.Substring(index+1, rowPrefix.Length-index-2), null).WriteTo(sb, HtmlEncoder.Default);
                 }
             }
             return new HtmlString(sb.ToString());

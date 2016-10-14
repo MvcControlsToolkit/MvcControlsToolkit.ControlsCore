@@ -44,17 +44,18 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             infos.Add("autocomplete", "off");
             var hidden = options.Generator.GenerateHidden(
                 tag.ViewContext,
-                tag.For.ModelExplorer,
+                tag.ForPropertyExplorer??tag.For.ModelExplorer,
                 tag.ForExpressionOverride ?? tag.For.Name,
-                tag.For.Model,
+                tag.ForPropertyExplorer != null ? tag.ForPropertyExplorer.Model : tag.For.Model,
                 false,
                 null);
-            
+            var metadata = tag.DisplayPropertyExplorer != null ? tag.DisplayPropertyExplorer.Metadata : tag.For.ModelExplorer.Metadata;
+
             var search = options.Generator.GenerateTextBox(tag.ViewContext,
-                tag.DisplayProperty.ModelExplorer,
+                tag.DisplayPropertyExplorer??tag.DisplayProperty.ModelExplorer,
                 tag.DisplayPropertyExpressionOverride ?? tag.DisplayProperty.Name,
-                tag.DisplayProperty.Model,
-                tag.For.Metadata.HasNonDefaultEditFormat ? tag.For.Metadata.EditFormatString: tag.DisplayProperty.Metadata.EditFormatString,
+                tag.DisplayPropertyExplorer != null ? tag.DisplayPropertyExplorer.Model : tag.DisplayProperty.Model,
+                metadata.HasNonDefaultEditFormat ? metadata.EditFormatString: metadata.EditFormatString,
                 infos);
             output.TagName = string.Empty;
             var result = new StringWriter();

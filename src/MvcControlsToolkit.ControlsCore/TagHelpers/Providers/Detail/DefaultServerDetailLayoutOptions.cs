@@ -23,6 +23,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
         
         public bool? Antiforgery { get; private set; }
 
+        public bool NoSubmit { get; private set; }
+
         private ContextualizedHelpers helpers;
         public DefaultServerDetailLayoutOptions(
             ContextualizedHelpers helpers,
@@ -38,7 +40,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             bool editMode,
             string formAction,
             string formMethod,
-            bool? antiforgery
+            bool? antiforgery,
+            bool noSubmit=false
             ) : base(rows, toolbars, layoutTemplate, subTemplates, mainContent)
         {
             this.helpers = helpers;
@@ -51,6 +54,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             Antiforgery = antiforgery;
             FormAction = formAction;
             FormMethod = formMethod;
+            NoSubmit = noSubmit;
         }
         
     }
