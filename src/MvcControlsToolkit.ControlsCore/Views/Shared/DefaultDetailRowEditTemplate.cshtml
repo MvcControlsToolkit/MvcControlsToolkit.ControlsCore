@@ -6,9 +6,10 @@
 @using System.Globalization
 @{
     var row = ViewData["Options"] as RowType;
-    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var fatherHelpers = ViewData["ContextualizedHelpers"] as ContextualizedHelpers;
+    var helpers = fatherHelpers.CreateChild(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
     row.ComputeWidths(true, 12);
-    
+
 }
 
     @foreach (var col in row.Columns)

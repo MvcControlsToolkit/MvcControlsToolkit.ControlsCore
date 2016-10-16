@@ -1,6 +1,7 @@
 ﻿@model ControlsTest.Models.ProductViewModelDetail
 @using System.Collections
 @using ControlsTest.Controllers
+@using MvcControlsToolkit.Core.Templates
 @{
     ViewData["Title"] = "Edit Detail test";
     Func<object, Task<IEnumerable>> getTasks = async x => ViewData["AllTypes"] as IEnumerable;
@@ -12,6 +13,7 @@
              edit-mode-default="true" 
              form-method="POST"
              form-action="@Url.Action("Edit", "DetailTest")"
+             
              >
     <column asp-for="TypeId">
         @*<external-key-static display-property="TypeName" 
@@ -27,6 +29,21 @@
                              url-token="_zzz_"
                              max-results="20" />                      
     </column> 
+    <column asp-for="Description">
+        <asp-template type="Edit">
+        @{ {
+        var Model = Html.Item<string>();
+        var rc = Html.Options<Column>();
+        <div class="form-group col-xs-12">
+                <label asp-for="@Model" ></label>
+                <textarea class="form-control" asp-for="@Model"></textarea>
+                <span asp-validation-for="@Model" class="text-danger"></span>
+          
+        </div>
+        } }
+    </asp-template>
+        
+    </column>
     <row-type asp-for="@Model.SubInfo<ProductMaintenanceViewModelDetail>().Model" from-row="0">
         <column asp-for="Price" detail-widths="new decimal[] {30, 15 }" />
         <column asp-for="@((Model as ProductMaintenanceViewModelDetail).MaintenanceYearlyRate)" />

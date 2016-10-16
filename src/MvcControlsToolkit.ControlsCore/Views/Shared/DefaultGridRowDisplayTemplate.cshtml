@@ -6,7 +6,8 @@
 @using System.Globalization
 @{
     var row = ViewData["Options"] as RowType;
-    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var fatherHelpers = ViewData["ContextualizedHelpers"] as ContextualizedHelpers;
+    var helpers = fatherHelpers.CreateChild(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
 }
 <tr @row.RenderRowAttributes(Model)>
     @if(row.MustAddButtonColumn(helpers))
