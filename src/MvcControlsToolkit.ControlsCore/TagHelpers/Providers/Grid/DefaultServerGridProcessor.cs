@@ -49,8 +49,10 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 if(rowPrefix.Length>0 && rowPrefix[rowPrefix.Length - 1] == ']')
                 {
                     var index = rowPrefix.LastIndexOf('[');
+                    helpers.Context.ViewData.TemplateInfo.HtmlFieldPrefix=string.Empty;
                     helpers.Html.Hidden(combinePrefixes(rowPrefix.Substring(0, index), "index"), 
                         rowPrefix.Substring(index+1, rowPrefix.Length-index-2), null).WriteTo(sb, HtmlEncoder.Default);
+                    helpers.Context.ViewData.TemplateInfo.HtmlFieldPrefix = rowPrefix;
                 }
             }
             return new HtmlString(sb.ToString());

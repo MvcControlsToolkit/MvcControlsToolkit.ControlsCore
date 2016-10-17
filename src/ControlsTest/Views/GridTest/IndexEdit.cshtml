@@ -1,0 +1,57 @@
+﻿@model ControlsTest.Models.ProductlistViewModel
+@using ControlsTest.Controllers
+@{
+    ViewData["Title"] = "Edit immediate";
+}
+<style>
+    tfoot .pagination, thead .pagination {
+        margin: 0;
+    }
+</style>
+<h2>@ViewData["Title"].</h2>
+<div >
+    <grid asp-for="Products.Data"
+          type="Immediate"
+          all-properties="true"
+          mvc-controller="typeof(GridTestController)"
+          class="table table-condensed table-bordered">
+        <column asp-for="Products.Data.Element().TypeId">
+            <external-key-static display-property="Products.Data.Element().TypeName" />
+            @*<external-key-static display-property="Products.Data.Element().TypeName"
+            items-selector="@getTasks"
+            items-value-property="Value"
+            items-display-property="Display"
+             />*@
+            <external-key-remote display-property="Products.Data.Element().TypeName"
+                                 items-value-property="Value"
+                                 items-display-property="Display"
+                                 items-url="@(Url.Action("GetTypes", "DetailTest", new { search = "_zzz_" }))"
+                                 dataset-name="product-types"
+                                 url-token="_zzz_"
+                                 max-results="20" />   
+        </column> />
+        <column asp-for="Products.Data.Element().Price" colspan="2" />
+        <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Model"
+                  mvc-controller="typeof(GridTestController)"
+                  from-row="0">
+            <column asp-for="Products.Data.Element().Price" colspan="1" />
+            <column asp-for="Products.Data.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
+        </row-type>
+        <toolbar zone-name="@LayoutStandardPlaces.Header">
+            <copy-html name="main-pager">
+                <pager mode="CustomPages"
+                       ajax-id="grid_container"
+                       class="pagination pagination-sm"
+                       max-pages="4"
+                       current-page="Products.Page"
+                       page-size-default="3"
+                       total-pages="Products.TotalPages"
+                       skip-url-token="_zzz_"
+                       url-default="@Url.Action("IndexEdit", "GridTest", new {page="_zzz_" })" />
+            </copy-html>
+        </toolbar>
+        <toolbar zone-name="@LayoutStandardPlaces.Footer">
+            <paste-html name="main-pager" />
+        </toolbar>
+    </grid>
+</div>

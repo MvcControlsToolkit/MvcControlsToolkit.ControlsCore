@@ -1,0 +1,87 @@
+﻿@model ControlsTest.Models.ProductlistBatchViewModel
+@using ControlsTest.Controllers
+@{
+    ViewData["Title"] = "Batch grid";
+}
+<style>
+    tfoot .pagination, thead .pagination {
+        margin: 0;
+    }
+    .full-cell {
+        border:none;
+        width: 100%;
+    }
+    table .input-validation-error
+    {
+        border: 1px solid red;
+        background-color: mistyrose;
+    }
+</style>
+<h2>@ViewData["Title"].</h2>
+<form asp-action="IndexBatch">
+    <div>
+        <grid asp-for="ModifiedProducts"
+              type="Batch"
+              all-properties="true"
+              mvc-controller="typeof(GridTestController)"
+              class="table table-condensed table-bordered">
+            <column asp-for="ModifiedProducts.Element().TypeId">
+                @*<external-key-static display-property="ModifiedProducts.Element().TypeName"
+                    items-selector="@getTasks"
+                    items-value-property="Value"
+                    items-display-property="Display"
+                     />*@
+                <external-key-remote display-property="ModifiedProducts.Element().TypeName"
+                                     items-value-property="Value"
+                                     items-display-property="Display"
+                                     items-url="@(Url.Action("GetTypes", "DetailTest", new { search = "_zzz_" }))"
+                                     dataset-name="product-types"
+                                     url-token="_zzz_"
+                                     max-results="20" />
+            </column> />
+            <column asp-for="ModifiedProducts.Element().Price" colspan="2" />
+            <row-type asp-for="ModifiedProducts.SubInfo<ProductMaintenanceViewModel>().Model"
+                      mvc-controller="typeof(GridTestController)"
+                      from-row="0">
+                <column asp-for="ModifiedProducts.Element().Price" colspan="1" />
+                <column asp-for="ModifiedProducts.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
+            </row-type>
+            <toolbar zone-name="@LayoutStandardPlaces.Header">
+                <copy-html name="main-pager">
+                    <pager mode="CustomPages"
+                           ajax-id="grid_container"
+                           class="pagination pagination-sm"
+                           max-pages="4"
+                           current-page="Products.Page"
+                           page-size-default="3"
+                           total-pages="Products.TotalPages"
+                           skip-url-token="_zzz_"
+                           url-default="@Url.Action("IndexBatch", "GridTest", new {page="_zzz_" })" />
+                </copy-html>
+            </toolbar>
+            <toolbar zone-name="@LayoutStandardPlaces.Footer">
+                <paste-html name="main-pager" />
+            </toolbar>
+        </grid>
+        <store-model asp-for="Products" />
+    </div>
+    <div class="form-group col-xs-12">
+        <button type="submit" class="btn btn-primary">
+            Submit changes
+        </button>
+    </div>
+</form>
+@section Scripts {
+    @*<link href="~/lib/mvcct-controls-server/modules-bootstrap/typeaheadjs3.css" rel="stylesheet" />
+            @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+            <script src="~/lib/corejs-typeahead/dist/typeahead.bundle.js"></script>
+        <script src="~/lib/mvcct-controls-server/mvcct.controls.server.js"></script>
+        <script src="~/lib/mvcct-controls-server/modules-bootstrap/mvcct.controls.server.autocomplete.js"></script>*@
+
+    <link href="~/lib/awesomplete/awesomplete.css" rel="stylesheet" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script src="~/lib/awesomplete/awesomplete.min.js"></script>
+    <script src="~/lib/mvcct-controls/mvcct.controls.js"></script>
+    <script src="~/lib/mvcct-controls/modules/mvcct.controls.autocomplete.js"></script>
+}
+

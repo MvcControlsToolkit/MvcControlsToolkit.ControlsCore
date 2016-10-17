@@ -77,6 +77,13 @@ namespace MvcControlsToolkit.Core.TagHelpers
         {
             //estabilish context
             if (For == null) throw new ArgumentNullException(ForAttributeName);
+            if (RequiredFunctionalities == null)
+            {
+                if(Type == GridType.Immediate)
+                    RequiredFunctionalities =  (x) => Functionalities.FullDetail;
+                else
+                    RequiredFunctionalities = (x) => Functionalities.FullInLine;
+            }
             string fullName = ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(For.Name);
             string id = OverrideId ?? TagBuilder.CreateSanitizedId(fullName, IdAttributeDotReplacement);
             var currProvider = ViewContext.TagHelperProvider();

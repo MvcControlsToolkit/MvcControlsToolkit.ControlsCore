@@ -8,6 +8,10 @@ namespace ControlsTest.Models
 {
     public class ProductlistViewModel
     {
-       public DataPage<ProductViewModel>  Products { get; set; } 
+        public DataPage<ProductViewModel> Products { get; set; }
+    }
+    public class ProductlistBatchViewModel: ProductlistViewModel
+    {
+        public IEnumerable<ProductViewModel> ModifiedProducts { get; set; }
     }
 }

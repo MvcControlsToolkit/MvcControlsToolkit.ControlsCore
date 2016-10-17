@@ -36,8 +36,8 @@
             <label for="@TagBuilder.CreateSanitizedId(ViewData.TemplateInfo.GetFullHtmlFieldName(infos.DisplayProperty.Name), IdAttributeDotReplacement)" class="control-label">
                 @infos.DisplayProperty.Metadata.GetDisplayName()
             </label>
-            <autocomplete for-explorer="@col.For.ModelExplorer"
-                          display-explorer="@infos.DisplayProperty.ModelExplorer"
+            <autocomplete for-explorer="@ViewData.ModelExplorer.GetExplorerForProperty(col.For.Name)"
+                          display-explorer="@ViewData.ModelExplorer.GetExplorerForProperty(infos.DisplayProperty.Name)"
                           for-expression-override="@col.For.Name"
                           display-expression-override="@infos.DisplayProperty.Name"
                           items-display-property="@infos.ItemsDisplayProperty"
@@ -55,7 +55,7 @@
     else if (metaData.UnderlyingOrModelType == typeof(bool))
     {
         <label asp-for="@Model">@col.For.Metadata.GetDisplayName()</label>
-        <p @Html.Raw("class='" + (col.InputCssClass != null ? col.CheckboxCssClass : "form-control-static") + "'")>
+        <p @Html.Raw("class='" + (col.CheckboxCssClass != null ? col.CheckboxCssClass : "form-control-static") + "'")>
             <input asp-for="@Model" type="checkbox"  />
         </p>
 
