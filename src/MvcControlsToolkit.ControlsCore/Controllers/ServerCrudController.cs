@@ -123,6 +123,7 @@ namespace MvcControlsToolkit.Controllers
         {
             return defaultMessages[i];
         }
+        [ResponseCache(Duration =0, NoStore =true)]
         public async Task<IActionResult> Delete(D key)
         {
             if((requiredFunctionalities& Functionalities.Delete)==0) return Json(new ModelError[3]);
@@ -140,10 +141,18 @@ namespace MvcControlsToolkit.Controllers
                 {
                     Repository.Delete(key);
                     await Repository.SaveChanges();
+                    return Json(new ModelError[0]);
                 }
-                return Json(new ModelError[0]);
+                else return Json(new ModelError[] {
+                        new ModelError
+                        {
+                            Prefix="",
+                            Errors=new string[] { ErrorMessage(0) }
+                        }
+                    });
+
             }
-            catch
+            catch(Exception ex)
             {
                 return Json(new ModelError[] {
                         new ModelError
@@ -156,6 +165,7 @@ namespace MvcControlsToolkit.Controllers
 
         }
         [HttpGet]
+        [ResponseCache(Duration = 0, NoStore = true)]
         public async Task<IActionResult> InLineEdit(D key, string prefix)
         {
             if (key != null && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");
@@ -199,6 +209,7 @@ namespace MvcControlsToolkit.Controllers
             else return Json(PackErrors(ModelState));
         }
         [HttpGet]
+        [ResponseCache(Duration = 0, NoStore = true)]
         public async Task<IActionResult> EditDetail(D key, bool? readOnly)
         {
             if ((readOnly==null || !readOnly.Value) && key != null &&(requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");

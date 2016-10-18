@@ -144,56 +144,56 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             allButtonProperties.Add(StandardButtons.AddAfter, 
                 new ButtonProperties {
                     IconClass= "glyphicon-plus",
-                    OperationName="add-after",
+                    OperationName="add after",
                     ShowText="add after"
                 });
             allButtonProperties.Add(StandardButtons.AddAfterDetail,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-plus",
-                    OperationName = "add-after-detail",
+                    OperationName = "add-detail after",
                     ShowText = "add after"
                 });
             allButtonProperties.Add(StandardButtons.AddBefore,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-plus",
-                    OperationName = "add-before",
+                    OperationName = "add before",
                     ShowText = "add before"
                 });
             allButtonProperties.Add(StandardButtons.AddBeforeDetail,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-plus",
-                    OperationName = "add-before-detail",
+                    OperationName = "add-detail before",
                     ShowText = "add before"
                 });
             allButtonProperties.Add(StandardButtons.Append,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-plus",
-                    OperationName = "append",
+                    OperationName = "add append",
                     ShowText = "add at end"
                 });
             allButtonProperties.Add(StandardButtons.Prepend,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-plus",
-                    OperationName = "prepend",
+                    OperationName = "add prepend",
                     ShowText = "add at beginning"
                 });
             allButtonProperties.Add(StandardButtons.AppendDetail,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-plus",
-                    OperationName = "append-detail",
+                    OperationName = "add-detail append",
                     ShowText = "add at end"
                 });
             allButtonProperties.Add(StandardButtons.PrependDetail,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-plus",
-                    OperationName = "prepend-detail",
+                    OperationName = "add-detail prepend",
                     ShowText = "add at beginning"
                 });
             allButtonProperties.Add(StandardButtons.Delete,

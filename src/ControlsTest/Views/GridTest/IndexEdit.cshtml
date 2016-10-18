@@ -40,7 +40,6 @@
         <toolbar zone-name="@LayoutStandardPlaces.Header">
             <copy-html name="main-pager">
                 <pager mode="CustomPages"
-                       ajax-id="grid_container"
                        class="pagination pagination-sm"
                        max-pages="4"
                        current-page="Products.Page"
@@ -55,3 +54,19 @@
         </toolbar>
     </grid>
 </div>
+
+@section Scripts {
+    @*<link href="~/lib/mvcct-controls-server/modules-bootstrap/typeaheadjs3.css" rel="stylesheet" />
+            @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+            <script src="~/lib/corejs-typeahead/dist/typeahead.bundle.js"></script>
+        <script src="~/lib/mvcct-controls-server/mvcct.controls.server.js"></script>
+        <script src="~/lib/mvcct-controls-server/modules-bootstrap/mvcct.controls.server.autocomplete.js"></script>*@
+
+    <link href="~/lib/awesomplete/awesomplete.css" rel="stylesheet" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script src="~/lib/awesomplete/awesomplete.min.js"></script>
+    <script src="~/lib/mvcct-controls/mvcct.controls.js"></script>
+    <script src="~/lib/mvcct-controls/modules/mvcct.controls.autocomplete.js"></script>
+    <script src="~/lib/mvcct-controls/modules/mvcct.controls.ajax.js"></script>
+    <script src="~/lib/mvcct-controls/modules/mvcct.controls.serverGrid.js"></script>
+}

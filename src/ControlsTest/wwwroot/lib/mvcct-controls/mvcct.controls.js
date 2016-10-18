@@ -382,6 +382,7 @@
                     
                     this["find"] = function (attr) {
                         for(;  currentLocation; currentLocation=currentLocation.parentNode){
+                            if (!currentLocation.getAttribute) return null;
                             attValue = currentLocation.getAttribute(attr);
                             if (attValue) return currentLocation;
                         }
@@ -419,7 +420,7 @@
                     var val = dictionary[operation];
                     if (val) {
                         if (val.type) {
-                            var controlType = el.getAttribute('data-control-type');
+                            var controlType = target.getAttribute('data-control-type');
                             var row, control;
                             if (!controlType) {
                                 var d = new operationArgs(target, operation, args);
@@ -429,7 +430,7 @@
                                 }
                                 var control = d.find('data-control-type');
                                 if (!control) return false;
-                                controlType = cpntrol.getAttribute('data-control-type');
+                                controlType = control.getAttribute('data-control-type');
                                 
                             }
                             val = dictionary[operation + "_" + controlType];

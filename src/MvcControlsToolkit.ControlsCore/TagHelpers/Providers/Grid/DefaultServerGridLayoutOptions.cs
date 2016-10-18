@@ -75,104 +75,91 @@ namespace MvcControlsToolkit.Core.TagHelpers
             sb.Append(Id);
             sb.Append("_container' ");
 
-            if (Type == GridType.Immediate)
+            
+            if (Messages != null)
             {
-                if (Messages != null)
+                if (Messages.AddFailed != null)
                 {
-                    if (Messages.AddFailed != null)
-                    {
-                        sb.Append("data-add-failed='");
-                        sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.AddFailed)));
-                        sb.Append("' ");
-                    }
-                    if (Messages.DeleteConfirmation != null)
-                    {
-                        sb.Append("data-delete-confirmation='");
-                        sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.DeleteConfirmation)));
-                        sb.Append("' ");
-                    }
-                    if (Messages.DeleteFailed != null)
-                    {
-                        sb.Append("data-delete-failed='");
-                        sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.DeleteFailed)));
-                        sb.Append("' ");
-                    }
-                    if (Messages.ModificationFailed != null)
-                    {
-                        sb.Append("data-modification-failed='");
-                        sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.ModificationFailed)));
-                        sb.Append("' ");
-                    }
-                    if (Messages.ShowDetailFailed != null)
-                    {
-                        sb.Append("data-record-not-found='");
-                        sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.ShowDetailFailed)));
-                        sb.Append("' ");
-                    }
+                    sb.Append("data-add-failed='");
+                    sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.AddFailed)));
+                    sb.Append("' ");
                 }
-                foreach (var row in Rows)
+                if (Messages.DeleteConfirmation != null)
                 {
-                    var requiredFunctionalities = row.RequiredFunctionalities(helpers.User);
-                    if (row.ControllerType != null && requiredFunctionalities != 0)
+                    sb.Append("data-delete-confirmation='");
+                    sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.DeleteConfirmation)));
+                    sb.Append("' ");
+                }
+                if (Type == GridType.Immediate && Messages.DeleteFailed != null)
+                {
+                    sb.Append("data-delete-failed='");
+                    sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.DeleteFailed)));
+                    sb.Append("' ");
+                }
+                if (Messages.ModificationFailed != null)
+                {
+                    sb.Append("data-modification-failed='");
+                    sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.ModificationFailed)));
+                    sb.Append("' ");
+                }
+                if (Type==GridType.Immediate && Messages.ShowDetailFailed != null)
+                {
+                    sb.Append("data-record-not-found='");
+                    sb.Append(HtmlEncoder.Default.Encode(Localize(Messages.ShowDetailFailed)));
+                    sb.Append("' ");
+                }
+            }
+            foreach (var row in Rows)
+            {
+                var requiredFunctionalities = row.RequiredFunctionalities(helpers.User);
+                if (row.ControllerType != null && requiredFunctionalities != 0)
+                {
+                    if ((requiredFunctionalities & (Functionalities.AddAfter | Functionalities.AddBefore |
+                        Functionalities.Append | Functionalities.Prepend | Functionalities.Edit)) != 0)
                     {
-                        if ((requiredFunctionalities & (Functionalities.AddAfter | Functionalities.AddBefore |
-                            Functionalities.Append | Functionalities.Prepend | Functionalities.Edit)) != 0)
-                        {
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                                row.Order,
-                                row.RenderUrl(helpers, "InLineEdit", null));
-                        }
-                        if ((requiredFunctionalities & (Functionalities.AddAfterDetail | Functionalities.AddBeforeDetail |
-                            Functionalities.AppendDetail | Functionalities.PrependDetail |  Functionalities.EditDetail)) != 0)
-                        {
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                                row.Order,
-                                row.RenderUrl(helpers, "EditDetail", null));
-                        }
-                        if ((requiredFunctionalities & Functionalities.Edit) != 0)
-                        {
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                                row.Order,
-                                row.RenderUrl(helpers, "InLineEdit", new { key = "_zzFzz_" }));
-                        }
-                        if ((requiredFunctionalities & Functionalities.EditDetail) != 0)
-                        {
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                                row.Order,
-                                row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_" }));
-                        }
-                        if ((requiredFunctionalities & Functionalities.ShowDetail) != 0)
-                        {
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                                row.Order,
-                                row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_", readOnly = true }));
-                        }
-                        if ((requiredFunctionalities & Functionalities.Delete) != 0)
-                        {
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                                row.Order,
-                                row.RenderUrl(helpers, "Delete", new { key = "_zzFzz_" }));
-                        }
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
+                            row.Order,
+                            row.RenderUrl(helpers, "InLineEdit", null));
+                    }
+                    if ((requiredFunctionalities & (Functionalities.AddAfterDetail | Functionalities.AddBeforeDetail |
+                        Functionalities.AppendDetail | Functionalities.PrependDetail |  Functionalities.EditDetail)) != 0)
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-detail-url-{0}='{1}' ",
+                            row.Order,
+                            row.RenderUrl(helpers, "EditDetail", null));
+                    }
+                    if (Type==GridType.Immediate && (requiredFunctionalities & Functionalities.Edit) != 0)
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-url-{0}='{1}' ",
+                            row.Order,
+                            row.RenderUrl(helpers, "InLineEdit", new { key = "_zzFzz_" }));
+                    }
+                    if ((requiredFunctionalities & Functionalities.EditDetail) != 0)
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-detail-url-{0}='{1}' ",
+                            row.Order,
+                            row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_" }));
+                    }
+                    if ((requiredFunctionalities & Functionalities.ShowDetail) != 0)
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-show-url-{0}='{1}' ",
+                            row.Order,
+                            row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_", readOnly = true }));
+                    }
+                    if (Type == GridType.Immediate && (requiredFunctionalities & Functionalities.Delete) != 0)
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-delete-url-{0}='{1}' ",
+                            row.Order,
+                            row.RenderUrl(helpers, "Delete", new { key = "_zzFzz_" }));
                     }
                 }
             }
-            else
+            
+            if(Type == GridType.Batch)
             {
                 sb.Append("data-prefix='");
                 sb.Append(Prefix);
-                sb.Append("' ");
-                foreach (var row in Rows)
-                {
-                    var requiredFunctionalities = row.RequiredFunctionalities(helpers.User);
-                    if (row.ControllerType != null &&
-                        (requiredFunctionalities & (Functionalities.AddAfter | Functionalities.AddBefore |
-                            Functionalities.Append | Functionalities.Prepend | Functionalities.Edit)) != 0)
-                    {
-                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                                row.Order,
-                                row.RenderUrl(helpers, "InLineEdit", new {prefix= "_zzFzz_" }));
-                    }
-                }
+                sb.Append("' ");  
             }
             return new HtmlString(sb.ToString());
         }
