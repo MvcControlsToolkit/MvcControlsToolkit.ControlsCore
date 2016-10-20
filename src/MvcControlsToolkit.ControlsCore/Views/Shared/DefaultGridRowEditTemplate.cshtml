@@ -6,8 +6,7 @@
 @using System.Globalization
 @{
     var row = ViewData["Options"] as RowType;
-    var fatherHelpers = ViewData["ContextualizedHelpers"] as ContextualizedHelpers;
-    var helpers = fatherHelpers.CreateChild(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
     bool hiddensToRender = true;
 }
 <tr @row.RenderRowAttributes(Model)>
@@ -17,9 +16,8 @@
         var currProvider = ViewContext.TagHelperProvider();
         var localizer = row.GetLocalizer(helpers.LocalizerFactory);
         <td class="grid-buttons">
-            
-          @currProvider.RenderButton(StandardButtons.Save, null, "btn-default btn-xs", helpers, localizer)
-            
+         @currProvider.RenderButton(StandardButtons.Undo, Model == null ? "add" : null, "btn-default btn-xs", helpers, localizer)
+         @currProvider.RenderButton(StandardButtons.Save, null, "btn-default btn-xs", helpers, localizer)   
         </td>
     }
     @foreach(var col in row.Columns)

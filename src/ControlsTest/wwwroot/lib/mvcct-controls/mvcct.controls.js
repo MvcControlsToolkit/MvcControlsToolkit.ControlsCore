@@ -5,19 +5,19 @@
         (function (factory) {
             if (typeof define === 'function' && define['amd']) {
                 // [1] AMD anonymous module
-                define(['exports'], factory);
+                define(['exports', "../../mvcct-enhancer/mvcct.enhancer.min"], factory);
             } else if (typeof exports === 'object' && typeof module === 'object') {
                 // [2] CommonJS/Node.js
-                factory(module['exports'] || exports);  // module.exports is for Node.js
+                factory(module['exports'] || exports, require("mvcct-enhancer"));  // module.exports is for Node.js
             } else {
                 // [3] No module loader (plain <script> tag) - put directly in global namespace
                 var mvcct = window["mvcct"] = window["mvcct"] || {};
                 var controls = mvcct['controls'] = mvcct['controls'] || {};
-                factory(controls);
+                factory(controls, mvcct['enhancer']);
             }
         }(
 
-            (function (serverExports) {
+            (function (serverExports, enhancer) {
 
                 var serverControls = typeof serverExports !== 'undefined' ? serverExports : {};
                 //Start actual code
@@ -366,6 +366,53 @@
                     };
                 }
                 serverControls['searchDictionary'] = searchDictionary;
+                //parsing html strings
+                function firstChild(x) {
+                    for (var i = 0; i < x.childNodes.length; i++) {
+                        if (x.childNodes[i].nodeType == 1) return x.childNodes[i];
+                    }
+                    return null;
+                }
+                var str2DOMElement = function (html) {
+                    /* code taken from jQuery */
+                    var wrapMap = {
+                        option: [1, "<select multiple='multiple'>", "</select>"],
+                        legend: [1, "<fieldset>", "</fieldset>"],
+                        area: [1, "<map>", "</map>"],
+                        param: [1, "<object>", "</object>"],
+                        thead: [1, "<table>", "</table>"],
+                        tr: [2, "<table><tbody>", "</tbody></table>"],
+                        col: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
+                        td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
+
+                        // IE6-8 can't serialize link, script, style, or any html5 (NoScope) tags,
+                        // unless wrapped in a div with non-breaking characters in front of it.
+                        _default: [1, "<div>", "</div>"]
+                    };
+                    wrapMap.optgroup = wrapMap.option;
+                    wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
+                    wrapMap.th = wrapMap.td;
+                    var element = document.createElement('div');
+                    var match = /<\s*\w.*?>/g.exec(html);
+                    if (match != null) {
+                        var tag = match[0].replace(/</g, '').replace(/>/g, '');
+                        tag = tag.split(' ')[0];
+                        var map = wrapMap[tag] || wrapMap._default, element;
+                        html = map[1] + html + map[2];
+                        element.innerHTML = html;
+                        // Descend through wrappers to the right content
+                        var j = map[0] + 1;
+                        while (j--) {
+                            element = firstChild(element);
+                        }
+                    } else {
+                        // if only text is passed
+                        element.innerHTML = html;
+                        element = firstChild(element);
+                    }
+                    return element;
+                }
+                serverControls["parseHTML"] = str2DOMElement;
 
                 var operationAttribute = "data-operation";
                 
@@ -453,27 +500,33 @@
                     }
                     return false;
                 }
-                //events operations may be attached to.
-                document.addEventListener("click", function (evt) {
-                    var target = evt.target;
-                    var val = target.getAttribute(operationAttribute);
-                    if (!val && target.parentNode) {
-                        target = target.parentNode;
-                        val = target.getAttribute(operationAttribute);
-                    }
-                    if (val) {
-                        if (target.getAttribute("type") == 'submit') return;
-                        var result = dispatcher(val, target, "_click");
-                        if (result) {
-                            evt.preventDefault();
+                function init(x, go) {
+                    if (!go) return;
+                    //events operations may be attached to.
+                    document.addEventListener("click", function (evt) {
+                        var target = evt.target;
+                        if (!target || !target.getAttribute) return;
+                        var val = target.getAttribute(operationAttribute);
+                        if (!val && target.parentNode && target.parentNode.getAttribute) {
+                            target = target.parentNode;
+                            val = target.getAttribute(operationAttribute);
                         }
-                    }
-                    
-                }, false);
-                document.addEventListener("focus", function (evt) {
-                    var val = evt.target.getAttribute(operationAttribute);
-                    if (val) dispatcher(val, evt.target, "_focus");
-                }, true);
+                        if (val) {
+                            if (target.getAttribute("type") == 'submit') return;
+                            var result = dispatcher(val, target, "_click");
+                            if (result) {
+                                evt.preventDefault();
+                            }
+                        }
+
+                    }, false);
+                    document.addEventListener("focus", function (evt) {
+                        if (!evt.target || !evt.target.getAttribute) return;
+                        var val = evt.target.getAttribute(operationAttribute);
+                        if (val) dispatcher(val, evt.target, "_focus");
+                    }, true);
+                }
+                enhancer["register"](init, true, null, "mvcct event handling");
                 //Finish actual code
                 
             })

@@ -17,16 +17,115 @@
         }(
 
             (function (serverControls, enhancer) {
-
+                jQuery = window["jQuery"];
                 //Start actual code
                 var options;
                 var empty;
-                var validateForm
+                var validateForm;
+                var dispatchServerErrors;
+                var clearErrors;
+                var validationSummarySelector, validationSummaryValidClass, validationSummaryInvalidClass;
+                var fieldErrorClass, errorLabelValidClass, errorLabelInvalidClass, errorLabelLocator;
                 function processOptions(o) {
                     options = o["ajax"] || {};
-                    empty = options['empty'] || function (x) {if(x) x.innerHTML = ''; };
-                    validateForm = options['validateForm'] || function (x) { return true;};
+                    empty = options['empty'] || function (x) {
+                        if (x) x.innerHTML = '';
+                        if (jQuery) jQuery(x)["empty"]();
+                        else x.innerHTML = '';
+                    };
+                    validateForm = options['validateForm'] || function (x)
+                    {
+                        if (jQuery && jQuery['validator']) {
+                            return jQuery(x)["closest"]('form')["validate"]()["form"]();
+                        }
+                        return true;
+                    };
+                    clearErrors = options['clearErrors'] || defaultClearErrors;
+                    dispatchServerErrors = options['dispatchServerErrors'] || defaultDispatchServerErrors;
+                    clearErrors = options["clearErrors"] || defaultClearErrors;
+                    validationSummarySelector = options["validationSummarySelector"] || '[data-valmsg-summary="true"]';
+                    validationSummaryValidClass = options["validationSummaryValidClass"] || "validation-summary-valid";
+                    validationSummaryInvalidClass = options["validationSummaryInvalidClass"] || "validation-summary-errors";
+
+                    fieldErrorClass = options["fieldErrorClass"] || "input-validation-error";
+                    errorLabelValidClass = options["errorLabelValidClass"] || "field-validation-valid";
+                    errorLabelInvalidClass = options["errorLabelInvalidClass"] || "field-validation-error";
+
+                    errorLabelLocator = options["errorLabelLocator"] || function (x, form) {
+                        form = form || findForm(x);
+                        if (!form) return null;
+                        return form.querySelector('[data-val-msg-for="' + x.name + '"]');
+                    }
+                    serverControls['dispatchServerErrors'] = dispatchServerErrors;
+                    serverControls['clearErrors'] = clearErrors;
+                    serverControls['validateForm'] = validateForm;
                 };
+                function appendToList(ul, txtArray) {
+                    if (!ul || !txtArray) return;
+                    for(var i=0; i<txtArray.length; i++){
+                        var node = document.createElement("LI");                 
+                        var textnode = document.createTextNode(txtArray[i]);         
+                        node.appendChild(textnode); 
+                        ul.appendChild(node);
+                    }
+                }
+                function defaultDispatchServerErrors(errors, x) {
+                    if (!errors || !errors.length) return;
+                    var form = findForm(x);
+                    if (!form) return;
+                    var summary = form.querySelector(validationSummarySelector);
+                    var toAppend;
+                    if(summary){
+                        empty(summary);
+                        summary.classList.remove(validationSummaryValidClass);
+                        summary.classList.add(validationSummaryInvalidClass);
+                        toAppend=document.createElement("UL");
+                        summary.appendChild(toAppend);
+                    }
+                    errors.map(function (er) {
+                        if (!er.prefix) appendToList(toAppend, er.errors);
+                        else {
+                            var el = form.querySelector('[name="' + er.prefix+'"]');
+                            if (!el) { appendToList(toAppend, er.errors); return; }
+                            el.classList.add(fieldErrorClass);
+                            var label = errorLabelLocator(el, form);
+                            if (label) {
+                                label.classList.add(errorLabelInvalidClass);
+                                label.classList.remove(errorLabelValidClass);
+                                label.appendChild(document.createTextNode(er.errors[0]));
+                            }
+                            else appendToList(toAppend, er.errors);
+                        }
+                    });
+                }
+                function defaultClearErrors(x) {
+                    var form = findForm(x);
+                    if (!form) return;
+                    var summary = form.querySelector(validationSummarySelector);
+                    if (!summary) return;
+                    empty(summary);
+                    summary.classList.remove(validationSummaryInvalidClass);
+                    summary.classList.add(validationSummaryValidClass);
+                    var res = form.querySelectorAll("." + fieldErrorClass);
+                    for (var i = 0; i < res.length; i++) {
+                        var y = res[i];
+                        y.classList.remove(fieldErrorClass);
+                        var label = errorLabelLocator(y, form);
+                        if (label) {
+                            label.classList.remove(errorLabelInvalidClass);
+                            label.classList.add(errorLabelValidClass);
+                            empty(label);
+
+                        }
+                    }
+                }
+                function findForm(x) {
+                    for (; x; x = x.parentNode) {
+                        if (!x.getAttribute) return null;
+                        else if (x.tagName == 'FORM') return x;
+                    }
+                    return null;
+                }
                 
                 function attachHtml(infos) {
                     var href = infos["href"];
@@ -86,6 +185,7 @@
                 serverControls['removeEndpoint'] = function(name){
                     delete endpoints[name];
                 };
+                
                 serverControls['postJson'] = function (el, url, data, bearerToken, onSuccess, errorMessageF, onError, onCompleted, onProgress) {
                     var ajax = new XMLHttpRequest();
                     ajax.open("POST", url, true);
@@ -132,15 +232,16 @@
 
                     ajax.send();
                 };
-                serverControls['postForm'] = function (form, extraData, onSuccess, errorMessageF, onError, onCompleted, onProgress) {
+                serverControls['postForm'] = function (inForm, url, extraData, onSuccess, errorMessageF, onError, onCompleted, onProgress, onStart) {
+                    var form = findForm(inForm);
                     if (!validateForm(form)) return;
+                    if (onStart) onStart(inForm);
+                    serverControls['clearErrors'](inForm);
                     var ajax = new XMLHttpRequest();
                     var el = form;
+                    url = url || form.getAttribute("action");
                     var params = [].filter.call(form.elements, function (el) {
-                        //Allow only elements that don't have the 'checked' property
-                        //Or those who have it, and it's checked for them.
-                        return typeof (el.checked) === 'undefined' || el.checked;
-                        //Practically, filter out checkboxes/radios which aren't checekd.
+                        return (el.type != "radio" && el.type != "checkbox") || el.checked;
                     })
                     .filter(function (el) { return !!el.name; }) //Nameless elements die.
                     .filter(function (el) { return !el.disabled; }) //Disabled elements die.
@@ -153,17 +254,24 @@
                         else params = extraData;
                     }
                     ajax.open("POST", url, true);
-                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                     ajax.onload = function () {
-                        
+                        if (ajax.responseText && ajax.responseText.trim().charAt(0)=="[")
+                        {
+                            var errors = JSON.parse(ajax.responseText);
+                            if (errors.length > 0) {
+                                dispatchServerErrors(errors, form);
+                            }
+                            onCompleted ? onCompleted(el) : null;
+                        }
                         if (ajax.responseText && ajax.responseText.charAt(0) == '#') {
                             onCompleted ? onCompleted(el) : null;
                             onError ? onError(ajax.responseText.substring(1)) : null;
                             return;
                         }
                         else if (ajax.status != 200) {
-                            proc.completed ? proc.completed(el) : null;
-                            proc.onerror ? proc.onerror(errorMessageF ? errorMessageF(ajax.status) : "") : null;
+                            onCompleted ? onCompleted(el) : null;
+                            onError ? onError(errorMessageF ? errorMessageF(ajax.status) : "") : null;
                             return;
                         }
                         onSuccess(ajax.responseText);

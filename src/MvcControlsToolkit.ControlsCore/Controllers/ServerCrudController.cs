@@ -28,22 +28,29 @@ namespace MvcControlsToolkit.Controllers
             "wrong call",
             "internal server error",
             "item not found",
-            "unauthorized"
+            "unauthorized",
+            "unable to delete item (maybe already deleted)",
+            "unable to update item (maybe it has been deleted)"
         };
-        public ServerCrudController(IStringLocalizerFactory factory, IHttpContextAccessor accessor)
+        private void getRow(string id)
         {
-            row = ControllerHelpers.GetRowType(this.GetType());
+            row = ControllerHelpers.GetRowType(this.GetType(), id??string.Empty);
             if (row != null)
             {
-                requiredFunctionalities = row.RequiredFunctionalities(User);
+                requiredFunctionalities = requiredFunctionalities & row.RequiredFunctionalities(User);
             }
+            
+        }
+        public ServerCrudController(IStringLocalizerFactory factory, IHttpContextAccessor accessor)
+        {
+            requiredFunctionalities=Permissions(User);
             this.factory = factory;
             if (factory != null) localizer = factory.Create(typeof(ServerCrudController));
             this.accessor = accessor;
         }
         private string localize(string x)
         {
-            return localizer != null ? localizer[x] : null;
+            return localizer != null ? localizer[x] : x;
         }
         protected async Task<IActionResult> Invoke(object model, bool edit, string prefix=null)
         {
@@ -96,7 +103,10 @@ namespace MvcControlsToolkit.Controllers
                 throw new NotImplementedException(Resources.NotImplementetControllerTemplates);
             }
         }
-        
+        protected virtual Functionalities Permissions(System.Security.Principal.IPrincipal user)
+        {
+            return Functionalities.All;
+        }
         public ICRUDRepository Repository { get; protected set; }
         public virtual bool DetailFull{get{ return false; }}
         public virtual bool InLineFull { get { return false; } }
@@ -119,14 +129,16 @@ namespace MvcControlsToolkit.Controllers
         //1: Internal server error
         //2: Record not found
         //3: Unauthorized
+        //4: already deletes
+        //5: deleted
         protected virtual string ErrorMessage(int i)
         {
-            return defaultMessages[i];
+            return localize(defaultMessages[i]);
         }
         [ResponseCache(Duration =0, NoStore =true)]
         public async Task<IActionResult> Delete(D key)
         {
-            if((requiredFunctionalities& Functionalities.Delete)==0) return Json(new ModelError[3]);
+            if ((requiredFunctionalities& Functionalities.Delete)==0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
             if (!ModelState.IsValid) return 
                     Json(new ModelError[] {
                         new ModelError
@@ -152,13 +164,13 @@ namespace MvcControlsToolkit.Controllers
                     });
 
             }
-            catch(Exception ex)
+            catch
             {
                 return Json(new ModelError[] {
                         new ModelError
                         {
                             Prefix="",
-                            Errors=new string[] { ErrorMessage(1) }
+                            Errors=new string[] { ErrorMessage(4) }
                         }
                     });
             }
@@ -166,17 +178,21 @@ namespace MvcControlsToolkit.Controllers
         }
         [HttpGet]
         [ResponseCache(Duration = 0, NoStore = true)]
-        public async Task<IActionResult> InLineEdit(D key, string prefix)
+        public async Task<IActionResult> InLineEdit(D key, string rowId, bool? undo)
         {
+            getRow(rowId);
+            var display = undo.HasValue && undo.Value;
             if (key != null && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             else if (key == null && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Content("#" + ErrorMessage(3), "text/plain");
-            if (!ModelState.IsValid) return Content("#"+ ErrorMessage(0), "text/plain");
-            if (key == null) return await Invoke(null, true, prefix);
+            if (!ModelState.IsValid || row == null) return Content("#"+ ErrorMessage(0), "text/plain");
+            if (key == null) return await Invoke(null, true, null);
             try
             {
+                
                 var res = await Repository.GetById<VMS, D>(key);
-                if (res == null) return Content("#"+ ErrorMessage(2), "text/plain");
-                return await Invoke(res, true, prefix);
+                if (res == null) return Content("#" + ErrorMessage(2), "text/plain");
+                var result = await Invoke(res, !display, null);
+                return result;
             }
             catch
             {
@@ -184,10 +200,13 @@ namespace MvcControlsToolkit.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> InLineEdit(VMS vm, bool isAdd)
+        public async Task<IActionResult> InLineEdit(VMS vm, string rowId, bool isAdd)
         {
-            if (!isAdd && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Json(new ModelError[3]);
-            if (isAdd && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Json(new ModelError[3]);
+            getRow(rowId);
+            if (!isAdd && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
+            if (isAdd && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
+            if(row == null) return Json(new ModelError[1] {new ModelError(ErrorMessage(0)) });
+            ModelState.AddModelError("", "fake message");
             if (ModelState.IsValid)
             {
                 try
@@ -202,7 +221,7 @@ namespace MvcControlsToolkit.Controllers
                 }
                 catch
                 {
-                    ModelState.AddModelError("", ErrorMessage(1));
+                    ModelState.AddModelError("", isAdd ? ErrorMessage(1) : ErrorMessage(1));
                     return Json(PackErrors(ModelState));
                 }
             }
@@ -215,7 +234,7 @@ namespace MvcControlsToolkit.Controllers
             if ((readOnly==null || !readOnly.Value) && key != null &&(requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             else if (key == null && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             
-            if (!ModelState.IsValid) return Content("#"+ErrorMessage(0), "text/plain");
+            if (!ModelState.IsValid || row == null) return Content("#"+ErrorMessage(0), "text/plain");
             if (key == null)
             {
                 ViewData.ModelExplorer = row.For.ModelExplorer.GetExplorerForExpression(typeof(VMD), null);
@@ -246,10 +265,11 @@ namespace MvcControlsToolkit.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> EditDetail(VMD vm, bool isAdd)
+        public async Task<IActionResult> EditDetail(VMD vm, string rowId, bool isAdd)
         {
-            if (!isAdd && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Json(new ModelError[3]);
-            if (isAdd && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Json(new ModelError[3]);
+            getRow(rowId);
+            if (!isAdd && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
+            if (isAdd && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
             if (ModelState.IsValid)
             {
                 try
@@ -263,7 +283,7 @@ namespace MvcControlsToolkit.Controllers
                 }
                 catch
                 {
-                    ModelState.AddModelError("", ErrorMessage(1));
+                    ModelState.AddModelError("", isAdd ? ErrorMessage(1) : ErrorMessage(5));
                     return Json(PackErrors(ModelState));
                 }
             }

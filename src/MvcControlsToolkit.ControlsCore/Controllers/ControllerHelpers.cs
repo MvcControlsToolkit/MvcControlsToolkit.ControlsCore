@@ -12,21 +12,23 @@ namespace MvcControlsToolkit.Controllers
 {
     public static class ControllerHelpers
     {
-        private static IDictionary<Type, RowType> serverTemplates = new ConcurrentDictionary<Type, RowType>();
+        private static IDictionary<KeyValuePair<Type, string>, RowType> serverTemplates = new ConcurrentDictionary<KeyValuePair<Type, string>, RowType>();
         public static void DeclareServerRowtype(Type controllerType, RowType row)
         {
-            if (!serverTemplates.ContainsKey(controllerType))
+            var pair = new KeyValuePair<Type, string>(controllerType, row.RowId);
+            if (!serverTemplates.ContainsKey(pair))
             {
                 if (!typeof(Controller).GetTypeInfo().IsAssignableFrom(controllerType))
                     throw new ArgumentException(string.Format(Resources.NotAController, controllerType.Name), nameof(controllerType));
-                serverTemplates[controllerType] = row;
+                serverTemplates[pair] = row;
             }
 
         }
-        public static RowType GetRowType(Type controllerType)
+        public static RowType GetRowType(Type controllerType, string id)
         {
             RowType res = null;
-            if (serverTemplates.TryGetValue(controllerType, out res)) return res;
+            var pair = new KeyValuePair<Type, string>(controllerType, id);
+            if (serverTemplates.TryGetValue(pair, out res)) return res;
             return null;
         }
     }

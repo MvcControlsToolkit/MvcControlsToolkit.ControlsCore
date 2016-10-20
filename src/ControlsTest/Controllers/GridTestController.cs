@@ -72,7 +72,8 @@ namespace ControlsTest.Controllers
                 q => q.OrderBy(m => m.Name),
                 pg, 3)
             };
-            return PartialView("_gridIndex", model);
+            var res = PartialView("_gridIndex", model);
+            return res;
 
 
         }

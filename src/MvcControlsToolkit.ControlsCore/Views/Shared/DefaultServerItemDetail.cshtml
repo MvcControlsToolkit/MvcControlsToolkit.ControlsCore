@@ -7,7 +7,7 @@
 @{
 
     var id = ViewData["id"] as string;
-    var factory = ViewData["localizer"] as Func<string, string>;
+    var localizer = ViewData["localizer"] as Func<string, string>;
     var title = ViewData["title"] as string;
     var ReadOnly = (bool)ViewData["ReadOnly"];
     var KeyName = ViewData["KeyName"] as string;
@@ -18,7 +18,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="@(id+"_label")">@title</h4>
+                <h4 class="modal-title" id="@(id+"_label")">@(localizer(title))</h4>
             </div>
             <div class="modal-body">
                 <detail-form

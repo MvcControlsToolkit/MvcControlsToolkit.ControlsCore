@@ -119,7 +119,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     {
                         sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
                             row.Order,
-                            row.RenderUrl(helpers, "InLineEdit", null));
+                            row.RenderUrl(helpers, "InLineEdit", new {rowId = "_zzFzz_" }));
                     }
                     if ((requiredFunctionalities & (Functionalities.AddAfterDetail | Functionalities.AddBeforeDetail |
                         Functionalities.AppendDetail | Functionalities.PrependDetail |  Functionalities.EditDetail)) != 0)
@@ -132,7 +132,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     {
                         sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-url-{0}='{1}' ",
                             row.Order,
-                            row.RenderUrl(helpers, "InLineEdit", new { key = "_zzFzz_" }));
+                            row.RenderUrl(helpers, "InLineEdit", new { key = "_zzFzz_", rowId = "_zzFzz_1" }));
                     }
                     if ((requiredFunctionalities & Functionalities.EditDetail) != 0)
                     {
