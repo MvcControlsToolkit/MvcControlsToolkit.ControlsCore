@@ -238,7 +238,6 @@
                     if (onStart) onStart(inForm);
                     serverControls['clearErrors'](inForm);
                     var ajax = new XMLHttpRequest();
-                    var el = form;
                     url = url || form.getAttribute("action");
                     var params = [].filter.call(form.elements, function (el) {
                         return (el.type != "radio" && el.type != "checkbox") || el.checked;
@@ -262,22 +261,22 @@
                             if (errors.length > 0) {
                                 dispatchServerErrors(errors, form);
                             }
-                            onCompleted ? onCompleted(el) : null;
+                            onCompleted ? onCompleted(inForm) : null;
                         }
                         if (ajax.responseText && ajax.responseText.charAt(0) == '#') {
-                            onCompleted ? onCompleted(el) : null;
+                            onCompleted ? onCompleted(inForm) : null;
                             onError ? onError(ajax.responseText.substring(1)) : null;
                             return;
                         }
                         else if (ajax.status != 200) {
-                            onCompleted ? onCompleted(el) : null;
+                            onCompleted ? onCompleted(inForm) : null;
                             onError ? onError(errorMessageF ? errorMessageF(ajax.status) : "") : null;
                             return;
                         }
                         onSuccess(ajax.responseText);
-                        onCompleted ? onCompleted(el) : null;
+                        onCompleted ? onCompleted(inForm) : null;
                     };
-                    ajax.onerror = function (e) { onCompleted ? onCompleted(el) : null; onError ? onError(errorMessageF ? errorMessageF(ajax.status) : "") : null; }
+                    ajax.onerror = function (e) { onCompleted ? onCompleted(inForm) : null; onError ? onError(errorMessageF ? errorMessageF(ajax.status) : "") : null; }
                     ajax.onprogress = onProgress;
 
                     ajax.send(params);

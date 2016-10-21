@@ -178,20 +178,20 @@ namespace MvcControlsToolkit.Controllers
         }
         [HttpGet]
         [ResponseCache(Duration = 0, NoStore = true)]
-        public async Task<IActionResult> InLineEdit(D key, string rowId, bool? undo)
+        public async Task<IActionResult> InLineEdit(D key, string rowId, bool? undo, string prefix)
         {
             getRow(rowId);
             var display = undo.HasValue && undo.Value;
             if (key != null && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             else if (key == null && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             if (!ModelState.IsValid || row == null) return Content("#"+ ErrorMessage(0), "text/plain");
-            if (key == null) return await Invoke(null, true, null);
+            if (key == null) return await Invoke(null, true, prefix);
             try
             {
                 
                 var res = await Repository.GetById<VMS, D>(key);
                 if (res == null) return Content("#" + ErrorMessage(2), "text/plain");
-                var result = await Invoke(res, !display, null);
+                var result = await Invoke(res, !display, prefix);
                 return result;
             }
             catch
@@ -206,7 +206,6 @@ namespace MvcControlsToolkit.Controllers
             if (!isAdd && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
             if (isAdd && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
             if(row == null) return Json(new ModelError[1] {new ModelError(ErrorMessage(0)) });
-            ModelState.AddModelError("", "fake message");
             if (ModelState.IsValid)
             {
                 try
@@ -229,12 +228,13 @@ namespace MvcControlsToolkit.Controllers
         }
         [HttpGet]
         [ResponseCache(Duration = 0, NoStore = true)]
-        public async Task<IActionResult> EditDetail(D key, bool? readOnly)
+        public async Task<IActionResult> EditDetail(D key, bool? readOnly, int? rowIndex)
         {
             if ((readOnly==null || !readOnly.Value) && key != null &&(requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             else if (key == null && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             
             if (!ModelState.IsValid || row == null) return Content("#"+ErrorMessage(0), "text/plain");
+            int sRow = rowIndex.HasValue ? rowIndex.Value : 0;
             if (key == null)
             {
                 ViewData.ModelExplorer = row.For.ModelExplorer.GetExplorerForExpression(typeof(VMD), null);
@@ -243,6 +243,7 @@ namespace MvcControlsToolkit.Controllers
                 ViewData["title"] = DeatailTitle;
                 ViewData["KeyName"] = DeatailKeyName;
                 ViewData["ColumnAdjust"] = DeatailColumnAdjustView;
+                ViewData["RowIndex"] = sRow;
                 ViewBag.ReadOnly = false;
                 return PartialView(DeatailView);
             }
@@ -256,6 +257,7 @@ namespace MvcControlsToolkit.Controllers
                 ViewData["title"]=DeatailTitle;
                 ViewData["KeyName"] = DeatailKeyName;
                 ViewData["ColumnAdjust"] = DeatailColumnAdjustView;
+                ViewData["RowIndex"] = sRow;
                 ViewBag.ReadOnly = readOnly.HasValue && readOnly.Value;
                 return PartialView(DeatailView, res);
             }
@@ -265,7 +267,7 @@ namespace MvcControlsToolkit.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> EditDetail(VMD vm, string rowId, bool isAdd)
+        public async Task<IActionResult> EditDetail(VMD vm, string rowId, bool isAdd, string prefix)
         {
             getRow(rowId);
             if (!isAdd && (requiredFunctionalities & Functionalities.AnyEdit) == 0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
@@ -279,7 +281,7 @@ namespace MvcControlsToolkit.Controllers
                     else
                         Repository.Update(DetailFull, vm);
                     await Repository.SaveChanges();
-                    return await Invoke(vm, false);
+                    return await Invoke(vm, false, prefix);
                 }
                 catch
                 {

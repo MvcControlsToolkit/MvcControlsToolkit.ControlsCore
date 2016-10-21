@@ -117,28 +117,33 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     if ((requiredFunctionalities & (Functionalities.AddAfter | Functionalities.AddBefore |
                         Functionalities.Append | Functionalities.Prepend | Functionalities.Edit)) != 0)
                     {
-                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
-                            row.Order,
-                            row.RenderUrl(helpers, "InLineEdit", new {rowId = "_zzFzz_" }));
+                        if(Type == GridType.Immediate)
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
+                                row.Order,
+                                row.RenderUrl(helpers, "InLineEdit", new {rowId = row.RowId }));
+                        else
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-url-{0}='{1}' ",
+                                row.Order,
+                                row.RenderUrl(helpers, "InLineEdit", new { rowId = row.RowId, prefix = "_zzFzz_" }));
                     }
                     if ((requiredFunctionalities & (Functionalities.AddAfterDetail | Functionalities.AddBeforeDetail |
                         Functionalities.AppendDetail | Functionalities.PrependDetail |  Functionalities.EditDetail)) != 0)
                     {
                         sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-detail-url-{0}='{1}' ",
                             row.Order,
-                            row.RenderUrl(helpers, "EditDetail", null));
+                            row.RenderUrl(helpers, "EditDetail", new { rowIndex = row.Order}));
                     }
                     if (Type==GridType.Immediate && (requiredFunctionalities & Functionalities.Edit) != 0)
                     {
                         sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-url-{0}='{1}' ",
                             row.Order,
-                            row.RenderUrl(helpers, "InLineEdit", new { key = "_zzFzz_", rowId = "_zzFzz_1" }));
+                            row.RenderUrl(helpers, "InLineEdit", new { key = "_zzFzz_", rowId = row.RowId }));
                     }
                     if ((requiredFunctionalities & Functionalities.EditDetail) != 0)
                     {
                         sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-detail-url-{0}='{1}' ",
                             row.Order,
-                            row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_" }));
+                            row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_"}));
                     }
                     if ((requiredFunctionalities & Functionalities.ShowDetail) != 0)
                     {
@@ -152,6 +157,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
                             row.Order,
                             row.RenderUrl(helpers, "Delete", new { key = "_zzFzz_" }));
                     }
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "data-row-id-{0}='{1}' ",
+                            row.Order,
+                            row.RowId);
                 }
             }
             

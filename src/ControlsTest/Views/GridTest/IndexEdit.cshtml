@@ -26,7 +26,8 @@
               type="Immediate"
               all-properties="true"
               mvc-controller="typeof(GridTestController)"
-              operations="x => Functionalities.FullInLine"
+              row-id="immediate-example"
+              operations="x => Functionalities.FullInLine | Functionalities.AddBefore | Functionalities.AddAfter"
               class="table table-condensed table-bordered">
             <column asp-for="Products.Data.Element().TypeId">
                 <external-key-static display-property="Products.Data.Element().TypeName" />

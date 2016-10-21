@@ -76,11 +76,14 @@
                     var tRoot = row.parentNode;
                     var readRow = row[expandoAlternateRow];
                     row[expandoAlternateRow] = null;
-                    readRow[expandoAlternateRow] = row;
                     var me = tRoot[expandoAlternateRow];
                     if (row == me) tRoot[expandoAlternateRow] = null;
                     serverControls['clearErrors'](row);
-                    row.parentNode.replaceChild(readRow, row);
+                    if (!readRow) detachRow(row);
+                    else {
+                        readRow[expandoAlternateRow] = row;
+                        row.parentNode.replaceChild(readRow, row);
+                    }
                     
                 }
                 function goEdit(row, editRow) {
@@ -172,8 +175,7 @@
                     
                     serverControls['postForm'](
                         row,
-                        tRoot.getAttribute("data-add-url-" + row.getAttribute("data-row"))
-                            .replace(placeholder, row.getAttribute("data-row-id")),
+                        tRoot.getAttribute("data-add-url-" + row.getAttribute("data-row")),
                         row.getAttribute("data-key") ? "isAdd=False" : "isAdd=True",
                         function (html) {
                             var newRow = serverControls['parseHTML'](html);
@@ -182,6 +184,73 @@
                         function () { return failure; },
                         showErrors, onCompleted, onProgress, onStart);
                 }
+                function fillAddInfos(infos) {
+                    var args = infos["args"];
+                    if (!args.length) return null;
+                    var type = args[0];
+                    infos['type']=type;
+                    if (type == "before" || type == "after")
+                    {
+                        var row = infos["find"]("data-row");
+                        if (!row) return null;
+                        infos["row"] = row;
+                    }
+                    var id = infos["control"] ? 
+                        infos["control"].getAttribute('id') :
+                        infos['target'].getAttribute('data-target');
+                    if (!id) return null;
+                    id = document.getElementById(id + '_container');
+                    if (!id) return null;
+                    infos["container"] = id;
+                    return infos;
+                }
+
+                function serverAdd(infos, immediate) {
+                    if (!infos) return;
+                    var row = infos['row'];
+                    var args = infos['args'];
+                    var type = infos['type'];
+                    var rowOrder =
+                        args.length > 1 ? args[1] :
+                        (row ? row.getAttribute("data-row") : "0");
+                    tRoot = infos['container'];
+                    var url = tRoot.getAttribute("data-add-url-" + rowOrder);
+                    if (!immediate)
+                        url = url.replace(placeholder, tRoot.getAttribute('data-prefix'));
+                    var failure = tRoot.getAttribute("data-add-failed");
+                    onStart(infos['control']);
+                    serverControls['getContent'](
+                        row,
+                        url,
+                        null,
+                        function (x) {
+                            var newRow = serverControls['parseHTML'](x);
+                            if (newRow) {
+                                if (type == "before") tRoot.insertBefore(newRow, row);
+                                else if (type == "append" ||
+                                        (type == "prepend" && !tRoot.hasChildNodes()) ||
+                                        (type == "after" && row == tRoot.lastChild)
+                                    ) tRoot.appendChild(newRow);
+                                else if (type == "prepend")
+                                    tRoot.insertBefore(newRow, tRoot.firstChild);
+                                
+                                else if (type == "after")
+                                    tRoot.insertBefore(newRow, row.nextSibling);
+                                else
+                                    tRoot.appendChild(newRow);
+                                enhancer["transform"](newRow);
+                                if (immediate) {
+                                    undoEdit(tRoot[expandoAlternateRow]);
+                                    tRoot[expandoAlternateRow] = newRow;
+                                }
+                            }
+                        },
+                        function () { return failure; },
+                        showErrors,
+                        onCompleted,
+                        onProgress);
+                }
+
                 enhancer["register"](null, null, processOptions, "serverGrid", null);
                 serverControls['addOperation']('save_click', serverDetailSave, 'server-detail', true);
                 serverControls['addOperation']('delete_click', function (infos) { serverGridDelete(infos, true); }, 'server-immediate-grid');
@@ -189,6 +258,8 @@
                 serverControls['addOperation']('edit_click', function (infos) { serverEdit(infos, false); }, 'server-immediate-grid');
                 serverControls['addOperation']('undo_click', function (infos) { serverEdit(infos, true); }, 'server-immediate-grid');
                 serverControls['addOperation']('save_click', function (infos) { serverSubmit(infos); }, 'server-immediate-grid');
+                serverControls['addOperation']('add_click', function (infos) { serverAdd(fillAddInfos(infos), true); }, 'server-immediate-grid');
+                serverControls['addOperation']('add_click', function (infos) { serverAdd(fillAddInfos(infos), false); }, 'server-batch-grid');
                 //Finish actual code
                 return serverControls;
             })

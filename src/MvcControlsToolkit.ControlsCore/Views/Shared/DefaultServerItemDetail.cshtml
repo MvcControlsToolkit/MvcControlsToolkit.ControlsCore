@@ -12,6 +12,7 @@
     var ReadOnly = (bool)ViewData["ReadOnly"];
     var KeyName = ViewData["KeyName"] as string;
     var DeatailColumnAdjustView = ViewData["ColumnAdjust"] as string;
+    var rowDefault = (int)ViewData["RowIndex"];
 }
 <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="@(id+"_label")">
     <div class="modal-dialog modal-lg" role="document">
@@ -28,6 +29,7 @@
                     FormMethod="POST"
                     FormAction="@Url.Action("EditDetail")"
                     edit-mode-default="@(!ReadOnly)"
+                    model-null-row-default="@rowDefault"
                 >
                     @if(DeatailColumnAdjustView!= null)
                     {

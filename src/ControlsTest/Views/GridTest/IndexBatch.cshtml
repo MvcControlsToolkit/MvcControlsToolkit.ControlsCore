@@ -24,6 +24,8 @@
               type="Batch"
               all-properties="true"
               mvc-controller="typeof(GridTestController)"
+              operations="x => Functionalities.FullInLine | Functionalities.AddBefore | Functionalities.AddAfter"
+              row-id="batch-example"
               class="table table-condensed table-bordered">
             <column asp-for="ModifiedProducts.Element().TypeId">
                 @*<external-key-static display-property="ModifiedProducts.Element().TypeName"
@@ -62,7 +64,7 @@
                 <paste-html name="main-pager" />
             </toolbar>
         </grid>
-        <store-model asp-for="Products" />
+        <store-model asp-for="Products" encrypted="true" />
     </div>
     <div class="form-group col-xs-12">
         <button type="submit" class="btn btn-primary">

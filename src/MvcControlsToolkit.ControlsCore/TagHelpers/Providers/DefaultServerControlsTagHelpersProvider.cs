@@ -71,7 +71,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                         else if (o is IFormattable && !string.IsNullOrEmpty(col.DisplayFormat))
                             return new HtmlString(helpers.Html.Encode(string.Format(CultureInfo.CurrentCulture, col.DisplayFormat, (o as IFormattable)) ));
                         else if (col.For.Metadata.IsEnum) return new HtmlString(getEnumDisplayName(col.For.Metadata.UnderlyingOrModelType, ((int)o).ToString(CultureInfo.CurrentCulture), helpers.Html));
-                        return helpers.Html.Display(helpers.Html.CurrentScope<object>().FatherPrefix);
+                        return helpers.Html.Display(helpers.Html.CurrentScope<object>().FatherPrefix.CleanPrefix());
                     }, null);
         static DefaultServerControlsTagHelpersProvider()
         {

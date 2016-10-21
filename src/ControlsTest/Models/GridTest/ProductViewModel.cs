@@ -45,12 +45,16 @@ namespace ControlsTest.Models
     {
     }
     [RunTimeType]
-    public class ProductMaintenanceViewModel: ProductViewModel
+    public class ProductMaintenanceViewModel: ProductViewModel, IUpdateConnections
     {
         [Display(Name = "Price/Year", Order = 299)]
         
         public decimal MaintenanceYearlyRate { get; set; }
-        
+
+        public bool MayUpdate(string prefix)
+        {
+            return prefix == "Maintenance";
+        }
     }
     public class ProductViewModelDetail: ProductViewModelBase
     {

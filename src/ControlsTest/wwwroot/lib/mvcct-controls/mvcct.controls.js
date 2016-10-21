@@ -495,6 +495,7 @@
                 function dispatcher(operation, target, event) {
                     if (operation && target) {
                         var args = operation.split(' ');
+                        args=args.filter(function (x) { return !!x.trim(); })
                         operation = args[0]+event;
                         return serverControls['dispatch'](target, operation, args.slice(1));
                     }

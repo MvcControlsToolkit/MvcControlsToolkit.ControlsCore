@@ -46,12 +46,10 @@ namespace MvcControlsToolkit.Core.TagHelpers.Internals
             {
                 if(!_NeedsRunTimeTypeCheck.HasValue)
                 {
-                    if (Type == GridType.Batch)
-                    {
-                        var refType = Rows[0].For.Metadata.ModelType;
-                        _NeedsRunTimeTypeCheck = Rows.Any(m => m.For.Metadata.ModelType != refType);
-                    }
-                    else _NeedsRunTimeTypeCheck = false;
+                    
+                var refType = Rows[0].For.Metadata.ModelType;
+                _NeedsRunTimeTypeCheck = Rows.Any(m => m.For.Metadata.ModelType != refType);
+                    
                 }
                 return _NeedsRunTimeTypeCheck.Value;
             }
