@@ -20,7 +20,7 @@
           action="@(options.FormAction??string.Empty)"
           method="@(options.FormMethod??"POST")"
           asp-antiforgery="@options.Antiforgery">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div data-valmsg-ajax="true" asp-validation-summary="ModelOnly" class="text-danger"></div>
         @foreach (var bar in options.Toolbars)
         {
             if (bar.Key == LayoutStandardPlaces.HeaderEdit || bar.Key == LayoutStandardPlaces.Header)

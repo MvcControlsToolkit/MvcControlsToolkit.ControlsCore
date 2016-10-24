@@ -435,6 +435,9 @@
                         }
                         return null;
                     };
+                    this["reset"] = function () {
+                        currentLocation = target.parentNode;
+                    };
                     
                 }
                 
@@ -472,10 +475,10 @@
                             if (!controlType) {
                                 var d = new operationArgs(target, operation, args);
                                 if (!val.noRow) {
-                                    row = d.find('data-row');
-                                    if (!row) return false;
+                                    row = d["find"]('data-row');
+                                    if (!row) d["reset"]();
                                 }
-                                var control = d.find('data-control-type');
+                                var control = d["find"]('data-control-type');
                                 if (!control) return false;
                                 controlType = control.getAttribute('data-control-type');
                                 

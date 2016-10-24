@@ -35,6 +35,14 @@
             {
                 @currProvider.RenderButton(StandardButtons.AddAfter, null, "btn-default btn-xs", helpers, localizer)
             }
+            @if ((buttons & Functionalities.AddBeforeDetail) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.AddBeforeDetail, null, "btn-default btn-xs", helpers, localizer)
+            }
+            @if ((buttons & Functionalities.AddAfterDetail) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.AddAfterDetail, null, "btn-default btn-xs", helpers, localizer)
+            }
             @if ((buttons & Functionalities.Delete) > 0)
             {
                 @currProvider.RenderButton(StandardButtons.Delete, null, "btn-default btn-xs", helpers, localizer)

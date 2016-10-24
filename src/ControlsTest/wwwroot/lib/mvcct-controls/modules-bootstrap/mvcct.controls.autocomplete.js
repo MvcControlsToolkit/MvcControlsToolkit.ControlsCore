@@ -141,7 +141,7 @@
                     };
                     jel.bind("blur typeahead:autocomplete typeahead:selected", mainHandler);
                     jel.typeahead({ minLength: parseInt(args[4]) }, ds);
-                    el.focus();
+                    setTimeout(function () { el.focus(); });
                 }
                 enhancer["register"](null, null, processOptions, "server autocomplete", null)
                 serverControls['addOperation']('autocomplete_focus', attach);

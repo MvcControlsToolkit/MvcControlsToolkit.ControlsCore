@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +49,7 @@ namespace MvcControlsToolkit.Controllers
             if (factory != null) localizer = factory.Create(typeof(ServerCrudController));
             this.accessor = accessor;
         }
+        
         private string localize(string x)
         {
             return localizer != null ? localizer[x] : x;
@@ -56,7 +58,6 @@ namespace MvcControlsToolkit.Controllers
         {
             
             Template<RowType> template = edit ? row.EditTemplate : row.DisplayTemplate;
-            
             if (template.Type == Core.TagHelpers.TemplateType.Partial)
             {
                 ViewData["Options"] = row;
@@ -110,10 +111,9 @@ namespace MvcControlsToolkit.Controllers
         public ICRUDRepository Repository { get; protected set; }
         public virtual bool DetailFull{get{ return false; }}
         public virtual bool InLineFull { get { return false; } }
-        public virtual bool UseAntiForgery { get { return false; } }
-        public virtual string DeatailView  { get { return "DefaultServerItemDetail"; } }
-        public virtual string DeatailColumnAdjustView { get { return null; } }
-        public virtual string DeatailTitle { get { return "Item detail"; } }
+        public virtual string DetailView  { get { return "DefaultServerItemDetail"; } }
+        public virtual string DetailColumnAdjustView { get { return null; } }
+        public virtual string DetailTitle { get { return "Item detail"; } }
         public virtual string DeatailKeyName { get { return null; } }
         protected IEnumerable<ModelError> PackErrors(ModelStateDictionary ms)
         {
@@ -200,6 +200,7 @@ namespace MvcControlsToolkit.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> InLineEdit(VMS vm, string rowId, bool isAdd)
         {
             getRow(rowId);
@@ -228,11 +229,11 @@ namespace MvcControlsToolkit.Controllers
         }
         [HttpGet]
         [ResponseCache(Duration = 0, NoStore = true)]
-        public async Task<IActionResult> EditDetail(D key, bool? readOnly, int? rowIndex)
+        public async Task<IActionResult> EditDetail(D key, bool? readOnly, int? rowIndex, string rowId, string prefix, bool isAdd)
         {
             if ((readOnly==null || !readOnly.Value) && key != null &&(requiredFunctionalities & Functionalities.AnyEdit) == 0) return Content("#" + ErrorMessage(3), "text/plain");
             else if (key == null && (requiredFunctionalities & Functionalities.AnyAdd) == 0) return Content("#" + ErrorMessage(3), "text/plain");
-            
+            getRow(rowId);
             if (!ModelState.IsValid || row == null) return Content("#"+ErrorMessage(0), "text/plain");
             int sRow = rowIndex.HasValue ? rowIndex.Value : 0;
             if (key == null)
@@ -240,12 +241,12 @@ namespace MvcControlsToolkit.Controllers
                 ViewData.ModelExplorer = row.For.ModelExplorer.GetExplorerForExpression(typeof(VMD), null);
                 ViewData["id"] = "_" + Guid.NewGuid().ToString("N");
                 ViewData["localizer"] = new Func<string, string>(localize);
-                ViewData["title"] = DeatailTitle;
+                ViewData["title"] = DetailTitle;
                 ViewData["KeyName"] = DeatailKeyName;
-                ViewData["ColumnAdjust"] = DeatailColumnAdjustView;
+                ViewData["ColumnAdjust"] = DetailColumnAdjustView;
                 ViewData["RowIndex"] = sRow;
                 ViewBag.ReadOnly = false;
-                return PartialView(DeatailView);
+                return PartialView(DetailView);
             }
             try
             {
@@ -254,12 +255,12 @@ namespace MvcControlsToolkit.Controllers
                 ViewData.ModelExplorer = row.For.ModelExplorer.GetExplorerForExpression(typeof(VMD), res);
                 ViewData["id"] = "_" + Guid.NewGuid().ToString("N");
                 ViewData["localizer"] = new Func<string, string>(localize);
-                ViewData["title"]=DeatailTitle;
+                ViewData["title"]=DetailTitle;
                 ViewData["KeyName"] = DeatailKeyName;
-                ViewData["ColumnAdjust"] = DeatailColumnAdjustView;
+                ViewData["ColumnAdjust"] = DetailColumnAdjustView;
                 ViewData["RowIndex"] = sRow;
                 ViewBag.ReadOnly = readOnly.HasValue && readOnly.Value;
-                return PartialView(DeatailView, res);
+                return PartialView(DetailView, res);
             }
             catch
             {
@@ -267,6 +268,7 @@ namespace MvcControlsToolkit.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditDetail(VMD vm, string rowId, bool isAdd, string prefix)
         {
             getRow(rowId);
@@ -276,12 +278,14 @@ namespace MvcControlsToolkit.Controllers
             {
                 try
                 {
+                    
                     if (isAdd)
                         Repository.Add(DetailFull, vm);
                     else
                         Repository.Update(DetailFull, vm);
                     await Repository.SaveChanges();
-                    return await Invoke(vm, false, prefix);
+                    var key = (D)Repository.GetKey(vm);
+                    return await Invoke(await Repository.GetById<VMS, D>(key), prefix != null, prefix);
                 }
                 catch
                 {

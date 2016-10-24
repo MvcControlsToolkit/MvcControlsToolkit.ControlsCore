@@ -129,9 +129,14 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     if ((requiredFunctionalities & (Functionalities.AddAfterDetail | Functionalities.AddBeforeDetail |
                         Functionalities.AppendDetail | Functionalities.PrependDetail |  Functionalities.EditDetail)) != 0)
                     {
-                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-detail-url-{0}='{1}' ",
-                            row.Order,
-                            row.RenderUrl(helpers, "EditDetail", new { rowIndex = row.Order}));
+                        if(Type== GridType.Immediate)
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-detail-url-{0}='{1}' ",
+                                row.Order,
+                                row.RenderUrl(helpers, "EditDetail", new { rowIndex = row.Order, isAdd = true, rowId = row.RowId }));
+                        else
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-add-detail-url-{0}='{1}' ",
+                                row.Order,
+                                row.RenderUrl(helpers, "EditDetail", new { rowIndex = row.Order, prefix = "_zzFzz_", isAdd=true, rowId = row.RowId }));
                     }
                     if (Type==GridType.Immediate && (requiredFunctionalities & Functionalities.Edit) != 0)
                     {
@@ -141,15 +146,20 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     }
                     if ((requiredFunctionalities & Functionalities.EditDetail) != 0)
                     {
-                        sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-detail-url-{0}='{1}' ",
-                            row.Order,
-                            row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_"}));
+                        if(Type==GridType.Immediate)
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-detail-url-{0}='{1}' ",
+                                row.Order,
+                                row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_", isAdd = false, rowId = row.RowId }));
+                        else
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "data-edit-detail-url-{0}='{1}' ",
+                                row.Order,
+                                row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_", prefix = "_zzFzz_1", isAdd = false, rowId = row.RowId }));
                     }
                     if ((requiredFunctionalities & Functionalities.ShowDetail) != 0)
                     {
                         sb.AppendFormat(CultureInfo.InvariantCulture, "data-show-url-{0}='{1}' ",
                             row.Order,
-                            row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_", readOnly = true }));
+                            row.RenderUrl(helpers, "EditDetail", new { key = "_zzFzz_", readOnly = true, rowId = row.RowId }));
                     }
                     if (Type == GridType.Immediate && (requiredFunctionalities & Functionalities.Delete) != 0)
                     {

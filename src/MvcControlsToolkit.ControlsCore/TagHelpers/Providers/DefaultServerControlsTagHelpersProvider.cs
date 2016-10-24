@@ -322,6 +322,13 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                     OperationName = "sort-descending",
                     ShowText = "sort descending"
                 });
+            allButtonProperties.Add(StandardButtons.Close,
+                new ButtonProperties
+                {
+                    IconClass = "glyphicon-remove",
+                    OperationName = "close",
+                    ShowText = "close"
+                });
         }
         public  IHtmlContent RenderButton(StandardButtons buttonType, 
             string arguments, 

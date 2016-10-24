@@ -43,7 +43,7 @@
                     clearErrors = options['clearErrors'] || defaultClearErrors;
                     dispatchServerErrors = options['dispatchServerErrors'] || defaultDispatchServerErrors;
                     clearErrors = options["clearErrors"] || defaultClearErrors;
-                    validationSummarySelector = options["validationSummarySelector"] || '[data-valmsg-summary="true"]';
+                    validationSummarySelector = options["validationSummarySelector"] || '[data-valmsg-summary="true"], [data-valmsg-ajax="true"]';
                     validationSummaryValidClass = options["validationSummaryValidClass"] || "validation-summary-valid";
                     validationSummaryInvalidClass = options["validationSummaryInvalidClass"] || "validation-summary-errors";
 
@@ -262,6 +262,7 @@
                                 dispatchServerErrors(errors, form);
                             }
                             onCompleted ? onCompleted(inForm) : null;
+                            return;
                         }
                         if (ajax.responseText && ajax.responseText.charAt(0) == '#') {
                             onCompleted ? onCompleted(inForm) : null;

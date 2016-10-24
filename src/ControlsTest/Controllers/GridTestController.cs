@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ControlsTest.Controllers
 {
-    public class GridTestController : ServerCrudController<ProductViewModel, ProductViewModel, int?>
+    public class GridTestController : ServerCrudController<ProductViewModelDetail, ProductViewModel, int?>
     {
         static GridTestController()
         {
@@ -34,6 +34,28 @@ namespace ControlsTest.Controllers
                     }
 
                 );
+            DefaultCRUDRepository<ApplicationDbContext, Product>
+                .DeclareProjection<ProductViewModelDetail>(
+                    m => m.Maintenance != null ?
+                    new ProductMaintenanceViewModelDetail
+                    {
+
+                        MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate
+                    } :
+                    new ProductViewModelDetail
+                    {
+
+
+                    }
+
+                );
+            DefaultCRUDRepository<ApplicationDbContext, ProductType>
+                .DeclareProjection<DisplayValue>(
+                    m => new DisplayValue
+                    {
+                        Value = m.Id,
+                        Display = m.Name
+                    });
 
         }
         
@@ -43,6 +65,13 @@ namespace ControlsTest.Controllers
             //and then it is DI injected
             Repository = DefaultCRUDRepository.Create(db, db.Products);
             
+        }
+        public override string DetailColumnAdjustView
+        {
+            get
+            {
+                return "_DetailRows";
+            }
         }
         public async Task<IActionResult> Index(int? page)
         {
@@ -91,8 +120,37 @@ namespace ControlsTest.Controllers
             };
             return View(model);
         }
+        public async Task<IActionResult> IndexEditDetail(int? page)
+        {
+            int pg = page.HasValue ? page.Value : 1;
+            if (pg < 1) pg = 1;
+
+            var model = new ProductlistViewModel
+            {
+                Products = await Repository.GetPage<ProductViewModel>(
+                null,
+                q => q.OrderBy(m => m.Name),
+                pg, 3)
+            };
+            return View(model);
+        }
         [HttpGet]
         public async Task<IActionResult> IndexBatch(int? page)
+        {
+            int pg = page.HasValue ? page.Value : 1;
+            if (pg < 1) pg = 1;
+
+            var model = new ProductlistBatchViewModel
+            {
+                Products = await Repository.GetPage<ProductViewModel>(
+                null,
+                q => q.OrderBy(m => m.Name),
+                pg, 3)
+            };
+            model.ModifiedProducts = model.Products.Data;
+            return View(model);
+        }
+        public async Task<IActionResult> IndexBatchDetail(int? page)
         {
             int pg = page.HasValue ? page.Value : 1;
             if (pg < 1) pg = 1;
@@ -121,7 +179,21 @@ namespace ControlsTest.Controllers
                 return View(model);
             }
         }
-     }
+        [HttpPost]
+        public async Task<IActionResult> IndexBatchDetail(ProductlistBatchViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Repository.UpdateList(false, model.Products.Data, model.ModifiedProducts);
+                await Repository.SaveChanges();
+                return RedirectToAction("IndexBatchDetail", new { page = model.Products.Page });
+            }
+            else
+            {
+                return View(model);
+            }
+        }
+    }
     public class DetailTestController : Controller
     {
         private readonly DefaultCRUDRepository<ApplicationDbContext, Product> Repository;

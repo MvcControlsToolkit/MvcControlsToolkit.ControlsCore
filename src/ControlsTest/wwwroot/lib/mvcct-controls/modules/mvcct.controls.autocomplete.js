@@ -158,8 +158,8 @@
                     }, false);
                     
                     
+                    setTimeout(function () { el.focus(); });
                     
-                    el.focus();
                 }
                 enhancer["register"](null, null, processOptions, "server autocomplete", null)
                 serverControls['addOperation']('autocomplete_focus', attach);

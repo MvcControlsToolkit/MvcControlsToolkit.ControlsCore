@@ -16,22 +16,32 @@
         var currProvider = ViewContext.TagHelperProvider();
         var localizer = row.GetLocalizer(helpers.LocalizerFactory);
         <td class="grid-buttons">
-            @if ((buttons & Functionalities.ShowDetail) > 0)
+            @if (Model != null)
             {
-                @currProvider.RenderButton(StandardButtons.ShowDetail, null, "btn-default btn-xs", helpers, localizer)
-            }
-            @if ((buttons & Functionalities.EditDetail) > 0)
-            {
-                @currProvider.RenderButton(StandardButtons.EditDetail, null, "btn-default btn-xs", helpers, localizer)
-            }
-            
-            @if ((buttons & Functionalities.AddBefore) > 0)
-            {
-                @currProvider.RenderButton(StandardButtons.AddBefore, null, "btn-default btn-xs", helpers, localizer)
-            }
-            @if ((buttons & Functionalities.AddAfter) > 0)
-            {
-                @currProvider.RenderButton(StandardButtons.AddAfter, null, "btn-default btn-xs", helpers, localizer)
+                if ((buttons & Functionalities.ShowDetail) > 0)
+                {
+                    @currProvider.RenderButton(StandardButtons.ShowDetail, null, "btn-default btn-xs", helpers, localizer)
+                }
+                if ((buttons & Functionalities.EditDetail) > 0)
+                {
+                    @currProvider.RenderButton(StandardButtons.EditDetail, null, "btn-default btn-xs", helpers, localizer)
+                }
+                if ((buttons & Functionalities.AddBefore) > 0)
+                {
+                    @currProvider.RenderButton(StandardButtons.AddBefore, null, "btn-default btn-xs", helpers, localizer)
+                }
+                if ((buttons & Functionalities.AddAfter) > 0)
+                {
+                    @currProvider.RenderButton(StandardButtons.AddAfter, null, "btn-default btn-xs", helpers, localizer)
+                }
+                if ((buttons & Functionalities.AddBeforeDetail) > 0)
+                {
+                    @currProvider.RenderButton(StandardButtons.AddBeforeDetail, null, "btn-default btn-xs", helpers, localizer)
+                }
+                if ((buttons & Functionalities.AddAfterDetail) > 0)
+                {
+                    @currProvider.RenderButton(StandardButtons.AddAfterDetail, null, "btn-default btn-xs", helpers, localizer)
+                }
             }
             @if ((buttons & Functionalities.Delete) > 0)
             {

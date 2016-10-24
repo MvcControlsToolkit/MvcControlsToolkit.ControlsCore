@@ -28,7 +28,7 @@
               all-properties="true"
               mvc-controller="typeof(GridTestController)"
               row-id="immediate-example"
-              operations="x => Functionalities.FullInLine | Functionalities.AddBefore | Functionalities.AddAfter"
+              operations="x => Functionalities.FullDetail | Functionalities.AddBeforeDetail | Functionalities.AddAfterDetail  | Functionalities.ShowDetail"
               class="table table-condensed table-bordered">
             <column asp-for="Products.Data.Element().TypeId">
                 <external-key-static display-property="Products.Data.Element().TypeName" />
@@ -64,14 +64,14 @@
                                    page-size-default="3"
                                    total-pages="Products.TotalPages"
                                    skip-url-token="_zzz_"
-                                   url-default="@Url.Action("IndexEdit", "GridTest", new {page="_zzz_" })" />
+                                   url-default="@Url.Action("IndexEditDetail", "GridTest", new {page="_zzz_" })" />
                         </copy-html>
                     </div>
                     <div class="col-xs-8">
-                        <button type="button" data-operation="add append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
-                        <button type="button" data-operation="add append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
-                        <button type="button" data-operation="add prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
-                        <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
+                        <button type="button" data-operation="add-detail append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
+                        <button type="button" data-operation="add-detail append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
+                        <button type="button" data-operation="add-detail prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
+                        <button type="button" data-operation="add-detail prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
                     </div>
                 </div>
             </toolbar>
@@ -80,10 +80,10 @@
             </toolbar>
         </grid>
         <div class="form-group col-xs-12">
-            <button type="button" data-operation="add append 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto</button>
-            <button type="button" data-operation="add append 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione</button>
-            <button type="button" data-operation="add prepend 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto (prep)</button>
-            <button type="button" data-operation="add prepend 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione (prep)</button>
+            <button type="button" data-operation="add-detail append 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto</button>
+            <button type="button" data-operation="add-detail append 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione</button>
+            <button type="button" data-operation="add-detail prepend 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto (prep)</button>
+            <button type="button" data-operation="add-detail prepend 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione (prep)</button>
             
         </div>
     </form>

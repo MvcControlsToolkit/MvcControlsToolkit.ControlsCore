@@ -11,7 +11,7 @@
     var title = ViewData["title"] as string;
     var ReadOnly = (bool)ViewData["ReadOnly"];
     var KeyName = ViewData["KeyName"] as string;
-    var DeatailColumnAdjustView = ViewData["ColumnAdjust"] as string;
+    var DetailColumnAdjustView = ViewData["ColumnAdjust"] as string;
     var rowDefault = (int)ViewData["RowIndex"];
 }
 <div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="@(id+"_label")">
@@ -23,17 +23,20 @@
             </div>
             <div class="modal-body">
                 <detail-form
+                    asp-for="@Model"
                     all-properties="@true" 
                     localization-type="@typeof(MvcControlsToolkit.Controllers.ServerCrudController)" 
                     key="@KeyName"
-                    FormMethod="POST"
-                    FormAction="@Url.Action("EditDetail")"
+                    form-method="POST"
+                    form-action="@Context.Request.Path@Context.Request.QueryString"
                     edit-mode-default="@(!ReadOnly)"
                     model-null-row-default="@rowDefault"
+                    asp-antiforgery="true"
+                    no-submit="@true"
                 >
-                    @if(DeatailColumnAdjustView!= null)
+                    @if(DetailColumnAdjustView!= null)
                     {
-                        <import-settings asp-for="@Model" view-name="@DeatailColumnAdjustView"/>
+                        <import-settings asp-for="@Model" view-name="@DetailColumnAdjustView"/>
                     }
                 </detail-form>
             </div>

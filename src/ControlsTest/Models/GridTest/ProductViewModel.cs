@@ -56,7 +56,7 @@ namespace ControlsTest.Models
             return prefix == "Maintenance";
         }
     }
-    public class ProductViewModelDetail: ProductViewModelBase
+    public class ProductViewModelDetail: ProductViewModel
     {
 
     }

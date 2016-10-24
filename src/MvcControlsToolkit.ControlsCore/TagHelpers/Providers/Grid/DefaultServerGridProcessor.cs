@@ -43,7 +43,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 foreach (var col in columns)
                 {
                     var o = col.For.Metadata.PropertyGetter(rowModel);
-                    helpers.Html.Hidden(col.For.Name, o, null).WriteTo(sb, HtmlEncoder.Default);
+                    helpers.Html.Hidden(col.For.Name, o??string.Empty, null).WriteTo(sb, HtmlEncoder.Default);
                 }
                 var rowPrefix = helpers.Context.ViewData.TemplateInfo.HtmlFieldPrefix;
                 if(rowPrefix.Length>0 && rowPrefix[rowPrefix.Length - 1] == ']')

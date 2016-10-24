@@ -1,8 +1,6 @@
 ﻿(function ($) {
     var formsToFix = [];
-    function registerFormFix(el) {
-        var form = $(el).first().closest('form');
-        if (form.length == 0) return;
+    function registerFormFix(el, form) {
         var iform = form[0];
         if (iform._mvcct_form_expando_) return;
         iform._mvcct_form_expando_ = true;
@@ -42,12 +40,16 @@
     }
 
     $.validator.unobtrusive.parseDynamic = function (selector) {
+        var form = $(el).first().closest('form');
+        if (form.length == 0) return;
         $.validator.unobtrusive.parse(selector);
-        registerFormFix(selector);
+        registerFormFix(selector, form);
     }
     $.validator.unobtrusive.parseElementDynamic = function (selector) {
+        var form = $(el).first().closest('form');
+        if (form.length == 0) return;
         $.validator.unobtrusive.parseElement(selector, true);
-        registerFormFix(selector);
+        registerFormFix(selector, form);
     }
     var mvcct = window["mvcct"]||{};
     var enhancer = mvcct["enhancer"];

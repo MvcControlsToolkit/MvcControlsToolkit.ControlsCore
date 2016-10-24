@@ -18,14 +18,14 @@
     }
 </style>
 <h2>@ViewData["Title"].</h2>
-<form asp-action="IndexBatch">
+<form asp-action="IndexBatchDetail">
     <div>
         <div asp-validation-summary="All" class="text-danger"></div>
         <grid id="main_grid" asp-for="ModifiedProducts"
               type="Batch"
               all-properties="true"
               mvc-controller="typeof(GridTestController)"
-              operations="x => Functionalities.FullInLine | Functionalities.AddBefore | Functionalities.AddAfter"
+              operations="x => Functionalities.FullDetail | Functionalities.AddBeforeDetail | Functionalities.AddAfterDetail | Functionalities.ShowDetail"
               row-id="batch-example"
               class="table table-condensed table-bordered">
             <column asp-for="ModifiedProducts.Element().TypeId">
@@ -61,14 +61,14 @@
                                    page-size-default="3"
                                    total-pages="Products.TotalPages"
                                    skip-url-token="_zzz_"
-                                   url-default="@Url.Action("IndexBatch", "GridTest", new {page="_zzz_" })" />
+                                   url-default="@Url.Action("IndexBatchDetail", "GridTest", new {page="_zzz_" })" />
                         </copy-html>
                         </div>
                         <div class="col-xs-8">
-                            <button type="button" data-operation="add append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
-                            <button type="button" data-operation="add append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
-                            <button type="button" data-operation="add prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
-                            <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
+                            <button type="button" data-operation="add-detail append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
+                            <button type="button" data-operation="add-detail append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
+                            <button type="button" data-operation="add-detail prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
+                            <button type="button" data-operation="add-detail prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
                         </div>
                     </div>   
             </toolbar>
@@ -80,10 +80,10 @@
     </div>
 
     <div class="form-group col-xs-12">
-        <button type="button" data-operation="add append 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto</button>
-        <button type="button" data-operation="add append 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto con manutenzione</button>
-        <button type="button" data-operation="add prepend 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto (prep)</button>
-        <button type="button" data-operation="add prepend 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto con manutenzione (prep)</button>
+        <button type="button" data-operation="add-detail append 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto</button>
+        <button type="button" data-operation="add-detail append 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto con manutenzione</button>
+        <button type="button" data-operation="add-detail prepend 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto (prep)</button>
+        <button type="button" data-operation="add-detail prepend 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-batch-grid">nuovo prodotto con manutenzione (prep)</button>
         <button type="submit" class="btn btn-primary">
             Submit changes
         </button>

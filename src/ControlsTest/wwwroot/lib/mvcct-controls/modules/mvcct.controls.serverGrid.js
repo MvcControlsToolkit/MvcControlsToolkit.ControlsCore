@@ -26,24 +26,76 @@
                 var onStart;
                 var onCompleted;
                 var onProgress;
+                var openModal, closeModal;
                 function processOptions(o) {
                     var oAjax = o["ajax"] || {};
                     empty = oAjax['empty'] || function (x) { x.innerHTML = ''; };
-                    o = o["serverWidgets"] || {};
+                    var o = o["serverWidgets"] || {};
+                    var optionsModal = o["modal"] || {};
                     options = o['grid'] || {};
                     showErrors = options["onError"] || function (x) { alert(x); }
                     onStart = options["onStart"] || function (x) { };
                     onCompleted = options["onCompleted"] || function (x) { };
                     onProgress = options["onProgress"] || function (x) { };
+                    openModal = optionsModal["openModal"] || function (x, id, version) {
+                        var container = document.getElementById(id);
+                        var toCreate = true;
+                        if (!container) {
+                            container = document.createElement('DIV');
+                            container.setAttribute('id', id);
+                            container.setAttribute('data-version', version);
+                            container.appendChild(x);
+                            document.body.appendChild(container);
+                            enhancer["transform"](container);
+                        }
+                        else  {
+                            container.firstChild['expando_onSubmit']=null;
+                            container.firstChild['expando_onSubmitError']=null;
+                            empty(container);
+                            container.setAttribute('data-version', version);
+                            container.appendChild(x);
+                            enhancer["transform"](container);
+                        }
+                        if (toCreate) {
+                            jQuery(x).modal({
+                                show: false,
+                                backdrop: 'static'
+                            });
+                            if (x.getAttribute('data-destroy-on-close')) {
+                                jQuery(x).on('hidden.bs.modal', function (e) {
+                                    x['expando_onSubmit']=null;
+                                    x['expando_onSubmitError']=null;
+                                    empty(x.parentNode);
+                                    x.parentNode.parentNode.removeChild(x.parentNode);
+                                })
+                            }
+                        }
+                        jQuery(x).modal('show');
+                    };
+                    closeModal = optionsModal["closeModal"] || function (x) {
+                        jQuery(x).modal('hide'); 
+                        x['expando_onSubmit']=null;
+                        x['expando_onSubmitError']=null;
+                    };
                 };
 
                 function serverDetailSave(infos) {
                     var form = infos['control'];
                     if (!form) return;
-                    var onSuccess = form['expando_onSubmit'];
-                    var errorMessageF = form['expando_onSubmitError'];
+                    var root = infos['find']('data-version');
+                    if (!root) return;
+                    root = root.firstChild;
+                    var onSuccess = root['expando_onSubmit'];
+                    var errorMessageF = root['expando_onSubmitError'];
                     if (!onSuccess) return;
-                    serverControls['postForm'](form, null, onSuccess, errorMessageF, showErrors, onCompleted, onProgress, onStart);
+                    serverControls['postForm'](form, null, null, onSuccess, errorMessageF, showErrors, onCompleted, onProgress, onStart);
+                }
+                function serverDetailClose(infos) {
+                    var form = infos['control'];
+                    if (!form) return;
+                    var root = infos['find']('data-version');
+                    if (!root) return;
+                    closeModal(root);
                 }
                 function detachRow(row) {
                     var tRoot = row.parentNode;
@@ -59,8 +111,8 @@
                 }
                 function replaceRow(newRow, row) {
                     var tRoot = row.parentNode;
-                    empty(row);
                     row.parentNode.replaceChild(newRow, row);
+                    empty(row);
                     enhancer["transform"](newRow);
                     var me = tRoot[expandoAlternateRow];
                     if (row == me) tRoot[expandoAlternateRow] = null;
@@ -150,7 +202,6 @@
                     serverControls['getContent'](
                         row,
                         tRoot.getAttribute("data-edit-url-" + row.getAttribute("data-row"))
-                            .replace(placeholder + "1", row.getAttribute("data-row-id"))
                             .replace(placeholder, row.getAttribute("data-key")),
                                 
                         null,
@@ -199,6 +250,7 @@
                         infos["control"].getAttribute('id') :
                         infos['target'].getAttribute('data-target');
                     if (!id) return null;
+                    infos["control"] = infos["control"] || document.getElementById(id);
                     id = document.getElementById(id + '_container');
                     if (!id) return null;
                     infos["container"] = id;
@@ -250,16 +302,143 @@
                         onCompleted,
                         onProgress);
                 }
+                function serverDetailEdit(infos, immediate){
+                    var row = infos['row'];
+                    if (!row) return;
+                    var args = infos["args"];
+                    var tRoot = row.parentNode;
+                    var failure = tRoot.getAttribute("data-modification-failed");
+                    onStart(row);
+                    var rowIndex = row.getAttribute("data-row");
+                    var url=tRoot.getAttribute("data-edit-detail-url-" + rowIndex)
+                            .replace(placeholder, row.getAttribute("data-key"));
+                    if (!immediate)
+                        url = url
+                            .replace(placeholder+"1", tRoot.getAttribute('data-prefix'));
+                    serverControls['getContent'](
+                        row,
+                        url,
+                        null,
+                        function (x) {
+                            var detail = serverControls['parseHTML'](x);
+                            if (detail) {
+                                openModal(detail, infos["control"].getAttribute('id')+"_detail", rowIndex);
+                                detail['expando_onSubmit'] = function (html) {
+                                    var newRow = serverControls['parseHTML'](html);
+                                    if (newRow) replaceRow(newRow, row);
+                                    closeModal(detail);
+                                };
+                                detail['expando_onSubmitError'] = function () { return failure; };
+                            }
+                        },
+                        function () { return failure; },
+                        showErrors,
+                        onCompleted,
+                        onProgress);
+                }
+                function serverDetailShow(infos, immediate) {
+                    var row = infos['row'];
+                    if (!row) return;
+                    var args = infos["args"];
+                    var tRoot = row.parentNode;
+                    var failure = tRoot.getAttribute("data-record-not-found");
+                    onStart(row);
+                    var rowIndex = row.getAttribute("data-row");
+                    var url = tRoot.getAttribute("data-show-url-" + rowIndex)
+                            .replace(placeholder, row.getAttribute("data-key"));
+                    serverControls['getContent'](
+                        row,
+                        url,
+                        null,
+                        function (x) {
+                            var detail = serverControls['parseHTML'](x);
+                            if (detail) {
+                                openModal(detail, infos["control"].getAttribute('id') + "_detail", rowIndex); 
+                            }
+                        },
+                        function () { return failure; },
+                        showErrors,
+                        onCompleted,
+                        onProgress);
+                }
+                function serverDetailAdd(infos, immediate) {
+                    if (!infos) return;
+                    var row = infos['row'];
+                    var args = infos['args'];
+                    var type = infos['type'];
+                    var rowOrder =
+                        args.length > 1 ? args[1] :
+                        (row ? row.getAttribute("data-row") : "0");
+                    tRoot = infos['container'];
+                    var url = tRoot.getAttribute("data-add-detail-url-" + rowOrder);
+                    if (!immediate)
+                        url = url.replace(placeholder, tRoot.getAttribute('data-prefix'));
+                    var failure = tRoot.getAttribute("data-add-failed");
+                    onStart(infos['control']);
+                    serverControls['getContent'](
+                        row,
+                        url,
+                        null,
+                        function (x) {
+                            var detail = serverControls['parseHTML'](x);
+                            if (detail) {
+                                openModal(detail, infos["control"].getAttribute('id') + "_detail", rowOrder)
+                                detail['expando_onSubmit'] = function (html) {
+                                    var newRow = serverControls['parseHTML'](html);
+                                    if (newRow) {
+                                        if (type == "before") tRoot.insertBefore(newRow, row);
+                                        else if (type == "append" ||
+                                                (type == "prepend" && !tRoot.hasChildNodes()) ||
+                                                (type == "after" && row == tRoot.lastChild)
+                                            ) tRoot.appendChild(newRow);
+                                        else if (type == "prepend")
+                                            tRoot.insertBefore(newRow, tRoot.firstChild);
 
+                                        else if (type == "after")
+                                            tRoot.insertBefore(newRow, row.nextSibling);
+                                        else
+                                            tRoot.appendChild(newRow);
+                                        enhancer["transform"](newRow);
+
+                                        if (immediate) {
+                                            undoEdit(tRoot[expandoAlternateRow]);
+                                            tRoot[expandoAlternateRow] = newRow;
+                                        }
+                                    }
+                                    closeModal(detail);
+                                };
+                                detail['expando_onSubmitError'] = function () { return failure; };
+                                
+                            }
+                        },
+                        function () { return failure; },
+                        showErrors,
+                        onCompleted,
+                        onProgress);
+                }
                 enhancer["register"](null, null, processOptions, "serverGrid", null);
                 serverControls['addOperation']('save_click', serverDetailSave, 'server-detail', true);
+                serverControls['addOperation']('close_click', serverDetailClose, 'server-detail', true);
+
                 serverControls['addOperation']('delete_click', function (infos) { serverGridDelete(infos, true); }, 'server-immediate-grid');
                 serverControls['addOperation']('delete_click', function (infos) { serverGridDelete(infos, false); }, 'server-batch-grid');
+
                 serverControls['addOperation']('edit_click', function (infos) { serverEdit(infos, false); }, 'server-immediate-grid');
+                serverControls['addOperation']('edit-detail_click', function (infos) { serverDetailEdit(infos, true); }, 'server-immediate-grid');
+                serverControls['addOperation']('edit-detail_click', function (infos) { serverDetailEdit(infos, false); }, 'server-batch-grid');
+
                 serverControls['addOperation']('undo_click', function (infos) { serverEdit(infos, true); }, 'server-immediate-grid');
                 serverControls['addOperation']('save_click', function (infos) { serverSubmit(infos); }, 'server-immediate-grid');
+
                 serverControls['addOperation']('add_click', function (infos) { serverAdd(fillAddInfos(infos), true); }, 'server-immediate-grid');
                 serverControls['addOperation']('add_click', function (infos) { serverAdd(fillAddInfos(infos), false); }, 'server-batch-grid');
+
+                serverControls['addOperation']('add-detail_click', function (infos) { serverDetailAdd(fillAddInfos(infos), true); }, 'server-immediate-grid', true);
+                serverControls['addOperation']('add-detail_click', function (infos) { serverDetailAdd(fillAddInfos(infos), false); }, 'server-batch-grid', true);
+
+                serverControls['addOperation']('show-detail_click', function (infos) { serverDetailShow(infos, true); }, 'server-immediate-grid');
+                serverControls['addOperation']('show-detail_click', function (infos) { serverDetailShow(infos, false); }, 'server-batch-grid');
+                
                 //Finish actual code
                 return serverControls;
             })
