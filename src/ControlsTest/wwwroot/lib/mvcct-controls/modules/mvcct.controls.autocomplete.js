@@ -1,7 +1,7 @@
 ﻿(function () {
     var DEBUG = true;
     (function (undefined) {
-        var window = this || (0, eval)('this');
+        var window = this || (0, eval)('this'); 
         (function (factory) {
             if (typeof define === 'function' && define['amd']) {
                 // [1] AMD anonymous module
@@ -24,7 +24,7 @@
                     o = o["serverWidgets"] || {};
                     options = o['autocomplete'] || {};
                 };
-                
+                var $ = window["jQuery"];
                 function onChanged(hidden) {
                     var e = document.createEvent('HTMLEvents');
                     e.initEvent('blur', true, true);
@@ -32,9 +32,11 @@
                     e = document.createEvent('HTMLEvents');
                     e.initEvent('change', true, true);
                     hidden.dispatchEvent(e);
-                    var jhidden=$(hidden);
-                    var validator = jhidden.closest('form').validate();
-                    if (validator) validator.element(jhidden);
+                    if ($ && $['validator']) {
+                        var jhidden = $(hidden);
+                        var validator = jhidden['closest']('form')['validate']();
+                        if (validator) validator['element'](jhidden);
+                    }
                 }
                 var dict = {};
                 function attach(infos) {
@@ -65,14 +67,14 @@
                         dict[args[2]] = engine = new serverControls['searchDictionary'](args[0], minChars, maxItems, tOptions["maxCacheSize"])
                     }
                     var awesomplete = new Awesomplete(el, {
-                        minChars: minChars,
-                        maxItems: maxItems,
-                        filter: function (x, y) {
+                        'minChars': minChars,
+                        'maxItems': maxItems,
+                        'filter': function (x, y) {
                             x = removeDiacritics(x).toLowerCase();
                             y = removeDiacritics(y).toLowerCase();
                             return x.indexOf(y) >=0;
                         },
-                        data: function (item, input) {
+                        'data': function (item, input) {
                             return { label: item[args[1]], value: item[args[1]] };
                         }
                     });
@@ -126,9 +128,11 @@
                         hidden.value = newVal;
                         if (hidden.value !== oldVal) onChanged(hidden);
                         else {
-                            var jhidden = $(hidden);
-                            var validator = jhidden.closest('form').validate();
-                            if (validator) validator.element(jhidden);
+                            if ($ && $['validator']) {
+                                var jhidden = $(hidden);
+                                var validator = jhidden['closest']('form')['validate']();
+                                if (validator) validator['element'](jhidden);
+                            }
                         }
                     }
                     el.addEventListener('blur', mainHandler, false);
@@ -151,7 +155,7 @@
                         
                         ajax.open("GET", el.getAttribute('data-url').replace(el.getAttribute('data-url-token'), el.value), true);
                         ajax.onload = function () {
-                            awesomplete.list = lastData = JSON.parse(ajax.responseText);
+                            awesomplete['list'] = lastData = JSON.parse(ajax.responseText);
                             engine['add'](lastCall, lastData);
                             };
                         ajax.send();

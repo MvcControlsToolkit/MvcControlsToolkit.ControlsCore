@@ -26,7 +26,7 @@
               all-properties="true"
               mvc-controller="typeof(GridTestController)"
               operations="x => Functionalities.FullDetail | Functionalities.AddBeforeDetail | Functionalities.AddAfterDetail | Functionalities.ShowDetail"
-              row-id="batch-example"
+              row-id="batch-example-detail"
               class="table table-condensed table-bordered">
             <column asp-for="ModifiedProducts.Element().TypeId">
                 @*<external-key-static display-property="ModifiedProducts.Element().TypeName"
@@ -76,7 +76,7 @@
                 <paste-html name="main-pager" />
             </toolbar>
         </grid>
-        <store-model asp-for="Products" encrypted="true" />
+        <store-model asp-for="Products" encrypted="true"/>
     </div>
 
     <div class="form-group col-xs-12">
@@ -99,9 +99,9 @@
     <link href="~/lib/awesomplete/awesomplete.css" rel="stylesheet" />
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script src="~/lib/awesomplete/awesomplete.min.js"></script>
-    <script src="~/lib/mvcct-controls/mvcct.controls.js"></script>
-    <script src="~/lib/mvcct-controls/modules/mvcct.controls.autocomplete.js"></script>
-<script src="~/lib/mvcct-controls/modules/mvcct.controls.ajax.js"></script>
+    <script src="~/lib/mvcct-controls/mvcct.controls.min.js"></script>
+    <script src="~/lib/mvcct-controls/modules/mvcct.controls.autocomplete.min.js"></script>
+<script src="~/lib/mvcct-controls/modules/mvcct.controls.ajax.min.js"></script>
     <script src="~/lib/mvcct-controls/modules/mvcct.controls.serverGrid.js"></script>
 }
 

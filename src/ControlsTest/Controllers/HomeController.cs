@@ -44,6 +44,7 @@ namespace ControlsTest.Controllers
             return View(vm);
         }
         [HttpGet]
+        [ResponseCache(Duration =0, NoStore =true)]
         public IActionResult AutocompleteItems(string search)
         {
             var vm = new List<AutoCompleteItem>();
