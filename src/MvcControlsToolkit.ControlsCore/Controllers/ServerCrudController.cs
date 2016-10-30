@@ -15,6 +15,8 @@ using MvcControlsToolkit.Core.Templates;
 
 namespace MvcControlsToolkit.Controllers
 {
+    public enum CrudOperation {Modify, Create}
+    public enum CrudOperationSwitch {Go, Abort, SilentAbort}
     public abstract class ServerCrudController : Controller
     {
     }
@@ -31,7 +33,8 @@ namespace MvcControlsToolkit.Controllers
             "item not found",
             "unauthorized",
             "unable to delete item (maybe already deleted)",
-            "unable to update item (maybe it has been deleted)"
+            "unable to update item (maybe it has been deleted)",
+            "operation aborted"
         };
         private void getRow(string id)
         {
@@ -115,6 +118,30 @@ namespace MvcControlsToolkit.Controllers
         public virtual string DetailColumnAdjustView { get { return null; } }
         public virtual string DetailTitle { get { return "Item detail"; } }
         public virtual string DeatailKeyName { get { return null; } }
+        public virtual async Task OnOperationExecuted(CrudOperation op, VMS item)
+        {
+            return;
+        }
+        public virtual async Task OnDetailOperationExecuted(CrudOperation op, VMD item)
+        {
+            return;
+        }
+        public virtual async Task OnDeleteExecuted(D key)
+        {
+            return;
+        }
+        public virtual async Task<CrudOperationSwitch> OnOperationExecuting(CrudOperation op, VMS item)
+        {
+            return CrudOperationSwitch.Go;
+        }
+        public virtual async Task<CrudOperationSwitch> OnDetailOperationExecuting(CrudOperation op, VMD item)
+        {
+            return CrudOperationSwitch.Go;
+        }
+        public virtual async Task<CrudOperationSwitch> OnDeleteExecuting(D key)
+        {
+            return CrudOperationSwitch.Go;
+        }
         protected IEnumerable<ModelError> PackErrors(ModelStateDictionary ms)
         {
             return ms
@@ -131,6 +158,7 @@ namespace MvcControlsToolkit.Controllers
         //3: Unauthorized
         //4: already deletes
         //5: deleted
+        //6 aborted
         protected virtual string ErrorMessage(int i)
         {
             return localize(defaultMessages[i]);
@@ -151,8 +179,20 @@ namespace MvcControlsToolkit.Controllers
             {
                 if (key != null)
                 {
-                    Repository.Delete(key);
-                    await Repository.SaveChanges();
+                    var permission=await OnDeleteExecuting(key);
+                    if (permission == CrudOperationSwitch.Go) {
+                        Repository.Delete(key);
+                        await OnDeleteExecuted(key);
+                        await Repository.SaveChanges();
+                    }
+                    else if (permission == CrudOperationSwitch.Abort)
+                        return Json(new ModelError[] {
+                        new ModelError
+                        {
+                            Prefix="",
+                            Errors=new string[] { ErrorMessage(6) }
+                        }
+                    });
                     return Json(new ModelError[0]);
                 }
                 else return Json(new ModelError[] {
@@ -211,11 +251,21 @@ namespace MvcControlsToolkit.Controllers
             {
                 try
                 {
-                    if(isAdd)
-                        Repository.Add(InLineFull, vm);
-                    else
-                        Repository.Update(InLineFull, vm);
-                    await Repository.SaveChanges();
+                    var permission = await OnOperationExecuting(isAdd ? CrudOperation.Create : CrudOperation.Modify, vm);
+                    if (permission == CrudOperationSwitch.Go)
+                    {
+                        if (isAdd)
+                            Repository.Add(InLineFull, vm);
+                        else
+                            Repository.Update(InLineFull, vm);
+                        await OnOperationExecuted(isAdd ? CrudOperation.Create : CrudOperation.Modify, vm);
+                        await Repository.SaveChanges();
+                    }
+                    else if (permission == CrudOperationSwitch.Abort)
+                    {
+                        ModelState.AddModelError("", ErrorMessage(6));
+                        return Json(PackErrors(ModelState));
+                    }
                     ViewBag.ReadOnly = false;
                     return await Invoke(vm, false);
                 }
@@ -278,14 +328,25 @@ namespace MvcControlsToolkit.Controllers
             {
                 try
                 {
-                    
-                    if (isAdd)
-                        Repository.Add(DetailFull, vm);
+                    var permission = await OnDetailOperationExecuting(isAdd ? CrudOperation.Create : CrudOperation.Modify, vm);
+                    if (permission == CrudOperationSwitch.Go)
+                    {
+                        if (isAdd)
+                            Repository.Add(DetailFull, vm);
+                        else
+                            Repository.Update(DetailFull, vm);
+                        await OnDetailOperationExecuted(isAdd ? CrudOperation.Create : CrudOperation.Modify, vm);
+                        await Repository.SaveChanges();
+
+                        var key = (D)Repository.GetKey(vm);
+
+                        return await Invoke(await Repository.GetById<VMS, D>(key), prefix != null, prefix);
+                    }
                     else
-                        Repository.Update(DetailFull, vm);
-                    await Repository.SaveChanges();
-                    var key = (D)Repository.GetKey(vm);
-                    return await Invoke(await Repository.GetById<VMS, D>(key), prefix != null, prefix);
+                    {
+                        ModelState.AddModelError("", ErrorMessage(6));
+                        return Json(PackErrors(ModelState));
+                    }
                 }
                 catch
                 {
