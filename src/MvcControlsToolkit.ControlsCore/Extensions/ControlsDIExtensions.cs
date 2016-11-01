@@ -19,8 +19,8 @@ namespace MvcControlsToolkit.Core.Extensions
             ITagHelpersProvider defaultTagHelpersProviderInstance=null
         )
         {
-            
-            if(defaultTagHelpersProviderType == null)
+            services.AddLocalization();
+            if (defaultTagHelpersProviderType == null)
             {
                 defaultTagHelpersProviderInstance = null;
                 defaultTagHelpersProviderType = typeof(DefaultServerControlsTagHelpersProvider);

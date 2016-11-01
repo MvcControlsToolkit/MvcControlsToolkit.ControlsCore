@@ -41,7 +41,7 @@ namespace ControlsTest.Controllers
                 SelectedId = 1,
                 SelectedDisplay = "Ireland"
             };
-            return View(vm);
+            return View();
         }
         [HttpGet]
         [ResponseCache(Duration =0, NoStore =true)]
