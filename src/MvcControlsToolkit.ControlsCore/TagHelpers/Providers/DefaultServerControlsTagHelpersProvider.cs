@@ -138,6 +138,16 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 null
                 );
             DefineButtonProperies();
+            addExtensions();
+        }
+        private static void addExtensions()
+        {
+            var toAdd=TagHelpersProviderExtensionsRegister
+                .GetProcessors(typeof(DefaultServerControlsTagHelpersProvider));
+            foreach (var x in toAdd) allTagProcessors[x.Key] = x.Value;
+            var toAdd1 = TagHelpersProviderExtensionsRegister
+                .GetTemplates(typeof(DefaultServerControlsTagHelpersProvider));
+            foreach (var x in toAdd1) allTagDefaultTemplates[x.Key] = x.Value;
         }
         protected static void DefineButtonProperies()
         {

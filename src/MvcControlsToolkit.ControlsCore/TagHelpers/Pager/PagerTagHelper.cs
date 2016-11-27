@@ -23,6 +23,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("mode")]
         public PagerMode Mode { get; set; }
 
+        [HtmlAttributeName("layout-template")]
+        public string LayoutTemplate { get; set; }
+
         [HtmlAttributeName("max-pages")]
         public int MaxPages { get; set; }
 
@@ -112,7 +115,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 operation = "data-operation='ajax-html "+ AjaxId + "'";
             else if(AjaxEndpoint != null)
                 operation = "data-operation='ajax-json " + AjaxEndpoint + "'";
-            var options = new Internals.PagerOptions(currProvider.GetDefaultTemplates(TagName).LayoutTemplate, operation);
+            var defaultTemplates = currProvider.GetDefaultTemplates(TagName);
+            var options = new Internals.PagerOptions(defaultTemplates.GetLayoutTemplate(LayoutTemplate), operation);
             await currProvider.GetTagProcessor(TagName)(context, output, this,  options , ctx);
         }
     }
