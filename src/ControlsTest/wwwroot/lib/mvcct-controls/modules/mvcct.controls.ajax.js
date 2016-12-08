@@ -83,18 +83,18 @@
                         summary.appendChild(toAppend);
                     }
                     errors.map(function (er) {
-                        if (!er.prefix) appendToList(toAppend, er.errors);
+                        if (!er["prefix"]) appendToList(toAppend, er["errors"]);
                         else {
-                            var el = form.querySelector('[name="' + er.prefix+'"]');
-                            if (!el) { appendToList(toAppend, er.errors); return; }
+                            var el = form.querySelector('[name="' + er["prefix"]+'"]');
+                            if (!el) { appendToList(toAppend, er["errors"]); return; }
                             el.classList.add(fieldErrorClass);
                             var label = errorLabelLocator(el, form);
                             if (label) {
                                 label.classList.add(errorLabelInvalidClass);
                                 label.classList.remove(errorLabelValidClass);
-                                label.appendChild(document.createTextNode(er.errors[0]));
+                                label.appendChild(document.createTextNode(er["errors"][0]));
                             }
-                            else appendToList(toAppend, er.errors);
+                            else appendToList(toAppend, er["errors"]);
                         }
                     });
                 }
@@ -185,12 +185,19 @@
                 serverControls['removeEndpoint'] = function(name){
                     delete endpoints[name];
                 };
-                
-                serverControls['postJson'] = function (el, url, data, bearerToken, onSuccess, errorMessageF, onError, onCompleted, onProgress) {
+                function addHeaders(headers, ajax){
+                    if(headers && typeof headers === 'object')
+                        for (var property in headers) {
+                            if (headers.hasOwnProperty(property)) 
+                                ajax.setRequestHeader(property, headers[property]);
+                        }
+                }
+                serverControls['postJson'] = function (el, url, data, bearerToken, onSuccess, errorMessageF, onError, onCompleted, onProgress, headers) {
                     var ajax = new XMLHttpRequest();
                     ajax.open("POST", url, true);
                     ajax.setRequestHeader("Content-type", "application/json");
                     if (bearerToken) ajax.setRequestHeader('Authorization', 'Bearer ' + bearerToken);
+                    addHeaders(headers, ajax);
                     ajax.onload = function () {
                         if (ajax.status != 200) {
                             onCompleted ? onCompleted(el) : null;
@@ -207,10 +214,12 @@
                     
                     ajax.send(JSON.stringify(data));
                 };
-                serverControls['getContent'] = function (el, url, bearerToken, onSuccess, errorMessageF, onError, onCompleted, onProgress) {
+                serverControls['getContent'] = function (el, url, bearerToken, onSuccess, errorMessageF, onError, onCompleted, onProgress, headers, verb, params) {
                     var ajax = new XMLHttpRequest();
-                    ajax.open("GET", url, true);
+                    ajax.open(verb||"GET", url, true);
                     if (bearerToken) ajax.setRequestHeader('Authorization', 'Bearer ' + bearerToken);
+                    if(params) ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    addHeaders(headers, ajax);
                     ajax.onload = function () {
                         if (ajax.responseText && ajax.responseText.charAt(0) == '#') {
                             onCompleted ? onCompleted(el) : null;
@@ -230,9 +239,10 @@
                     ajax.onerror = function (e) { onCompleted ? onCompleted(el) : null; onError ? onError(errorMessageF ? errorMessageF(ajax.status) : "") : null; }
                     ajax.onprogress = onProgress;
 
-                    ajax.send();
+                    if(params) ajax.send(params)
+                    else ajax.send();
                 };
-                serverControls['postForm'] = function (inForm, url, extraData, onSuccess, errorMessageF, onError, onCompleted, onProgress, onStart) {
+                serverControls['postForm'] = function (inForm, url, extraData, onSuccess, errorMessageF, onError, onCompleted, onProgress, onStart, headers) {
                     var form = findForm(inForm);
                     if (!validateForm(form)) return;
                     if (onStart) onStart(inForm);
@@ -254,6 +264,7 @@
                     }
                     ajax.open("POST", url, true);
                     ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    addHeaders(headers, ajax);
                     ajax.onload = function () {
                         if (ajax.responseText && ajax.responseText.trim().charAt(0)=="[")
                         {

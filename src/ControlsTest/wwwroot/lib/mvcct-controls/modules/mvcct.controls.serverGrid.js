@@ -19,6 +19,7 @@
             (function (serverControls, ajaxServerControls, enhancer) {
                 var placeholder = "_zzFzz_";
                 var expandoAlternateRow = "_expando_row_";
+                var forgeryName="__RequestVerificationToken";
                 //Start actual code
                 var options;
                 var empty;
@@ -57,7 +58,7 @@
                             enhancer["transform"](container);
                         }
                         if (toCreate) {
-                            jQuery(x).modal({
+                            jQuery(x)['modal']({
                                 show: false,
                                 backdrop: 'static'
                             });
@@ -70,10 +71,10 @@
                                 })
                             }
                         }
-                        jQuery(x).modal('show');
+                        jQuery(x)['modal']('show');
                     };
                     closeModal = optionsModal["closeModal"] || function (x) {
-                        jQuery(x).modal('hide'); 
+                        jQuery(x)['modal']('hide'); 
                         x['expando_onSubmit']=null;
                         x['expando_onSubmitError']=null;
                     };
@@ -147,10 +148,25 @@
                     tRoot[expandoAlternateRow]=editRow;
                     row.parentNode.replaceChild(editRow, row);
                 }
+                function findForm(x) {
+                    for (; x; x = x.parentNode) {
+                        if (!x.getAttribute) return null;
+                        else if (x.tagName == 'FORM') return x;
+                    }
+                    return null;
+                }
                 function serverGridDelete(infos, immediate) {
                     var row = infos['row'];
                     if (!row) return;
                     var tRoot = row.parentNode;
+                    var form = findForm(row);
+                    var params = null;
+                    if(form){
+                        var forgery=form.querySelector('[name="' + forgeryName + '"]');
+                        if(forgery) {
+                            params= encodeURIComponent(forgeryName) + '=' + encodeURIComponent(forgery.value);
+                        }
+                    }
                     var confirmation = tRoot.getAttribute("data-delete-confirmation");
                     var failure = tRoot.getAttribute("data-delete-failed");
                     if (confirmation && !confirm(confirmation)) return;
@@ -172,7 +188,7 @@
                             function () { return failure;},
                             showErrors,
                             onCompleted,
-                            onProgress);
+                            onProgress, null, 'POST',params);
                     }
                 }
                 function serverEdit(infos, undo) {

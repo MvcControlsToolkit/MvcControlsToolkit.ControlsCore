@@ -92,10 +92,19 @@
                             else {
                                 
                                 if (lastData && lastData.length > 0) {
-                                    if (el.value != lastData[0][args[1]]) {
-                                        el.value = lastData[0][args[1]];
-                                        evt.preventDefault();
+                                    var x = removeDiacritics(el.value).toLowerCase();
+                                    var y;
+                                    for(var j = 0; j<lastData.length; j++){
+                                        y = removeDiacritics(lastData[j][args[1]]).toLowerCase();
+                                        if(y.indexOf(x) >=0){
+                                            if (x != y) {
+                                                el.value = lastData[j][args[1]];
+                                                evt.preventDefault();
+                                            } 
+                                            break;  
+                                        }
                                     }
+                                    
                                      
                                 }
                                 

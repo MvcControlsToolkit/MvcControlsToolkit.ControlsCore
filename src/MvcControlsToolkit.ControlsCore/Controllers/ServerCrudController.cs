@@ -164,6 +164,8 @@ namespace MvcControlsToolkit.Controllers
             return localize(defaultMessages[i]);
         }
         [ResponseCache(Duration =0, NoStore =true)]
+        [ValidateAntiForgeryToken]
+        [HttpPost]
         public async Task<IActionResult> Delete(D key)
         {
             if ((requiredFunctionalities& Functionalities.Delete)==0) return Json(new ModelError[1] { new ModelError(ErrorMessage(3)) });
