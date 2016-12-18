@@ -27,13 +27,32 @@
                 var validationSummarySelector, validationSummaryValidClass, validationSummaryInvalidClass;
                 var fieldErrorClass, errorLabelValidClass, errorLabelInvalidClass, errorLabelLocator;
                 function processOptions(o) {
-                    options = o["ajax"] || {};
-                    empty = options['empty'] || function (x) {
-                        if (x) x.innerHTML = '';
-                        if (jQuery) jQuery(x)["empty"]();
+                    options = o["ajax"] = o["ajax"] || {};
+                    empty = options['empty'] =  options['empty'] || function (x) {
+                        if (!x) return;
+                        if (jQuery){
+                            var jx=jQuery(x);
+                            if(jQuery['validator']){
+                                var form=findForm(x);
+                                if(form){
+                                    var validator = jQuery['data'](form, "validator" );
+                                    if(validator){
+                                        var settings = validator['settings'];
+                                        if(settings){
+                                            var staticRules = settings['rules'];
+                                            jx['find']("[data-val=true]")['each'](function(){
+                                                delete staticRules[ this.name ];
+                                            });
+                                        }
+                                    }     
+                                }
+                             }
+                             jx["empty"]();
+                             
+                        }
                         else x.innerHTML = '';
                     };
-                    validateForm = options['validateForm'] || function (x)
+                    validateForm = options['validateForm'] = options['validateForm'] || function (x)
                     {
                         if (jQuery && jQuery['validator']) {
                             return jQuery(x)["closest"]('form')["validate"]()["form"]();

@@ -25,6 +25,8 @@ namespace ControlsTest.Models
         [MaxLength(128)]
         public string Name { get; set; }
         public decimal Price { get; set; }
+
+        public DateTime? DateValid { get; set; }
         public Currency ChosenCurrency { get; set; }
         public bool Available { get; set; }
 

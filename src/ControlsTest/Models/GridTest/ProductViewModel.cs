@@ -9,6 +9,7 @@ using ControlsTest.Data;
 using System.Security.Claims;
 using System.Collections;
 using MvcControlsToolkit.Core.Business;
+using MvcControlsToolkit.Core.Types;
 
 namespace ControlsTest.Models
 {
@@ -40,6 +41,9 @@ namespace ControlsTest.Models
         [Display(Name = "Type", Order = 250)]
         [ColumnLayout(DetailWidthsAsString = "70")]
         public int? TypeId { get; set; }
+        [Display(Name = "Valid till", Order = 50)]
+        [ColumnLayout(DetailWidthsAsString = "100")]
+        public Month? DateValid { get; set; }
     }
     public class ProductViewModel: ProductViewModelBase
     {

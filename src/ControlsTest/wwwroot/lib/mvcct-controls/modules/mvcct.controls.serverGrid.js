@@ -29,16 +29,16 @@
                 var onProgress;
                 var openModal, closeModal;
                 function processOptions(o) {
-                    var oAjax = o["ajax"] || {};
+                    var oAjax = o["ajax"] = o["ajax"] || {};
                     empty = oAjax['empty'] || function (x) { x.innerHTML = ''; };
-                    var o = o["serverWidgets"] || {};
-                    var optionsModal = o["modal"] || {};
-                    options = o['grid'] || {};
+                    var o = o["serverWidgets"] = o["serverWidgets"] || {};
+                    var optionsModal = o["modal"] = o["modal"] || {};
+                    options = o['grid'] = o['grid'] || {};
                     showErrors = options["onError"] || function (x) { alert(x); }
                     onStart = options["onStart"] || function (x) { };
                     onCompleted = options["onCompleted"] || function (x) { };
                     onProgress = options["onProgress"] || function (x) { };
-                    openModal = optionsModal["openModal"] || function (x, id, version) {
+                    openModal = optionsModal["openModal"] = optionsModal["openModal"] || function (x, id, version) {
                         var container = document.getElementById(id);
                         var toCreate = true;
                         if (!container) {
@@ -73,7 +73,7 @@
                         }
                         jQuery(x)['modal']('show');
                     };
-                    closeModal = optionsModal["closeModal"] || function (x) {
+                    closeModal = optionsModal["closeModal"] = optionsModal["closeModal"] || function (x) {
                         jQuery(x)['modal']('hide'); 
                         x['expando_onSubmit']=null;
                         x['expando_onSubmitError']=null;
