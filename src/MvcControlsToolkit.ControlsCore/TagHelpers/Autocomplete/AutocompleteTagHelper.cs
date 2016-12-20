@@ -76,12 +76,15 @@ namespace MvcControlsToolkit.Core.TagHelpers
             if (MinChars == 0) MinChars = 3;
             var currProvider = ViewContext.TagHelperProvider();
             var resolver = jsonOptions.SerializerSettings.ContractResolver as DefaultContractResolver;
+            var vd = ViewContext.ViewData;
             var options = new AutocompleteOptions
             {
                 Generator = generator,
-                PropertyResolver = resolver != null ? resolver.GetResolvedPropertyName : new Func<string, string>(x => x)
-
-        };
+                PropertyResolver = resolver != null ? resolver.GetResolvedPropertyName : new Func<string, string>(x => x),
+                ForcedValueName =  currProvider.GenerateNames ? vd.GetFullHtmlFieldName(ForExpressionOverride ?? For.Name) : null,
+                ForcedDisplayName = currProvider.GenerateNames ? vd.GetFullHtmlFieldName(DisplayPropertyExpressionOverride ?? DisplayProperty.Name) : null,
+                NoId= !currProvider.GenerateNames || ViewContext.IsFilterRendering()
+            };
             await currProvider.GetTagProcessor(TagName)(context, output, this, options, null);
         }
     }

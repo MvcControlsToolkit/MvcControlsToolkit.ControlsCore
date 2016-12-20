@@ -13,6 +13,10 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
 {
     public class DefaultServerAutocompleteProcessor
     {
+        private static IDictionary<string, object> hiddenAttributes = new Dictionary<string, object>()
+        {
+            {"id", null }
+        };
         private TagHelperContext context;
         private TagHelperOutput output;
         private AutocompleteOptions options;
@@ -31,6 +35,8 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             {
                 foreach (var pair in output.Attributes) infos.Add(pair.Name, pair.Value);
             }
+            if(!infos.ContainsKey("name")) infos.Add("name", options.ForcedDisplayName);
+            if (options.NoId && !infos.ContainsKey("id")) infos.Add("id", null);
             infos.Add("data-url", tag.ItemsUrl);
             infos.Add("data-url-token", tag.UrlToken);
             infos.Add("data-operation", string.Format("autocomplete {0} {1} {2} {3} {4} {5}",
@@ -48,7 +54,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 tag.ForExpressionOverride ?? tag.For.Name,
                 tag.ForPropertyExplorer != null ? tag.ForPropertyExplorer.Model : tag.For.Model,
                 false,
-                null);
+                options.NoId ? hiddenAttributes : null);
             var metadata = tag.DisplayPropertyExplorer != null ? tag.DisplayPropertyExplorer.Metadata : tag.For.ModelExplorer.Metadata;
 
             var search = options.Generator.GenerateTextBox(tag.ViewContext,

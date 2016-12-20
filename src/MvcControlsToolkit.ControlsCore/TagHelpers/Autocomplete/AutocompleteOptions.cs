@@ -14,5 +14,9 @@ namespace MvcControlsToolkit.Core.TagHelpers.Internals
         }
         public IHtmlGenerator Generator { get; set; }
         public Func<string, string > PropertyResolver { get; set; }
+        public bool NoId { get; set; }
+        public string ForcedValueName { get; set; }
+        public string ForcedDisplayName { get; set; }
+
     }
 }
