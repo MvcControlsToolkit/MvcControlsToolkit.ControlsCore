@@ -6,7 +6,12 @@
 }
 @if (col.ColumnConnection != null)
 {
-    if (col.ColumnConnection is ColumnConnectionInfosStatic)
+    if (col.ColumnConnection.QueryDisplay)
+    {
+        <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "full-cell")" />
+
+    }
+    else if (col.ColumnConnection is ColumnConnectionInfosStatic)
     {
         var infos = col.ColumnConnection as ColumnConnectionInfosStatic;
         <select asp-for="@Model" asp-items="@(new SelectList(await infos.ItemsSelector(User), infos.ItemsValueProperty, infos.ItemsDisplayProperty))"
