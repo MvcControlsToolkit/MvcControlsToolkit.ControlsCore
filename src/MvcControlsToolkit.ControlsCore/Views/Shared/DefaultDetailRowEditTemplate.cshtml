@@ -15,6 +15,19 @@
     @foreach (var col in row.Columns)
     {
             @await row.RenderColumn(Model,col, !col.ReadOnly, helpers)
+            @if (col.EditDetailEndRow != null)
+            {
+                for (int i = 0; i < col.EditDetailEndRow.Length; i++)
+                {
+                    var css = col.GetLineBreakClass(SupportedGridSystems.Bootstrap3, true, i);
+                    if (css != null)
+                    {
+                        <div class="@css"></div>
+                    }
+
+                }
+
+            }
     }
 @row.RenderHiddens(helpers, Model)
   

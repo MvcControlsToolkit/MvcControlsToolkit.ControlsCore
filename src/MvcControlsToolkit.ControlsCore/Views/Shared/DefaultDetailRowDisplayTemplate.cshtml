@@ -17,6 +17,19 @@
         continue;
     }
     @await row.RenderColumn(Model,col,false,helpers)
+    @if (col.DisplayDetailEndRow != null)
+    {
+        for(int i=0; i<col.DisplayDetailEndRow.Length; i++)
+        {
+            var css = col.GetLineBreakClass(SupportedGridSystems.Bootstrap3, false, i);
+            if(css != null)
+            {
+                <div class="@css"></div>
+            }
+
+        }
+
+    }
 }
     
 
