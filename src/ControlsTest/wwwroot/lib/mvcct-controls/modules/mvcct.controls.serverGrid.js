@@ -21,11 +21,14 @@
                 var expandoAlternateRow = "_expando_row_";
                 var forgeryName="__RequestVerificationToken";
                 //Start actual code
+                var frozenAttribute = "data-frozen";
                 var options;
                 var empty;
                 var showErrors;
                 var onStart;
+                var onStartNet;
                 var onCompleted;
+                var onCompletedNet;
                 var onProgress;
                 var openModal, closeModal;
                 function processOptions(o) {
@@ -35,48 +38,23 @@
                     var optionsModal = o["modal"] = o["modal"] || {};
                     options = o['grid'] = o['grid'] || {};
                     showErrors = options["onError"] || function (x) { alert(x); }
-                    onStart = options["onStart"] || function (x) { };
-                    onCompleted = options["onCompleted"] || function (x) { };
-                    onProgress = options["onProgress"] || function (x) { };
-                    openModal = optionsModal["openModal"] = optionsModal["openModal"] || function (x, id, version) {
-                        var container = document.getElementById(id);
-                        var toCreate = true;
-                        if (!container) {
-                            container = document.createElement('DIV');
-                            container.setAttribute('id', id);
-                            container.setAttribute('data-version', version);
-                            container.appendChild(x);
-                            document.body.appendChild(container);
-                            enhancer["transform"](container);
-                        }
-                        else  {
-                            container.firstChild['expando_onSubmit']=null;
-                            container.firstChild['expando_onSubmitError']=null;
-                            empty(container);
-                            container.setAttribute('data-version', version);
-                            container.appendChild(x);
-                            enhancer["transform"](container);
-                        }
-                        if (toCreate) {
-                            jQuery(x)['modal']({
-                                show: false,
-                                backdrop: 'static'
-                            });
-                            if (x.getAttribute('data-destroy-on-close')) {
-                                jQuery(x).on('hidden.bs.modal', function (e) {
-                                    x['expando_onSubmit']=null;
-                                    x['expando_onSubmitError']=null;
-                                    empty(x.parentNode);
-                                    x.parentNode.parentNode.removeChild(x.parentNode);
-                                })
-                            }
-                        }
-                        jQuery(x)['modal']('show');
+                    onStartNet = options["onStart"] || function (x) { 
+                        x.style.opacity = "0.5";
                     };
-                    closeModal = optionsModal["closeModal"] = optionsModal["closeModal"] || function (x) {
-                        jQuery(x)['modal']('hide'); 
-                        x['expando_onSubmit']=null;
-                        x['expando_onSubmitError']=null;
+                    onCompletedNet = options["onCompleted"] || function (x) { 
+                        x.removeAttribute("style");
+                    };
+                    onProgress = options["onProgress"] || function (x) { };
+                    openModal = optionsModal["openModal"] ;
+                    closeModal = optionsModal["closeModal"];
+
+                    onStart=function(x){
+                        x.setAttribute(frozenAttribute, "true");
+                        onStartNet(x);
+                    };
+                    onCompleted=function(x){
+                        x.removeAttribute(frozenAttribute);
+                        onCompletedNet(x);
                     };
                 };
 
@@ -288,7 +266,7 @@
                     var failure = tRoot.getAttribute("data-add-failed");
                     onStart(infos['control']);
                     serverControls['getContent'](
-                        row,
+                        infos['control'],
                         url,
                         null,
                         function (x) {
@@ -324,7 +302,7 @@
                     var args = infos["args"];
                     var tRoot = row.parentNode;
                     var failure = tRoot.getAttribute("data-modification-failed");
-                    onStart(row);
+                    onStart(infos['control']);
                     var rowIndex = row.getAttribute("data-row");
                     var url=tRoot.getAttribute("data-edit-detail-url-" + rowIndex)
                             .replace(placeholder, row.getAttribute("data-key"));
@@ -332,7 +310,7 @@
                         url = url
                             .replace(placeholder+"1", tRoot.getAttribute('data-prefix'));
                     serverControls['getContent'](
-                        row,
+                        infos['control'],
                         url,
                         null,
                         function (x) {
@@ -358,12 +336,12 @@
                     var args = infos["args"];
                     var tRoot = row.parentNode;
                     var failure = tRoot.getAttribute("data-record-not-found");
-                    onStart(row);
+                    onStart(infos['control']);
                     var rowIndex = row.getAttribute("data-row");
                     var url = tRoot.getAttribute("data-show-url-" + rowIndex)
                             .replace(placeholder, row.getAttribute("data-key"));
                     serverControls['getContent'](
-                        row,
+                        infos['control'],
                         url,
                         null,
                         function (x) {
@@ -392,7 +370,7 @@
                     var failure = tRoot.getAttribute("data-add-failed");
                     onStart(infos['control']);
                     serverControls['getContent'](
-                        row,
+                        infos['control'],
                         url,
                         null,
                         function (x) {

@@ -26,6 +26,7 @@
                 var clearErrors;
                 var validationSummarySelector, validationSummaryValidClass, validationSummaryInvalidClass;
                 var fieldErrorClass, errorLabelValidClass, errorLabelInvalidClass, errorLabelLocator;
+                var openModal, closeModal, openStaticModal, closeStaticModal;
                 function processOptions(o) {
                     options = o["ajax"] = o["ajax"] || {};
                     empty = options['empty'] =  options['empty'] || function (x) {
@@ -78,6 +79,69 @@
                     serverControls['dispatchServerErrors'] = dispatchServerErrors;
                     serverControls['clearErrors'] = clearErrors;
                     serverControls['validateForm'] = validateForm;
+                    var serverWidgetsOptions = o["serverWidgets"] = o["serverWidgets"] || {};
+                    var optionsModal = serverWidgetsOptions["modal"] =serverWidgetsOptions["modal"] || {};
+                    openModal = optionsModal["openModal"] = optionsModal["openModal"] || function (x, id, version) {
+                        var container = document.getElementById(id);
+                        var toCreate = true;
+                        if (!container) {
+                            container = document.createElement('DIV');
+                            container.setAttribute('id', id);
+                            container.setAttribute('data-version', version);
+                            container.appendChild(x);
+                            document.body.appendChild(container);
+                            enhancer["transform"](container);
+                        }
+                        else  {
+                            container.firstChild['expando_onSubmit']=null;
+                            container.firstChild['expando_onSubmitError']=null;
+                            empty(container);
+                            container.setAttribute('data-version', version);
+                            container.appendChild(x);
+                            enhancer["transform"](container);
+                        }
+                        if (toCreate) {
+                            jQuery(x)['modal']({
+                                show: false,
+                                backdrop: 'static'
+                            });
+                            if (x.getAttribute('data-destroy-on-close')) {
+                                jQuery(x).on('hidden.bs.modal', function (e) {
+                                    x['expando_onSubmit']=null;
+                                    x['expando_onSubmitError']=null;
+                                    empty(x.parentNode);
+                                    x.parentNode.parentNode.removeChild(x.parentNode);
+                                })
+                            }
+                        }
+                        jQuery(x)['modal']('show');
+                    };
+                    closeModal = optionsModal["closeModal"] = optionsModal["closeModal"] || function (x) {
+                        jQuery(x)['modal']('hide'); 
+                        x['expando_onSubmit']=null;
+                        x['expando_onSubmitError']=null;
+                    };
+                    openStaticModal= optionsModal["openStaticModal"] = optionsModal["openStaticModal"] || function(x){
+                        var jx = jQuery(x);
+                        if(!x['expando_created']) {
+                            jx['show']();
+                            jQuery(x)['modal']({
+                                show: false,
+                                backdrop: 'static'
+                            });
+                            jQuery(x).on('hidden.bs.modal', function (e) {
+                                    x['expando_onSubmit']=null;
+                                    x['expando_onSubmitError']=null;
+                            });
+                        }
+                        jQuery(x)['modal']('show');
+                    };
+                    closeStaticModal = optionsModal["closeStaticModal"] = optionsModal["closeStaticModal"] || function (x) {
+                        jQuery(x)['modal']('hide'); 
+                        x['expando_onSubmit']=null;
+                        x['expando_onSubmitError']=null;
+                    };
+
                 };
                 function appendToList(ul, txtArray) {
                     if (!ul || !txtArray) return;

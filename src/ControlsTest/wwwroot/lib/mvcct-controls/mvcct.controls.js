@@ -409,7 +409,8 @@
                 serverControls["parseHTML"] = str2DOMElement;
 
                 var operationAttribute = "data-operation";
-                
+                var preprocessAttribute = "data-preprocess";
+                var frozengAttribute = "data-frozen";
                 /**
                 * object passed to argument processor
                 * @constructor
@@ -426,6 +427,8 @@
                     this["find"] = function (attr) {
                         for(;  currentLocation; currentLocation=currentLocation.parentNode){
                             if (!currentLocation.getAttribute) return null;
+                            attValue = currentLocation.getAttribute(frozengAttribute);
+                            if (attValue) return currentLocation;
                             attValue = currentLocation.getAttribute(attr);
                             if (attValue) return currentLocation;
                         }
@@ -472,10 +475,12 @@
                                 var d = new operationArgs(target, operation, args);
                                 if (!val.noRow) {
                                     row = d["find"]('data-row');
+                                    if(row && row.getAttribute(frozengAttribute)) return false;
                                     if (!row) d["reset"]();
                                 }
                                 var control = d["find"]('data-control-type');
                                 if (!control) return false;
+                                if(control.getAttribute(frozengAttribute)) return false;
                                 controlType = control.getAttribute('data-control-type');
                                 
                             }
@@ -491,8 +496,20 @@
                     return false;
                 }
                 //prepare argument for operation handler
-                function dispatcher(operation, target, event) {
+                function dispatcher(operation, target, event, preprocessOnly) {
                     if (operation && target) {
+                        var preprocess;
+                        if(preprocessOnly){
+                            preprocess = operation;
+                            operation = null;
+                        }
+                        else preprocess = target.getAttribute(preprocessAttribute);
+                        if(preprocess){
+                            var ops = preprocess.split(' ');
+                            for(var i=0; i<ops.length; i++) 
+                                serverControls['dispatch'](target, "pre_"+ops[i]+event, []);
+                        }
+                        if(!operation) return false;
                         var args = operation.split(' ');
                         args=args.filter(function (x) { return !!x.trim(); })
                         operation = args[0]+event;
@@ -504,16 +521,19 @@
                     if (!go) return;
                     //events operations may be attached to.
                     document.addEventListener("click", function (evt) {
+                        var preprocessOnly=false;
                         var target = evt.target;
                         if (!target || !target.getAttribute) return;
                         var val = target.getAttribute(operationAttribute);
+                        if(!val) {val = target.getAttribute(preprocessAttribute); preprocessOnly=val;}
                         if (!val && target.parentNode && target.parentNode.getAttribute) {
                             target = target.parentNode;
                             val = target.getAttribute(operationAttribute);
+                            if(!val) {val = target.getAttribute(preprocessAttribute); preprocessOnly=val;}
                         }
                         if (val) {
                             if (target.getAttribute("type") == 'submit') return;
-                            var result = dispatcher(val, target, "_click");
+                            var result = dispatcher(val, target, "_click", preprocessOnly);
                             if (result) {
                                 evt.preventDefault();
                             }
@@ -524,6 +544,11 @@
                         if (!evt.target || !evt.target.getAttribute) return;
                         var val = evt.target.getAttribute(operationAttribute);
                         if (val) dispatcher(val, evt.target, "_focus");
+                        else 
+                        {
+                            val = evt.target.getAttribute(preprocessAttribute);
+                            if (val) dispatcher(val, evt.target, "_focus", true);
+                        }
                     }, true);
                     if(document.activeElement && document.activeElement.getAttribute){
                         var val = document.activeElement.getAttribute(operationAttribute);
