@@ -29,6 +29,7 @@ namespace ControlsTest.Models
         [ColumnLayout(DetailWidthsAsString = "60 30")]
         [Display(Name = "Price", Order = 300)]
         [DisplayFormat(DataFormatString = "{0:N3}")]
+        [Query]
         public decimal Price { get; set; }
         [Display(Name = "Cur", Order = 280)]
         [ColumnLayout(WidthsAsString = "5", DetailWidthsAsString = "40 10")]

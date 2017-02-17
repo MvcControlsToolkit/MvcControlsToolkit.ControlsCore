@@ -9,7 +9,9 @@ using ControlsTest.Models;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Http;
 using ControlsTest.Data;
+using MvcControlsToolkit.Core.OData;
 using Microsoft.EntityFrameworkCore;
+using MvcControlsToolkit.Core.Types;
 
 namespace ControlsTest.Controllers
 {
@@ -58,13 +60,13 @@ namespace ControlsTest.Controllers
                     });
 
         }
-        
-        public GridTestController(Data.ApplicationDbContext db, IStringLocalizerFactory factory, IHttpContextAccessor accessor) :base(factory, accessor)
+        IWebQueryProvider queryProvider;
+        public GridTestController(Data.ApplicationDbContext db, IStringLocalizerFactory factory, IHttpContextAccessor accessor, IWebQueryProvider queryProvider) :base(factory, accessor)
         {
             //in actual 3 layers applications repository inherit from DefaultCRUDRepository
             //and then it is DI injected
             Repository = DefaultCRUDRepository.Create(db, db.Products);
-            
+            this.queryProvider = queryProvider;
         }
         public override string DetailColumnAdjustView
         {
@@ -75,15 +77,19 @@ namespace ControlsTest.Controllers
         }
         public async Task<IActionResult> Index(int? page)
         {
+            var query = queryProvider?.Parse<ProductViewModel>();
             int pg = page.HasValue ? page.Value : 1;
             if (pg < 1) pg = 1;
-            
+
+            var res = await Repository.GetPage<ProductViewModel>(
+                query?.GetFilterExpression(),
+                q => q.OrderBy(m => m.Name),
+                pg, 3);
             var model = new ProductlistViewModel
             {
-                Products = await Repository.GetPage<ProductViewModel>(
-                null,
-                q => q.OrderBy(m => m.Name),
-                pg, 3)
+               
+
+                Products = res
             };
             return View(model);
             
@@ -91,13 +97,14 @@ namespace ControlsTest.Controllers
         }
         public async Task<IActionResult> IndexPartial(int? page)
         {
+            var query = queryProvider?.Parse<ProductViewModel>();
             int pg = page.HasValue ? page.Value : 1;
             if (pg < 1) pg = 1;
 
             var model = new ProductlistViewModel
             {
                 Products = await Repository.GetPage<ProductViewModel>(
-                null,
+                query?.GetFilterExpression(),
                 q => q.OrderBy(m => m.Name),
                 pg, 3)
             };

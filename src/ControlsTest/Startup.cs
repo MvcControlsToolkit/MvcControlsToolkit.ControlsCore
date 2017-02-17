@@ -58,6 +58,7 @@ namespace ControlsTest
 
             services.AddMvc();
             services.AddMvcControlsToolkitControls();
+            services.AddODataQueries();
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
