@@ -12,6 +12,7 @@ using MvcControlsToolkit.Core.Views;
 using MvcControlsToolkit.Core.OptionsParsing;
 using MvcControlsToolkit.ControlsCore;
 using MvcControlsToolkit.Core.Templates;
+using MvcControlsToolkit.Core.TagHelpersUtilities;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
@@ -107,6 +108,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                RowType.GetRowsCollection(RowsCacheKey);
             var nc = new Core.OptionsParsing.ReductionContext(Core.OptionsParsing.TagTokens.RowContainer, 0, defaultTemplates, rows != null);
             context.SetChildrenReductionContext(nc);
+            TagContextHelper.OpenRowContainerContext(httpAccessor.HttpContext);
             await output.GetChildContentAsync();
             var collector = new Core.OptionsParsing.RowContainerCollector(nc);
             var res = collector.Process(this, defaultTemplates) as Tuple<IList<Core.Templates.RowType>, IList<KeyValuePair<string, string>>>;
@@ -117,6 +119,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     RowType.CacheRowGroup(RowsCacheKey, rows, httpAccessor.HttpContext);
             }
             var toolbars = res.Item2;
+            TagContextHelper.CloseRowContainerContext(httpAccessor.HttpContext, rows);
             //Prepare detail options
             var options = new Core.TagHelpers.Internals.GridOptions(rows, toolbars, GridType.Batch, id, fullName)
             {
