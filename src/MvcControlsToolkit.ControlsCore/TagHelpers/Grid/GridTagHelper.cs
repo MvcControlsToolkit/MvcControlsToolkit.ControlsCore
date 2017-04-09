@@ -92,7 +92,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             var defaultTemplates = currProvider.GetDefaultTemplates(actTagName);
             var ctx = new ContextualizedHelpers(ViewContext, html, httpAccessor, component, urlHelperFactory, factory);
             //
-
+            //estabilish context for children controls
+            TagContextHelper.OpenBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection, For);
             //get row definitions
             IList<RowType> rows = string.IsNullOrEmpty(RowsCacheKey) ?
                 null :
@@ -136,6 +137,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             };
             //finally process!
             await currProvider.GetTagProcessor(actTagName)(context, output, this, options, ctx);
+            TagContextHelper.CloseBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
         }
     }
 }
