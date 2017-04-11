@@ -38,13 +38,13 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public bool ModeDefault { get; set; }
 
         [HtmlAttributeName(ModeName)]
-        public ModelExplorer Mode { get; set; }
+        public ModelExpression Mode { get; set; }
 
         [HtmlAttributeName("model-null-row-default")]
         public int ModelNullRowDefault { get; set; }
 
         [HtmlAttributeName(ModelNullRowName)]
-        public ModelExplorer ModelNullRow { get; set; }
+        public ModelExpression ModelNullRow { get; set; }
 
         [HtmlAttributeName("form-action")]
         public string FormAction { get; set; }

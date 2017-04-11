@@ -3,18 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using MvcControlsToolkit.Core.Templates;
 
 namespace MvcControlsToolkit.Core.TagHelpers.Internals
 {
     public class GridOptions: TagProcessorOptions
     {
-        public GridOptions(IList<RowType> rows, IList<KeyValuePair<string, string>> toolbars, GridType type, string id, string fullName): base(rows)
+        public GridOptions(IList<RowType> rows, IList<KeyValuePair<string, string>> toolbars, GridType type, string id, string fullName, int? rowGroup=null, ModelExpression rowGroupFor=null): base(filterRows(rows, rowGroup, rowGroupFor))
         {
             Toolbars = toolbars;
             Type = type;
             Id = id;
             FullName = fullName;
+            RowsGroupSelectionFor = rowGroupFor;
+        }
+        private static IList<RowType> filterRows(IList<RowType> rows, int? rowGroup, ModelExpression rowGroupFor)
+        {
+            if(rowGroupFor != null && rowGroupFor.Model != null && rowGroupFor.Model is int?)
+            {
+                rowGroup = rowGroupFor.Model as int?;
+            }
+            if (rowGroup == null || rows == null) return rows;
+            return rows.Where(m => !m.RowGroup.HasValue || m.RowGroup.Value == rowGroup.Value)
+                .ToList();
         }
         public IList<KeyValuePair<string, string>> Toolbars { get; private set; }
         private IEnumerable<RowType> _ReverseRows=null;
@@ -30,6 +42,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Internals
             }
         }
         public GridErrorMessages ErrorMessages { get; set; }
+        public ModelExpression RowsGroupSelectionFor { get; set; }
         public GridType Type { get; private set; }
         public string CssClass { get; set; }
         public string Id { get; private set; }

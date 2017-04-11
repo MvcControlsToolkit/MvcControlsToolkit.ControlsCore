@@ -52,6 +52,12 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("rows-cache-key")]
         public string RowsCacheKey { get; set; }
 
+        [HtmlAttributeName("row-group-selection")]
+        public int? RowsGroupSelection { get; set; }
+
+        [HtmlAttributeName("row-group-selection-for")]
+        public ModelExpression RowsGroupSelectionFor { get; set; }
+
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -126,7 +132,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             //
 
             //Prepare grid options
-            var options = new GridOptions(rows, toolbars, Type, id, fullName)
+            var options = new GridOptions(rows, toolbars, Type, id, fullName, RowsGroupSelection, RowsGroupSelectionFor)
             {
                 CssClass=CssClass,
                 ErrorMessages=ErrorMessages,
