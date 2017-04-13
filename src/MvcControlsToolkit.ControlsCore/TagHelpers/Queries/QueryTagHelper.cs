@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Localization;
 using MvcControlsToolkit.Core.Templates;
 using MvcControlsToolkit.Core.TagHelpers;
+using MvcControlsToolkit.Core.OData;
+using System.Reflection;
+using System.Collections;
 
 namespace MvcControlsToolkit.ControlsCore.TagHelpers
 {
@@ -95,10 +98,11 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
             this.urlHelperFactory = urlHelperFactory;
             this.factory = factory;
         }
+
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             if (For == null) throw new ArgumentNullException(ForAttributeName);
-
+            if (!typeof(QueryDescription).GetTypeInfo().IsAssignableFrom(For.Metadata.ModelType)) throw new ArgumentException(ForAttributeName);
             if (CollectionFor == null)
             {
                 CollectionFor = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
@@ -109,12 +113,13 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
             var tagPrefix = Type == QueryWindowType.Filtering ? "query-filter-" :
                 (Type == QueryWindowType.Sorting ? "query-sort-" : "query-group-");
 
-            var buttonTag = tagPrefix + "button";
+            var buttonTag = "query-button";
             var windowTag = tagPrefix + "window";
             var ctx = new Core.Templates.ContextualizedHelpers(ViewContext, html, httpAccessor, component, urlHelperFactory, factory);
             
             var buttonDefaultTemplates = currProvider.GetDefaultTemplates(buttonTag);
             var windowDefaultTemplates = currProvider.GetDefaultTemplates(windowTag);
+            
             var buttonOptions = new QueryButtonOptions
             {
                 ButtonIcon = ButtonIcon,
@@ -124,9 +129,10 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
                     new Template<LayoutTemplateOptions>(TemplateType.Partial, ButtonTemplate),
                 CollectionFor = CollectionFor,
                 For = For,
-                Url = Url,
-                AjaxId = AjaxId,
-                TotalPagesContainer = TotalPagesContainer
+                TotalPagesContainer = TotalPagesContainer,
+                Type=Type,
+                AjaxId=AjaxId,
+                Url=Url
             };
             await currProvider.GetTagProcessor(buttonTag)(context, output, this, buttonOptions, ctx);
             IList<RowType> rows = string.IsNullOrEmpty(RowCollection) ?
@@ -140,8 +146,6 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
                 GroupingOutput=GroupingOutput,
                 Header=Header,
                 LayoutTemplate=LayoutTemplate,
-                Url=Url,
-                AjaxId=AjaxId,
                 TotalPagesContainer = TotalPagesContainer
             };
             Func<IList<RowType>, string> toExecute =
@@ -157,7 +161,7 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
                         foreach (var col in mainRow.Columns)
                         {
                             col.FilterTemplate = windowDefaultTemplates.EColumnTemplate;
-                            col.DisplayFilterTemplate = windowDefaultTemplates.DColumnTemplate;
+                            
                         }
                         var res = currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
                         res.Wait();

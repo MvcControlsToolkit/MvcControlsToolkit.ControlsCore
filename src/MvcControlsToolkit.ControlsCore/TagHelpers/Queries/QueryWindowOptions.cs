@@ -22,8 +22,6 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
         public ModelExplorer ClientCustomProcessorFor { get; set; }
         public string LayoutTemplate { get; set; }
         public string Header { get; set; }
-        public string Url { get; set; }
-        public string AjaxId { get; set; }
         public ModelExpression TotalPagesContainer { get; set; }
         public void UpdateRows(IList<RowType> rows)
         {
