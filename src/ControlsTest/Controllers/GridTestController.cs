@@ -113,13 +113,17 @@ namespace ControlsTest.Controllers
 
 
         }
-        public async Task<IActionResult> IndexEdit(int? page)
+        public async Task<IActionResult> IndexEdit()
         {
-            int pg = page.HasValue ? page.Value : 1;
-            if (pg < 1) pg = 1;
+            var query=queryProvider.Parse<ProductViewModel>();
+            
+            int pg = (int)query.Page;
+            if (query.Filter == null)
+                query.AddFilterCondition(m => m.Name == "antani");
 
             var model = new ProductlistViewModel
             {
+                Query=query,
                 Products = await Repository.GetPage<ProductViewModel>(
                 null,
                 q => q.OrderBy(m => m.Name),

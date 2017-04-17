@@ -53,6 +53,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("current-page")]
         public ModelExpression CurrentPage { get; set; }
 
+        [HtmlAttributeName("current-query")]
+        public ModelExpression Query { get; set; }
+
         [HtmlAttributeName("total-pages-default")]
         public int? TotalPagesDefault { get; set; }
 
@@ -100,9 +103,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
 
-            if (string.IsNullOrWhiteSpace(SkipUrlToken)) new ArgumentNullException("skip-url-token");
-            if (string.IsNullOrWhiteSpace(TakeUrlToken)) new ArgumentNullException("take-url-token");
-            if (string.IsNullOrWhiteSpace(UrlDefault) && Url == null) new ArgumentNullException("url-default/url");
+            if (string.IsNullOrWhiteSpace(SkipUrlToken)) SkipUrlToken="_skip_";
+            if (string.IsNullOrWhiteSpace(TakeUrlToken)) TakeUrlToken="_top_";
+            if (string.IsNullOrWhiteSpace(UrlDefault) && Url == null && Query == null) new ArgumentNullException("url-default/url/query");
 
             var ctx = new ContextualizedHelpers(ViewContext, html, httpAccessor, component, urlHelperFactory, factory);
 

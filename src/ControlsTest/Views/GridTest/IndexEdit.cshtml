@@ -2,6 +2,11 @@
 @using ControlsTest.Controllers
 @{
     ViewData["Title"] = "Edit immediate";
+    if(Model.Query.AttachedTo == null)
+    {
+        Model.Query.AttachEndpoint(Url.Action("IndexEdit", "GridTest"));
+
+    }
 }
 <style>
     tfoot .pagination, thead .pagination {
@@ -57,23 +62,27 @@
 
                     <div class="col-xs-4">
                         <copy-html name="main-pager">
-                            <pager mode="CustomPages"
+                            <pager 
                                    class="pagination pagination-sm"
                                    max-pages="4"
                                    current-page="Products.Page"
                                    page-size-default="3"
                                    total-pages="Products.TotalPages"
-                                   skip-url-token="_zzz_"
-                                   url-default="@Url.Action("IndexEdit", "GridTest", new {page="_zzz_" })" />
+                                   current-query="Query"/>
                         </copy-html>
+                        
                     </div>
                     <div class="col-xs-8">
+                        
                         <button type="button" data-operation="add append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
                         <button type="button" data-operation="add append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
                         <button type="button" data-operation="add prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
                         <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
                     </div>
                 </div>
+                <query asp-for="Query" type="Filtering" />
+                <query asp-for="Query" type="Sorting" />
+                <query asp-for="Query" type="Grouping" />
             </toolbar>
             <toolbar zone-name="@LayoutStandardPlaces.Footer">
                 <paste-html name="main-pager" />

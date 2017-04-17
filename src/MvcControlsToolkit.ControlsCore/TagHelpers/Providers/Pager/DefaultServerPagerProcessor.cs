@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using MvcControlsToolkit.Core.Templates;
 using System.Text.Encodings.Web;
+using MvcControlsToolkit.Core.Views;
 
 namespace MvcControlsToolkit.Core.TagHelpers.Providers
 {
@@ -37,14 +38,39 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             int pageSize = tag.PageSizeDefault;
             if (tag.PageSize?.Model != null && tag.PageSize.Metadata.ModelType == typeof(int))
                 pageSize = (int)tag.PageSize.Model;
-            int page = tag.CurrentPageDefault;
-            if (tag.CurrentPage?.Model != null && tag.CurrentPage.Metadata.ModelType == typeof(int))
-                page = (int)tag.CurrentPage.Model;
+            
             int totalPages = tag.TotalPagesDefault.HasValue? tag.TotalPagesDefault.Value: int.MaxValue;
             if (tag.TotalPages?.Model != null && tag.TotalPages.Metadata.ModelType == typeof(int))
                 totalPages = (int)tag.TotalPages.Model;
 
-
+            QueryDescription query = tag.Query?.Model as QueryDescription;
+            int page = tag.CurrentPageDefault;
+            if (query != null && query.Page > 0) page = (int)query.Page;
+            if (tag.CurrentPage?.Model != null && tag.CurrentPage.Metadata.ModelType == typeof(int))
+                page = (int)tag.CurrentPage.Model;
+            string url = tag.Url?.Model as string ?? tag.UrlDefault;
+            if(query != null)
+            {
+                url = query.AddToUrl(url ?? query?.AttachedTo?.BaseUrl, true);
+                if (!url.Contains(tag.TakeUrlToken))
+                {
+                    string toAdd;
+                    if (PagerMode.OData == tag.Mode)
+                    {
+                        toAdd = string.Format("$skip={0}&$top={1}", 
+                            tag.SkipUrlToken, 
+                            tag.TakeUrlToken);
+                    }
+                    else
+                    {
+                        toAdd = string.Format("page={0}&pagesize={1}",
+                            tag.SkipUrlToken,
+                            tag.TakeUrlToken);
+                    }
+                    if (url.Contains('?')) url = url + "&" + toAdd;
+                    else url = url + "?" + toAdd;
+                }
+            }
             var layoutOptions = new DefaultServerPagerLayoutOptions
                 (totalPages != 0 && page > 0,
                 pageSize,
@@ -52,7 +78,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 Math.Max(1, page - tag.MaxPages),
                 page,
                 Math.Min(page + tag.MaxPages, totalPages),
-                tag.Url?.Model as string ?? tag.UrlDefault,
+                url,
                 tag.SkipUrlToken,
                 tag.TakeUrlToken,
                 tag.LocalizationType,
@@ -60,6 +86,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 options.LayoutTemplate,
                 options.Operation
                 );
+            
             output.TagName = string.Empty;
             var fres = await options.LayoutTemplate.Invoke(tag.CurrentPage, layoutOptions, helpers);
             if (tag.CopyHtml != null)

@@ -1,0 +1,20 @@
+﻿@model MvcControlsToolkit.Core.Views.QueryDescription
+@using MvcControlsToolkit.Core.Views
+@using MvcControlsToolkit.Core.TagHelpers.Providers
+@using MvcControlsToolkit.Core.TagHelpers
+@{ 
+    var options = ViewData["Options"] as DefaultServerQueryButtonLayoutOptions;
+    string btnCss = options.ButtonCss ?? "btn btn-sm btn-default";
+    string btnIcon = options.ButtonIcon?? (options.Type == QueryWindowType.Filtering ? "glyphicon glyphicon-filter" :
+                (options.Type == QueryWindowType.Sorting ? "glyphicon glyphicon-list-alt" : "glyphicon glyphicon-th"));
+}
+<button class="@btnCss" type="button" @Html.Raw(options.OperationAttributes) title="@options.ButtonTitle">
+    <span class='@btnIcon' aria-hidden='true'></span>
+    @if (options.ButtonText != null)
+    {
+        @options.ButtonText
+    }
+</button>
+<only-once asp-for="@Model">
+    <store-model asp-for="@Model"/>
+</only-once>

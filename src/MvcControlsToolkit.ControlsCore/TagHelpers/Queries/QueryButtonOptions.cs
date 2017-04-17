@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using MvcControlsToolkit.Core.Templates;
-using MvcControlsToolkit.Core.TagHelpers;
 
-namespace MvcControlsToolkit.ControlsCore.TagHelpers
+namespace MvcControlsToolkit.Core.TagHelpers
 {
     public class QueryButtonOptions: TagProcessorOptions
     {
@@ -23,5 +18,6 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
         public ModelExpression TotalPagesContainer { get; set; }
         public string Url { get; set; }
         public string AjaxId { get; set; }
+        public string ButtonCss { get; set; }
     }
 }

@@ -12,12 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Localization;
 using MvcControlsToolkit.Core.Templates;
-using MvcControlsToolkit.Core.TagHelpers;
-using MvcControlsToolkit.Core.OData;
 using System.Reflection;
-using System.Collections;
 
-namespace MvcControlsToolkit.ControlsCore.TagHelpers
+namespace MvcControlsToolkit.Core.TagHelpers
 {
     
     [HtmlTargetElement(TagName, Attributes = ForAttributeName + "," + TypeAttributeName)]
@@ -33,7 +30,7 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
         private IViewComponentHelper component;
         private IUrlHelperFactory urlHelperFactory;
         private IStringLocalizerFactory factory;
-
+        private IStringLocalizer localizer=null;
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -52,7 +49,7 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
 
         [HtmlAttributeName("override-ajax-id")]
         public string AjaxId { get; set; }
-        [HtmlAttributeName("client-total-pages")]
+        [HtmlAttributeName("total-pages")]
         public ModelExpression TotalPagesContainer{get; set;}
 
         [HtmlAttributeName(ClientCustomProcessorForAttributeName)]
@@ -84,8 +81,12 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
 
         [HtmlAttributeName("grouping-output")]
         public Type GroupingOutput { get; set; }
+        [HtmlAttributeName("button-css")]
+        public string ButtonCss { get; set; }
+        [HtmlAttributeName("button-localization-type")]
+        public Type ButtonLocalizationType { get; set; }
 
-       
+
 
         public QueryTagHelper(IHtmlHelper html,
             IHttpContextAccessor httpAccessor, IViewComponentHelper component,
@@ -97,8 +98,18 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
             this.component = component;
             this.urlHelperFactory = urlHelperFactory;
             this.factory = factory;
+            if (ButtonLocalizationType != null) localizer = factory.Create(ButtonLocalizationType);
         }
-
+        private string localize(string x)
+        {
+            if (localizer == null || x== null) return x;
+            return localizer[x];
+        }
+        private string defaultTitle()
+        {
+            return Type == QueryWindowType.Filtering ? "filter" :
+                (Type == QueryWindowType.Sorting ? "sorting" : "grouping");
+        }
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             if (For == null) throw new ArgumentNullException(ForAttributeName);
@@ -123,8 +134,8 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
             var buttonOptions = new QueryButtonOptions
             {
                 ButtonIcon = ButtonIcon,
-                ButtonTitle = ButtonTitle,
-                ButtonText = ButtonText,
+                ButtonTitle = localize(ButtonTitle??defaultTitle()),
+                ButtonText = localize(ButtonText),
                 ButtonTemplate = string.IsNullOrEmpty(ButtonTemplate) ? buttonDefaultTemplates.LayoutTemplate :
                     new Template<LayoutTemplateOptions>(TemplateType.Partial, ButtonTemplate),
                 CollectionFor = CollectionFor,
@@ -132,7 +143,8 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
                 TotalPagesContainer = TotalPagesContainer,
                 Type=Type,
                 AjaxId=AjaxId,
-                Url=Url
+                Url=Url,
+                ButtonCss = ButtonCss
             };
             await currProvider.GetTagProcessor(buttonTag)(context, output, this, buttonOptions, ctx);
             IList<RowType> rows = string.IsNullOrEmpty(RowCollection) ?
@@ -153,9 +165,9 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
                 {
                     if (windowOptions.Rows == null && r != null) windowOptions.UpdateRows(r);
                     if (windowOptions.Rows == null) return string.Empty;
-                    var mainRow = windowOptions.Rows.SingleOrDefault();
+                    var mainRow = windowOptions.Rows.FirstOrDefault();
                     if (mainRow == null) return string.Empty;
-                    if (mainRow.FilterTemplate == null)
+                    if (Type == QueryWindowType.Filtering && mainRow.FilterTemplate == null)
                     {
                         mainRow.FilterTemplate = windowDefaultTemplates.ERowTemplate;
                         foreach (var col in mainRow.Columns)
@@ -163,12 +175,10 @@ namespace MvcControlsToolkit.ControlsCore.TagHelpers
                             col.FilterTemplate = windowDefaultTemplates.EColumnTemplate;
                             
                         }
-                        var res = currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
+                    }
+                    var res = currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
                         res.Wait();
                         return windowOptions.Result;
-                    }
-                    else return string.Empty;
-
                 };
             if (rows != null)
                 TagContextHelper.EndOfBodyHtml(httpAccessor.HttpContext, toExecute(rows));

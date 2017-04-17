@@ -40,7 +40,7 @@
     "dependencies": {
         "Microsoft.Extensions.FileProviders.Embedded": "1.1.0",
         "MvcControlsToolkit.Core": "1.1.5.30",
-        "MvcControlsToolkit.Core.OData": "0.0.0.13"
+        "MvcControlsToolkit.Core.OData": "0.0.0.15"
     },
     "scripts": {
         "postcompile": [ "dotnet pack --no-build --output /Nuget --configuration %compile:Configuration% %project:Directory%" ]

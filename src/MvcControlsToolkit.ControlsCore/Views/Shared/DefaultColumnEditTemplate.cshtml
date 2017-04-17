@@ -1,12 +1,13 @@
 ﻿@model Object
 @using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.Views
 @{
     var metaData = ViewData.ModelMetadata;
     var col = ViewData["Options"] as Column;
 }
 @if (col.ColumnConnection != null)
 {
-    if (col.ColumnConnection.QueryDisplay)
+    if (col.ColumnConnection.QueryDisplay && ViewContext.IsFilterRendering())
     {
         <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "full-cell")" />
 

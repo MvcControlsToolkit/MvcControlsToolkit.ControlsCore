@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using MvcControlsToolkit.Core.TagHelpers;
 using MvcControlsToolkit.Core.Templates;
 
-namespace MvcControlsToolkit.ControlsCore.TagHelpers
+namespace MvcControlsToolkit.Core.TagHelpers
 {
     public class QueryWindowOptions: TagProcessorOptions
     {

@@ -137,6 +137,66 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 null,
                 null
                 );
+            allTagProcessors["query-button"] =
+                (tc, to, th, tpo, ctx) =>
+                {
+                    return new DefaultServerQueryButtonProcessor(to, ctx, tpo as QueryButtonOptions).Process();
+                };
+            allTagDefaultTemplates["query-button"] = new DefaultTemplates(
+                true,
+                null,
+                null,
+                null,
+                null,
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultButtonTemplate"),
+                null,
+                null
+                );
+            allTagProcessors["query-filter-window"] =
+                async (tc, to, th, tpo, ctx) =>
+                {
+                    return ;
+                };
+            allTagDefaultTemplates["query-filter-window"] = new DefaultTemplates(
+                true,
+                null,
+                new Template<Column>(TemplateType.Partial, "DefaultColumnEditTemplate"),
+                null,
+                new Template<RowType>(TemplateType.Partial, "ServerQueries/DefaultFilterRowTemplate"),
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultFilterLayoutTemplate"),
+                null,
+                null
+                );
+            allTagProcessors["query-group-window"] =
+                async (tc, to, th, tpo, ctx) =>
+                {
+                    return ;
+                };
+            allTagDefaultTemplates["query-group-window"] = new DefaultTemplates(
+                true,
+                null,
+                null,
+                null,
+                null,
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultGroupingTemplate"),
+                null,
+                null
+                );
+            allTagProcessors["query-sort-window"] =
+                async  (tc, to, th, tpo, ctx) =>
+                {
+                    return ;
+                };
+            allTagDefaultTemplates["query-sort-window"] = new DefaultTemplates(
+                true,
+                null,
+                null,
+                null,
+                null,
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultSortingTemplate"),
+                null,
+                null
+                );
             DefineButtonProperies();
             addExtensions();
         }
@@ -314,7 +374,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             allButtonProperties.Add(StandardButtons.GroupWindow,
                 new ButtonProperties
                 {
-                    IconClass = "glyphicon glyphicon-th",
+                    IconClass = "glyphicon-th",
                     OperationName = "grouping-window",
                     ShowText = "change grouping"
                 });
