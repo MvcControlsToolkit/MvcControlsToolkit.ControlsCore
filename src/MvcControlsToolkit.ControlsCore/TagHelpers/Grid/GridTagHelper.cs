@@ -128,7 +128,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 }
             }
             var toolbars = res.Item2;
-            TagContextHelper.CloseRowContainerContext(httpAccessor.HttpContext, rows);
+            TagContextHelper.CloseRowContainerContext(httpAccessor.HttpContext, new Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>(rows, toolbars));
             //
 
             //Prepare grid options

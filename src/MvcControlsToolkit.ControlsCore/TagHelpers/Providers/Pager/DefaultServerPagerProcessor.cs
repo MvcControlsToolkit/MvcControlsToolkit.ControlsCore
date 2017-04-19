@@ -88,7 +88,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 );
             
             output.TagName = string.Empty;
-            var fres = await options.LayoutTemplate.Invoke(tag.CurrentPage, layoutOptions, helpers);
+            var fres = await options.LayoutTemplate.Invoke(tag.CurrentPage??tag.Query, layoutOptions, helpers);
             if (tag.CopyHtml != null)
             {
                 var iores = new System.IO.StringWriter();

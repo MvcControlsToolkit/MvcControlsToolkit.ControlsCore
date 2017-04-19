@@ -32,7 +32,30 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 return headerEdit;
             }
         }
-
+        private static string headerFilter = "header-filter";
+        public static string HeaderFilter
+        {
+            get
+            {
+                return headerFilter;
+            }
+        }
+        private static string headerSorting= "header-sorting";
+        public static string HeaderSorting
+        {
+            get
+            {
+                return headerSorting;
+            }
+        }
+        private static string headerGrouping = "header-grouping";
+        public static string HeaderGrouping
+        {
+            get
+            {
+                return headerGrouping;
+            }
+        }
         private static string footer = "footer";
         public static string Footer
         {
@@ -57,6 +80,30 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 return footerEdit;
             }
         }
+        private static string footerFilter = "footer-filter";
+        public static string FooterFilter
+        {
+            get
+            {
+                return footerFilter;
+            }
+        }
+        private static string footerSorting = "footer-sorting";
+        public static string FooterSorting
+        {
+            get
+            {
+                return footerSorting;
+            }
+        }
+        private static string footerGrouping = "footer-grouping";
+        public static string FooterGrouping
+        {
+            get
+            {
+                return footerGrouping;
+            }
+        }
         private static string leftAside = "left-aside";
         public static string LeftAside
         {
@@ -79,6 +126,30 @@ namespace MvcControlsToolkit.Core.TagHelpers
             get
             {
                 return submitBar;
+            }
+        }
+        private static string submitBarFilter = "submit-bar-filter";
+        public static string SubmitBarFilter
+        {
+            get
+            {
+                return submitBarFilter;
+            }
+        }
+        private static string submitBarSorting = "submit-bar-sorting";
+        public static string SubmitBarSorting
+        {
+            get
+            {
+                return submitBarSorting;
+            }
+        }
+        private static string submitBarGrouping = "submit-bar-grouping";
+        public static string SubmitBarGrouping
+        {
+            get
+            {
+                return submitBarGrouping;
             }
         }
     }

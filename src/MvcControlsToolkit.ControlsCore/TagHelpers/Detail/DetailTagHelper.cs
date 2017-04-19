@@ -119,7 +119,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     RowType.CacheRowGroup(RowsCacheKey, rows, httpAccessor.HttpContext);
             }
             var toolbars = res.Item2;
-            TagContextHelper.CloseRowContainerContext(httpAccessor.HttpContext, rows);
+            TagContextHelper.CloseRowContainerContext(httpAccessor.HttpContext, new Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>(rows, toolbars));
             //Prepare detail options
             var options = new Core.TagHelpers.Internals.GridOptions(rows, toolbars, GridType.Batch, id, fullName)
             {

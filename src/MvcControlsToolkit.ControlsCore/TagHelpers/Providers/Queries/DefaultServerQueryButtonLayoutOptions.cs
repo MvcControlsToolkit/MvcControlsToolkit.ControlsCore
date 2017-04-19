@@ -2,7 +2,7 @@
 using MvcControlsToolkit.Core.Templates;
 using MvcControlsToolkit.Core.Views;
 
-namespace MvcControlsToolkit.Core.TagHelpers.Providers
+namespace MvcControlsToolkit.Core.TagHelpers
 {
     public class DefaultServerQueryButtonLayoutOptions: LayoutTemplateOptions
     {

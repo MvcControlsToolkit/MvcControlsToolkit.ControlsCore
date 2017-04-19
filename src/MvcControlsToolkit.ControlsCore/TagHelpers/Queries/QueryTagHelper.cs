@@ -13,24 +13,23 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Localization;
 using MvcControlsToolkit.Core.Templates;
 using System.Reflection;
+using Microsoft.AspNetCore.Html;
+using MvcControlsToolkit.Core.OptionsParsing;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
-    
-    [HtmlTargetElement(TagName, Attributes = ForAttributeName + "," + TypeAttributeName)]
-    public class QueryTagHelper : TagHelper
+    public class QueryTagHelperBase : TagHelper
     {
-        private const string ForAttributeName = "asp-for";
-        private const string CollectionForAttributeName = "query-for";
-        private const string ClientCustomProcessorForAttributeName = "client-custom-processor-for";
-        private const string TypeAttributeName = "type";
-        private const string TagName = "query";
-        private IHttpContextAccessor httpAccessor;
-        private IHtmlHelper html;
-        private IViewComponentHelper component;
-        private IUrlHelperFactory urlHelperFactory;
-        private IStringLocalizerFactory factory;
-        private IStringLocalizer localizer=null;
+        protected const string ForAttributeName = "asp-for";
+        protected const string CollectionForAttributeName = "query-for";
+        protected const string ClientCustomProcessorForAttributeName = "client-custom-processor-for";
+        protected const string TypeAttributeName = "type";
+        protected IHttpContextAccessor httpAccessor;
+        protected IHtmlHelper html;
+        protected IViewComponentHelper component;
+        protected IUrlHelperFactory urlHelperFactory;
+        protected IStringLocalizerFactory factory;
+        protected IStringLocalizer localizer = null;
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -50,7 +49,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("override-ajax-id")]
         public string AjaxId { get; set; }
         [HtmlAttributeName("total-pages")]
-        public ModelExpression TotalPagesContainer{get; set;}
+        public ModelExpression TotalPagesContainer { get; set; }
 
         [HtmlAttributeName(ClientCustomProcessorForAttributeName)]
         public ModelExplorer ClientCustomProcessorFor { get; set; }
@@ -63,6 +62,52 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
         [HtmlAttributeName("window-template")]
         public string LayoutTemplate { get; set; }
+
+
+        [HtmlAttributeName("grouping-output")]
+        public Type GroupingOutput { get; set; }
+
+
+        public QueryTagHelperBase(IHtmlHelper html,
+            IHttpContextAccessor httpAccessor, IViewComponentHelper component,
+            IUrlHelperFactory urlHelperFactory,
+            IStringLocalizerFactory factory)
+        {
+            this.httpAccessor = httpAccessor;
+            this.html = html;
+            this.component = component;
+            this.urlHelperFactory = urlHelperFactory;
+            this.factory = factory;
+            
+        }
+        protected string localize(string x)
+        {
+            if (localizer == null || x == null) return x;
+            return localizer[x];
+        }
+        protected string localizeWindow(RowType row, string x)
+        {
+            if (row == null || x == null || row.LocalizationType == null) return x;
+            var localizer = row.GetLocalizer(factory);
+            return localizer[x];
+        }
+        protected string defaultTitle()
+        {
+            return Type == QueryWindowType.Filtering ? "filter" :
+                (Type == QueryWindowType.Sorting ? "sorting" : "grouping");
+        }
+        protected string defaultHeader()
+        {
+            return Type == QueryWindowType.Filtering ? "Filter" :
+                (Type == QueryWindowType.Sorting ? "Sorting" : "Grouping");
+        }
+    }
+
+    [HtmlTargetElement(TagName, Attributes = ForAttributeName + "," + TypeAttributeName, TagStructure = TagStructure.WithoutEndTag)]
+    public class QueryTagHelper : QueryTagHelperBase
+    {
+       
+        private const string TagName = "query";
 
         [HtmlAttributeName("window-header")]
         public string Header { get; set; }
@@ -79,8 +124,6 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("button-icon")]
         public string ButtonIcon { get; set; }
 
-        [HtmlAttributeName("grouping-output")]
-        public Type GroupingOutput { get; set; }
         [HtmlAttributeName("button-css")]
         public string ButtonCss { get; set; }
         [HtmlAttributeName("button-localization-type")]
@@ -92,23 +135,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
             IHttpContextAccessor httpAccessor, IViewComponentHelper component,
             IUrlHelperFactory urlHelperFactory,
             IStringLocalizerFactory factory)
+            :base(html, httpAccessor, component, urlHelperFactory, factory)
         {
-            this.httpAccessor = httpAccessor;
-            this.html = html;
-            this.component = component;
-            this.urlHelperFactory = urlHelperFactory;
-            this.factory = factory;
-            if (ButtonLocalizationType != null) localizer = factory.Create(ButtonLocalizationType);
-        }
-        private string localize(string x)
-        {
-            if (localizer == null || x== null) return x;
-            return localizer[x];
-        }
-        private string defaultTitle()
-        {
-            return Type == QueryWindowType.Filtering ? "filter" :
-                (Type == QueryWindowType.Sorting ? "sorting" : "grouping");
+            
+            
         }
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
@@ -119,6 +149,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 CollectionFor = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
                 if (CollectionFor == null) throw new ArgumentNullException(CollectionForAttributeName);
             }
+            if (ButtonLocalizationType != null) localizer = factory.Create(ButtonLocalizationType);
             var currProvider = ViewContext.TagHelperProvider();
             
             var tagPrefix = Type == QueryWindowType.Filtering ? "query-filter-" :
@@ -150,23 +181,30 @@ namespace MvcControlsToolkit.Core.TagHelpers
             IList<RowType> rows = string.IsNullOrEmpty(RowCollection) ?
                 null :
                 RowType.GetRowsCollection(RowCollection);
-            var windowOptions = new QueryWindowOptions(rows)
+            IList<KeyValuePair<string, string>> toolbars = string.IsNullOrEmpty(RowCollection) ?
+                null :
+                RowType.GetToolbarsCollection(RowCollection);
+            var windowOptions = new QueryWindowOptions(rows, toolbars)
             {
                 ClientCustomProcessorFor=ClientCustomProcessorFor,
                 CollectionFor=CollectionFor,
                 For = For,
+                SourceFor=SourceFor,
                 GroupingOutput=GroupingOutput,
-                Header=Header,
-                LayoutTemplate=LayoutTemplate,
+                Header=Header??defaultHeader(),
+                LayoutTemplate= string.IsNullOrEmpty(LayoutTemplate) ? windowDefaultTemplates.LayoutTemplate :
+                    new Template<LayoutTemplateOptions>(TemplateType.Partial, LayoutTemplate),
                 TotalPagesContainer = TotalPagesContainer
             };
-            Func<IList<RowType>, string> toExecute =
-                r =>
+            Func<Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>, IHtmlContent> toExecute =
+                group =>
                 {
-                    if (windowOptions.Rows == null && r != null) windowOptions.UpdateRows(r);
-                    if (windowOptions.Rows == null) return string.Empty;
+                    if (windowOptions.Rows == null && group != null) windowOptions.UpdateRows(group.Item1, group.Item2);
+                    if (windowOptions.Rows == null) return new HtmlString(string.Empty);
                     var mainRow = windowOptions.Rows.FirstOrDefault();
-                    if (mainRow == null) return string.Empty;
+                    if (mainRow == null) return new HtmlString(string.Empty);
+
+                    windowOptions.Header = localizeWindow(mainRow, windowOptions.Header);
                     if (Type == QueryWindowType.Filtering && mainRow.FilterTemplate == null)
                     {
                         mainRow.FilterTemplate = windowDefaultTemplates.ERowTemplate;
@@ -181,10 +219,111 @@ namespace MvcControlsToolkit.Core.TagHelpers
                         return windowOptions.Result;
                 };
             if (rows != null)
-                TagContextHelper.EndOfBodyHtml(httpAccessor.HttpContext, toExecute(rows));
+                TagContextHelper.EndOfBodyHtml(httpAccessor.HttpContext, toExecute(new Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>(rows, toolbars)));
             else
                 TagContextHelper.RegisterDefaultToolWindow(httpAccessor.HttpContext, toExecute);
             
+        }
+    }
+    [HtmlTargetElement(TagName, Attributes = ForAttributeName + "," + TypeAttributeName+","+CollectionForAttributeName, TagStructure = TagStructure.NormalOrSelfClosing)]
+    public class QueryTagHelperInLine : QueryTagHelperBase
+    {
+
+        private const string TagName = "query-inline";
+
+        public QueryTagHelperInLine(IHtmlHelper html,
+            IHttpContextAccessor httpAccessor, IViewComponentHelper component,
+            IUrlHelperFactory urlHelperFactory,
+            IStringLocalizerFactory factory)
+            : base(html, httpAccessor, component, urlHelperFactory, factory)
+        {
+
+
+        }
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        {
+            if (For == null) throw new ArgumentNullException(ForAttributeName);
+            if (!typeof(QueryDescription).GetTypeInfo().IsAssignableFrom(For.Metadata.ModelType)) throw new ArgumentException(ForAttributeName);
+            if (CollectionFor == null) throw new ArgumentNullException(CollectionForAttributeName);
+            
+            
+            var currProvider = ViewContext.TagHelperProvider();
+
+            var tagPrefix = Type == QueryWindowType.Filtering ? "query-filter-" :
+                (Type == QueryWindowType.Sorting ? "query-sort-" : "query-group-");
+
+           
+            var windowTag = tagPrefix + "inline";
+            var ctx = new Core.Templates.ContextualizedHelpers(ViewContext, html, httpAccessor, component, urlHelperFactory, factory);
+
+            
+            var windowDefaultTemplates = currProvider.GetDefaultTemplates(windowTag);
+
+            
+            
+            IList<RowType> rows = string.IsNullOrEmpty(RowCollection) ?
+                null :
+                RowType.GetRowsCollection(RowCollection);
+            IList<KeyValuePair<string, string>> toolbars = string.IsNullOrEmpty(RowCollection) ?
+                null :
+                RowType.GetToolbarsCollection(RowCollection);
+            if(rows == null || toolbars == null)
+            {
+                var nc = new Core.OptionsParsing.ReductionContext(Core.OptionsParsing.TagTokens.RowContainer, 0, windowDefaultTemplates, rows != null);
+                context.SetChildrenReductionContext(nc);
+                
+                await output.GetChildContentAsync();
+                var collector = new Core.OptionsParsing.RowContainerCollector(nc);
+                var res = collector.Process(this, windowDefaultTemplates) as Tuple<IList<Core.Templates.RowType>, IList<KeyValuePair<string, string>>>;
+                if (rows == null)
+                {
+                    rows = res.Item1;
+                    if (!string.IsNullOrEmpty(RowCollection))
+                        RowType.CacheRowGroup(RowCollection, rows, httpAccessor.HttpContext);
+                }
+                if (toolbars == null)
+                {
+                    toolbars = res.Item2;
+                    if (!string.IsNullOrEmpty(RowCollection))
+                        RowType.CacheToolbarGroup(RowCollection, toolbars, httpAccessor.HttpContext);
+                }
+            }
+            var windowOptions = new QueryWindowOptions(rows, toolbars)
+            {
+                ClientCustomProcessorFor = ClientCustomProcessorFor,
+                CollectionFor = CollectionFor,
+                For = For,
+                SourceFor = SourceFor,
+                GroupingOutput = GroupingOutput,
+                Header = null,
+                LayoutTemplate = string.IsNullOrEmpty(LayoutTemplate) ? windowDefaultTemplates.LayoutTemplate :
+                    new Template<LayoutTemplateOptions>(TemplateType.Partial, LayoutTemplate),
+                TotalPagesContainer = TotalPagesContainer
+            };
+            Func<Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>, Task<IHtmlContent>> toExecute =
+                async group =>
+                {
+                    if (windowOptions.Rows == null && group != null) windowOptions.UpdateRows(group.Item1, group.Item2);
+                    if (windowOptions.Rows == null) return new HtmlString(string.Empty);
+                    var mainRow = windowOptions.Rows.FirstOrDefault();
+                    if (mainRow == null) return new HtmlString(string.Empty);
+
+                    windowOptions.Header = localizeWindow(mainRow, windowOptions.Header);
+                    if (Type == QueryWindowType.Filtering && mainRow.FilterTemplate == null)
+                    {
+                        mainRow.FilterTemplate = windowDefaultTemplates.ERowTemplate;
+                        foreach (var col in mainRow.Columns)
+                        {
+                            col.FilterTemplate = windowDefaultTemplates.EColumnTemplate;
+
+                        }
+                    }
+                    await currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
+                    
+                    return windowOptions.Result;
+                };
+            output.TagName = string.Empty;
+            output.Content.SetHtmlContent(await toExecute(new Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>(rows, toolbars)));
         }
     }
 }

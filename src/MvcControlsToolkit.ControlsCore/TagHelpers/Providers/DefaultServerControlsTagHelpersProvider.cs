@@ -152,48 +152,78 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 null,
                 null
                 );
-            allTagProcessors["query-filter-window"] =
-                async (tc, to, th, tpo, ctx) =>
+            allTagProcessors["query-filter-window"] = allTagProcessors["query-filter-inline"] =
+                (tc, to, th, tpo, ctx) =>
                 {
-                    return ;
+                    return new DefaultServerQueryWindowProcessor(tpo as QueryWindowOptions, ctx).ProcessFilter();
                 };
             allTagDefaultTemplates["query-filter-window"] = new DefaultTemplates(
                 true,
                 null,
-                new Template<Column>(TemplateType.Partial, "DefaultColumnEditTemplate"),
+                new Template<Column>(TemplateType.Partial, "ServerQueries/DefaultFilterColumnTemplate"),
                 null,
                 new Template<RowType>(TemplateType.Partial, "ServerQueries/DefaultFilterRowTemplate"),
-                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultFilterLayoutTemplate"),
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultQueryLayoutTemplate"),
                 null,
                 null
                 );
-            allTagProcessors["query-group-window"] =
-                async (tc, to, th, tpo, ctx) =>
+            allTagDefaultTemplates["query-filter-inline"] = new DefaultTemplates(
+                true,
+                null,
+                new Template<Column>(TemplateType.Partial, "ServerQueries/DefaultFilterColumnTemplate"),
+                null,
+                new Template<RowType>(TemplateType.Partial, "ServerQueries/DefaultFilterRowTemplate"),
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultInLineQueryLayoutTemplate"),
+                null,
+                null
+                );
+            allTagProcessors["query-group-window"] = allTagProcessors["query-group-inline"] =
+                (tc, to, th, tpo, ctx) =>
                 {
-                    return ;
+                    return new DefaultServerQueryWindowProcessor(tpo as QueryWindowOptions, ctx).ProcessGrouping();
                 };
             allTagDefaultTemplates["query-group-window"] = new DefaultTemplates(
                 true,
                 null,
                 null,
                 null,
-                null,
-                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultGroupingTemplate"),
+                new Template<RowType>(TemplateType.Partial, "ServerQueries/DefaultGroupingRowTemplate"),
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultQueryLayoutTemplate"),
                 null,
                 null
                 );
-            allTagProcessors["query-sort-window"] =
-                async  (tc, to, th, tpo, ctx) =>
+            allTagDefaultTemplates["query-group-inline"] = new DefaultTemplates(
+               true,
+               null,
+               null,
+               null,
+               new Template<RowType>(TemplateType.Partial, "ServerQueries/DefaultGroupingRowTemplate"),
+               new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultInLineQueryLayoutTemplate"),
+               null,
+               null
+               );
+            allTagProcessors["query-sort-window"] = allTagProcessors["query-sort-inline"] =
+                (tc, to, th, tpo, ctx) =>
                 {
-                    return ;
+                    return new DefaultServerQueryWindowProcessor(tpo as QueryWindowOptions, ctx).ProcessSorting();
                 };
             allTagDefaultTemplates["query-sort-window"] = new DefaultTemplates(
                 true,
                 null,
                 null,
                 null,
+                new Template<RowType>(TemplateType.Partial, "ServerQueries/DefaultSortingRowTemplate"),
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultQueryLayoutTemplate"),
                 null,
-                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultSortingTemplate"),
+                null
+                );
+            allTagDefaultTemplates["query-sort-inline"] = new DefaultTemplates(
+                true,
+                null,
+                null,
+                null,
+                new Template<RowType>(TemplateType.Partial, "ServerQueries/DefaultSortingRowTemplate"),
+                new Template<LayoutTemplateOptions>(TemplateType.Partial, "ServerQueries/DefaultInLineQueryLayoutTemplate"),
                 null,
                 null
                 );
@@ -361,22 +391,22 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-filter",
-                    OperationName = "filter-window",
-                    ShowText = "change filter"
+                    OperationName = "filter-window-submit",
+                    ShowText = "apply filter"
                 });
             allButtonProperties.Add(StandardButtons.SortWindow,
                 new ButtonProperties
                 {
-                    IconClass = "glyphicon-list-alt",
-                    OperationName = "sort-window",
-                    ShowText = "change sorting"
+                    IconClass = "glyphicon-sort",
+                    OperationName = "sort-window-submit",
+                    ShowText = "apply sorting"
                 });
             allButtonProperties.Add(StandardButtons.GroupWindow,
                 new ButtonProperties
                 {
                     IconClass = "glyphicon-th",
-                    OperationName = "grouping-window",
-                    ShowText = "change grouping"
+                    OperationName = "grouping-window-submit",
+                    ShowText = "apply grouping"
                 });
             allButtonProperties.Add(StandardButtons.SortAscending,
                 new ButtonProperties
