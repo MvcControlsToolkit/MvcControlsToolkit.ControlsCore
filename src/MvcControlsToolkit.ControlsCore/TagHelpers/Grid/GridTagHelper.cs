@@ -46,17 +46,16 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("layout-parts")]
         public IEnumerable<string> LayoutParts { get; set; }
 
+        [HtmlAttributeName("query-for")]
+        public ModelExpression QueryFor { get; set; }
+
         [HtmlAttributeName("error-messages")]
         public GridErrorMessages ErrorMessages { get; set; }
 
         [HtmlAttributeName("rows-cache-key")]
         public string RowsCacheKey { get; set; }
 
-        [HtmlAttributeName("row-group-selection")]
-        public int? RowsGroupSelection { get; set; }
-
-        [HtmlAttributeName("row-group-selection-for")]
-        public ModelExpression RowsGroupSelectionFor { get; set; }
+        
 
         [HtmlAttributeNotBound]
         [ViewContext]
@@ -100,6 +99,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             //
             //estabilish context for children controls
             TagContextHelper.OpenBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection, For);
+            if(QueryFor != null && QueryEnabled.HasValue && QueryEnabled.Value)
+                TagContextHelper.OpenBindingContext(httpAccessor.HttpContext, BindingContextNames.Query, QueryFor);
             //get row definitions
             IList<RowType> rows = string.IsNullOrEmpty(RowsCacheKey) ?
                 null :
@@ -132,7 +133,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             //
 
             //Prepare grid options
-            var options = new GridOptions(rows, toolbars, Type, id, fullName, RowsGroupSelection, RowsGroupSelectionFor)
+            var options = new GridOptions(rows, toolbars, Type, id, fullName)
             {
                 CssClass=CssClass,
                 ErrorMessages=ErrorMessages,
@@ -143,6 +144,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             };
             //finally process!
             await currProvider.GetTagProcessor(actTagName)(context, output, this, options, ctx);
+            if (QueryFor != null && QueryEnabled.HasValue && QueryEnabled.Value)
+                TagContextHelper.CloseBindingContext(httpAccessor.HttpContext, BindingContextNames.Query);
             TagContextHelper.CloseBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
         }
     }

@@ -1,6 +1,7 @@
 ﻿@model Object
 @using MvcControlsToolkit.Core.Templates
 @using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.TagHelpersUtilities
 @using MvcControlsToolkit.Core.Views
 @using Microsoft.Extensions.Localization
 @using System.Globalization
@@ -8,11 +9,12 @@
     var row = ViewData["Options"] as RowType;
     var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
     bool hiddensToRender = true;
+    var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
 }
 <tr @row.RenderRowAttributes(Model)>
-    @if (row.MustAddButtonColumn(helpers, true))
+    @if (row.MustAddButtonColumn(helpers, query, true))
     {
-        var buttons = row.RequiredFunctionalities(User);
+        var buttons = row.RequiredFunctionalitiesExt(User, query);
         var currProvider = ViewContext.TagHelperProvider();
         var localizer = row.GetLocalizer(helpers.LocalizerFactory);
         <td class="grid-buttons">
@@ -49,7 +51,7 @@
             }
         </td>
     }
-    @foreach(var col in row.Columns)
+    @foreach(var col in row.ColumnsToRender(query))
     {
             <td @Html.Raw(col.ColumnCssClass != null ? "class='" +col.ColumnCssClass+"'": "")
                 @Html.Raw(col.ColSpan.HasValue ? "colspan='"+col.ColSpan.Value.ToString(CultureInfo.InvariantCulture)+"'" : "")>

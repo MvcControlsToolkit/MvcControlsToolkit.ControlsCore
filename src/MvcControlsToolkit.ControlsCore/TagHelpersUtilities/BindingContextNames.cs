@@ -8,8 +8,8 @@ namespace MvcControlsToolkit.Core.TagHelpersUtilities
     public static class BindingContextNames
     {
         public static string Collection { get { return "collection"; } }
-        public static string Filter { get { return "filter"; } }
+        public static string Query { get { return "filter"; } }
 
-        public static string CollectionToFilter { get { return "collection_to_filter"; } }
+        public static string CollectionToQuery { get { return "collection_to_filter"; } }
     }
 }

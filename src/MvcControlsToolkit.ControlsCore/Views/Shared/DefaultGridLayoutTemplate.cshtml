@@ -1,6 +1,7 @@
 ﻿@model Object
 @using MvcControlsToolkit.Core.Templates
 @using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.TagHelpersUtilities
 @using MvcControlsToolkit.Core.Views
 @using Microsoft.Extensions.Localization
 @using System.Globalization
@@ -8,6 +9,7 @@
     var options = ViewData["Options"] as DefaultServerGridLayoutOptions;
     var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
     var headerTemplate = options.SubTemplates.FirstOrDefault();
+    var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
 }
 <table @options.RenderTopContainerAttributes() @Html.Raw(options.CssClass != null ? "class='"+options.CssClass+"'" : "")>
     @if(!string.IsNullOrEmpty(options.Caption))
@@ -15,31 +17,34 @@
         <caption>@options.Caption</caption>
     }
     <thead>
-        @if (options.Toolbars != null)
+    @if (options.Toolbars != null)
+    {
+        foreach (var tb in options.Toolbars)
         {
-            foreach (var tb in options.Toolbars)
+            if (tb.Key == LayoutStandardPlaces.Header)
             {
-                if (tb.Key == LayoutStandardPlaces.Header)
-                {
                 <tr>
                     <th class="header-toolbar" colspan="@options.VisibleColumns.ToString(CultureInfo.InvariantCulture)">
                         @Html.Raw(tb.Value)
                     </th>
                 </tr>
-                }
             }
-
         }
-        @if(headerTemplate != null)
+
+    }
+    @if (headerTemplate != null)
+    {
+        foreach (var row in options.Rows)
         {
-            foreach (var row in options.Rows)
+            if (row.RowToRender(query))
             {
                 options.CurrentRow = row;
                 @await headerTemplate.Invoke(new ModelExpression(string.Empty, ViewData.ModelExplorer), options, helpers)
             }
         }
-        
-    </thead>
+    }
+
+</thead>
     <tfoot>
         @if (options.Toolbars != null)
         {

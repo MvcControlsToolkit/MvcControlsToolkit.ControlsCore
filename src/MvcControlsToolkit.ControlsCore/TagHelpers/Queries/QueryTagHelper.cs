@@ -34,11 +34,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [ViewContext]
         public ViewContext ViewContext { get; set; }
 
-        [HtmlAttributeName(ForAttributeName)]
-        public ModelExpression For { get; set; }
-
-        [HtmlAttributeName(CollectionForAttributeName)]
-        public ModelExpression CollectionFor { get; set; }
+        
 
         [HtmlAttributeName("source-for")]
         public ModelExplorer SourceFor { get; set; }
@@ -103,7 +99,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         }
     }
 
-    [HtmlTargetElement(TagName, Attributes = ForAttributeName + "," + TypeAttributeName, TagStructure = TagStructure.WithoutEndTag)]
+    [HtmlTargetElement(TagName, Attributes = TypeAttributeName, TagStructure = TagStructure.WithoutEndTag)]
     public class QueryTagHelper : QueryTagHelperBase
     {
        
@@ -140,15 +136,18 @@ namespace MvcControlsToolkit.Core.TagHelpers
             
             
         }
+        private ModelExpression For { get; set; }
+        private ModelExpression CollectionFor { get; set; }
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            if (For == null) throw new ArgumentNullException(ForAttributeName);
+            For = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Query);
+            if (For == null) return;
+
             if (!typeof(QueryDescription).GetTypeInfo().IsAssignableFrom(For.Metadata.ModelType)) throw new ArgumentException(ForAttributeName);
-            if (CollectionFor == null)
-            {
-                CollectionFor = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
-                if (CollectionFor == null) throw new ArgumentNullException(CollectionForAttributeName);
-            }
+
+            CollectionFor = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
+            if (CollectionFor == null) throw new ArgumentNullException(CollectionForAttributeName);
+
             if (ButtonLocalizationType != null) localizer = factory.Create(ButtonLocalizationType);
             var currProvider = ViewContext.TagHelperProvider();
             
@@ -230,6 +229,11 @@ namespace MvcControlsToolkit.Core.TagHelpers
     {
 
         private const string TagName = "query-inline";
+        [HtmlAttributeName(ForAttributeName)]
+        public ModelExpression For { get; set; }
+
+        [HtmlAttributeName(CollectionForAttributeName)]
+        public ModelExpression CollectionFor { get; set; }
 
         public QueryTagHelperInLine(IHtmlHelper html,
             IHttpContextAccessor httpAccessor, IViewComponentHelper component,

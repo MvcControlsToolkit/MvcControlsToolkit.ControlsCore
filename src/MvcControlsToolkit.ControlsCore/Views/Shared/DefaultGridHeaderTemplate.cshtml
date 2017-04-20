@@ -1,6 +1,7 @@
 ﻿@model Object
 @using MvcControlsToolkit.Core.Templates
 @using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.TagHelpersUtilities
 @using MvcControlsToolkit.Core.Views
 @using Microsoft.Extensions.Localization
 @using System.Globalization
@@ -9,16 +10,17 @@
     var options = ViewData["Options"] as DefaultServerGridLayoutOptions;
     var row = options.CurrentRow;
     var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
 }
 <tr >
-    @if (row.MustAddButtonColumn(helpers))
+    @if (row.MustAddButtonColumn(helpers, query))
     {
 
         <th class="grid-buttons">
             
         </th>
     }
-    @foreach (var col in row.Columns)
+    @foreach (var col in row.ColumnsToRender(query))
     {
         var width = col.Widths != null && col.Widths.Length > 0 ? "style='width: " + col.Widths[0].ToString(CultureInfo.InvariantCulture) + "%;'" : "";
             <th @Html.Raw(width) @Html.Raw(col.ColumnCssClass != null ? "class='" +col.ColumnCssClass+"'": "")

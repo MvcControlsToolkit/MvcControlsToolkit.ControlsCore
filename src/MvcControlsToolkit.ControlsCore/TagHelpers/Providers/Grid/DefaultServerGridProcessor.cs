@@ -123,7 +123,8 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 options.ErrorMessages??defaultMessages,
                 options.CssClass,
                 tag.Caption,
-                tag.LocalizationType);
+                tag.LocalizationType,
+                tag.QueryFor);
             //
 
             //Invoke Layout

@@ -17,7 +17,7 @@
     <div data-valmsg-ajax="true" asp-validation-summary="ModelOnly" class="text-danger"></div>
     @foreach (var bar in options.Toolbars)
     {
-        if (bar.Key == options.HeaderBarName )
+        if (bar.Key == options.HeaderBarName)
         {
             @Html.Raw(bar.Value)
         }
@@ -39,8 +39,9 @@
     }
     @if (!maibarFound)
     {
+        
         <div class="form-group col-xs-12">
-            @currProvider.RenderButton(options.SubmitButton, null, "btn-primary", helpers, localizer, true, false)
+            @currProvider.RenderButton(options.SubmitButton, options.OperationParameters, "btn-primary", helpers, localizer, true, false)
         </div>
     }
     <div class="clearfix"></div>

@@ -6,8 +6,10 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Localization;
 using MvcControlsToolkit.Core.Templates;
+using MvcControlsToolkit.Core.Views;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
@@ -43,7 +45,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             GridErrorMessages messages,
             string cssClass,
             string caption,
-            Type localizerType
+            Type localizerType,
+            ModelExpression query
             ) : base(rows, toolbars, layoutTemplate, subTemplates, mainContent)
         {
             this.helpers = helpers;
@@ -55,7 +58,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             Caption = caption;
             var first = rows.FirstOrDefault();
             MustAddButtonColumn = first.MustAddButtonColumn(helpers, Type== GridType.Batch);
-            VisibleColumns = first.VisibleColumns(helpers, Type == GridType.Batch);
+            VisibleColumns = first.VisibleColumns(helpers, query?.Model as QueryDescription, Type == GridType.Batch);
             LocalizerType = localizerType;
             Localizer = LocalizerType != null ? helpers.LocalizerFactory.Create(LocalizerType) : null;
         }

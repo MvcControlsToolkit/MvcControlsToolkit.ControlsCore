@@ -34,7 +34,9 @@
               mvc-controller="typeof(GridTestController)"
               row-id="immediate-example"
               operations="x => Functionalities.FullInLine | Functionalities.AddBefore | Functionalities.AddAfter"
-              class="table table-condensed table-bordered">
+              class="table table-condensed table-bordered"
+              query-for="Query"
+              enable-query="true">
             <column asp-for="Products.Data.Element().TypeId">
                 <external-key-static display-property="Products.Data.Element().TypeName" />
                 @*<external-key-static display-property="Products.Data.Element().TypeName"
@@ -79,9 +81,9 @@
                         <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
                     </div>
                 </div>
-                <query asp-for="Query" type="Filtering" />
-                <query asp-for="Query" type="Sorting" />
-                <query asp-for="Query" type="Grouping" />
+                <query  type="Filtering" />
+                <query  type="Sorting" />
+                <query  type="Grouping" />
             </toolbar>
             <toolbar zone-name="@LayoutStandardPlaces.Footer">
                 <paste-html name="main-pager" />
