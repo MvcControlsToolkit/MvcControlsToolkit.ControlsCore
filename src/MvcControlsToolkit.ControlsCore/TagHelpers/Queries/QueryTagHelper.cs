@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using MvcControlsToolkit.Core.Views;
-using MvcControlsToolkit.Core.TagHelpersUtilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Localization;
@@ -22,6 +21,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
     {
         protected const string ForAttributeName = "asp-for";
         protected const string CollectionForAttributeName = "query-for";
+        protected const string GroupingOutputName = "grouping-type";
         protected const string ClientCustomProcessorForAttributeName = "client-custom-processor-for";
         protected const string TypeAttributeName = "type";
         protected IHttpContextAccessor httpAccessor;
@@ -60,8 +60,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public string LayoutTemplate { get; set; }
 
 
-        [HtmlAttributeName("grouping-output")]
-        public Type GroupingOutput { get; set; }
+        
 
 
         public QueryTagHelperBase(IHtmlHelper html,
@@ -136,8 +135,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
             
             
         }
-        private ModelExpression For { get; set; }
-        private ModelExpression CollectionFor { get; set; }
+        private ModelExpression For;
+        private ModelExpression CollectionFor;
+        private Type GroupingOutput=null;
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             For = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Query);
@@ -147,7 +147,11 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
             CollectionFor = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
             if (CollectionFor == null) throw new ArgumentNullException(CollectionForAttributeName);
-
+            if (Type == QueryWindowType.Grouping)
+            {
+                GroupingOutput = TagContextHelper.GetTypeBindingContext(httpAccessor.HttpContext, BindingContextNames.GroupingType);
+                if (GroupingOutput == null) throw new ArgumentNullException(GroupingOutputName); 
+            }
             if (ButtonLocalizationType != null) localizer = factory.Create(ButtonLocalizationType);
             var currProvider = ViewContext.TagHelperProvider();
             
@@ -235,6 +239,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName(CollectionForAttributeName)]
         public ModelExpression CollectionFor { get; set; }
 
+        [HtmlAttributeName(GroupingOutputName)]
+        public Type GroupingOutput { get; set; }
+
         public QueryTagHelperInLine(IHtmlHelper html,
             IHttpContextAccessor httpAccessor, IViewComponentHelper component,
             IUrlHelperFactory urlHelperFactory,
@@ -247,6 +254,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             if (For == null) throw new ArgumentNullException(ForAttributeName);
+
+            if (Type == QueryWindowType.Grouping && GroupingOutput == null) throw new ArgumentNullException(GroupingOutputName);
             if (!typeof(QueryDescription).GetTypeInfo().IsAssignableFrom(For.Metadata.ModelType)) throw new ArgumentException(ForAttributeName);
             if (CollectionFor == null) throw new ArgumentNullException(CollectionForAttributeName);
             

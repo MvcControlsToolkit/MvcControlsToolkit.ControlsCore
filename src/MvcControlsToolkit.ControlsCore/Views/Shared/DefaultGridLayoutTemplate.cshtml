@@ -1,7 +1,6 @@
 ﻿@model Object
 @using MvcControlsToolkit.Core.Templates
 @using MvcControlsToolkit.Core.TagHelpers
-@using MvcControlsToolkit.Core.TagHelpersUtilities
 @using MvcControlsToolkit.Core.Views
 @using Microsoft.Extensions.Localization
 @using System.Globalization
@@ -10,6 +9,7 @@
     var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
     var headerTemplate = options.SubTemplates.FirstOrDefault();
     var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
+    var groupingType = TagContextHelper.GetTypeBindingContext(ViewContext.HttpContext, BindingContextNames.GroupingType);
 }
 <table @options.RenderTopContainerAttributes() @Html.Raw(options.CssClass != null ? "class='"+options.CssClass+"'" : "")>
     @if(!string.IsNullOrEmpty(options.Caption))
@@ -36,7 +36,7 @@
     {
         foreach (var row in options.Rows)
         {
-            if (row.RowToRender(query))
+            if (row.RowToRender(query, groupingType))
             {
                 options.CurrentRow = row;
                 @await headerTemplate.Invoke(new ModelExpression(string.Empty, ViewData.ModelExplorer), options, helpers)

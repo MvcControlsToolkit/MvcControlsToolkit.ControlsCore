@@ -31,7 +31,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
         {
             layoutOptions.SetParameters(new HtmlString(string.Empty),
                 StandardButtons.FilterWindow,
-                "query-filter",
+                "server-query-filter",
                 LayoutStandardPlaces.HeaderFilter,
                 LayoutStandardPlaces.FooterFilter,
                 LayoutStandardPlaces.SubmitBarFilter,
@@ -43,7 +43,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
         {
             layoutOptions.SetParameters(new HtmlString(string.Empty),
                 StandardButtons.SortWindow,
-                "query-sorting",
+                "server-query-sorting",
                 LayoutStandardPlaces.HeaderSorting,
                 LayoutStandardPlaces.FooterSorting,
                 LayoutStandardPlaces.SubmitBarSorting,
@@ -55,7 +55,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
         {
             layoutOptions.SetParameters(new HtmlString(string.Empty),
                 StandardButtons.GroupWindow,
-                "query-grouping",
+                "server-query-grouping",
                 LayoutStandardPlaces.HeaderGrouping,
                 LayoutStandardPlaces.FooterGrouping,
                 LayoutStandardPlaces.SubmitBarGrouping,

@@ -12,7 +12,7 @@ using MvcControlsToolkit.Core.Views;
 using MvcControlsToolkit.Core.OptionsParsing;
 using MvcControlsToolkit.ControlsCore;
 using MvcControlsToolkit.Core.Templates;
-using MvcControlsToolkit.Core.TagHelpersUtilities;
+
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {

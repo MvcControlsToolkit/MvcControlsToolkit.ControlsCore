@@ -15,7 +15,6 @@ using MvcControlsToolkit.Controllers;
 using MvcControlsToolkit.Core.Filters;
 using MvcControlsToolkit.Core.OptionsParsing;
 using MvcControlsToolkit.Core.TagHelpers.Internals;
-using MvcControlsToolkit.Core.TagHelpersUtilities;
 using MvcControlsToolkit.Core.Templates;
 using MvcControlsToolkit.Core.Views;
 
@@ -48,6 +47,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
         [HtmlAttributeName("query-for")]
         public ModelExpression QueryFor { get; set; }
+
+        [HtmlAttributeName("query-grouping-type")]
+        public Type GroupingOutput { get; set; }
 
         [HtmlAttributeName("error-messages")]
         public GridErrorMessages ErrorMessages { get; set; }
@@ -99,8 +101,11 @@ namespace MvcControlsToolkit.Core.TagHelpers
             //
             //estabilish context for children controls
             TagContextHelper.OpenBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection, For);
-            if(QueryFor != null && QueryEnabled.HasValue && QueryEnabled.Value)
+            if (QueryFor != null && QueryEnabled.HasValue && QueryEnabled.Value)
+            {
                 TagContextHelper.OpenBindingContext(httpAccessor.HttpContext, BindingContextNames.Query, QueryFor);
+                TagContextHelper.OpenTypeBindingContext(httpAccessor.HttpContext, BindingContextNames.GroupingType, GroupingOutput??For.Metadata.ElementType);
+            }
             //get row definitions
             IList<RowType> rows = string.IsNullOrEmpty(RowsCacheKey) ?
                 null :
@@ -145,7 +150,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
             //finally process!
             await currProvider.GetTagProcessor(actTagName)(context, output, this, options, ctx);
             if (QueryFor != null && QueryEnabled.HasValue && QueryEnabled.Value)
+            {
+                TagContextHelper.CloseTypeBindingContext(httpAccessor.HttpContext, BindingContextNames.GroupingType);
                 TagContextHelper.CloseBindingContext(httpAccessor.HttpContext, BindingContextNames.Query);
+            }
             TagContextHelper.CloseBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
         }
     }
