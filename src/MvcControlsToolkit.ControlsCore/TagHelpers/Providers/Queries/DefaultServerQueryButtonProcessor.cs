@@ -26,7 +26,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             sb.Append(
             options.Type == QueryWindowType.Filtering ? "query-filtering " :
                 (options.Type == QueryWindowType.Sorting ? "query-sorting " : "query-grouping "));
-            sb.Append(helpers.Context.ViewData.GetFullHtmlFieldName(this.options.For.Name));
+            sb.Append(helpers.Html.GenerateIdFromName(helpers.Context.ViewData.GetFullHtmlFieldName(this.options.For.Name)));
             if(options.Url != null)
             {
                 sb.Append(" ");

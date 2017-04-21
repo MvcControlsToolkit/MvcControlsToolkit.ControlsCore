@@ -125,16 +125,17 @@
                         var jx = jQuery(x);
                         if(!x['expando_created']) {
                             jx['show']();
-                            jQuery(x)['modal']({
+                            jx['addClass'](jx['attr']('data-class'));
+                            jx['modal']({
                                 show: false,
                                 backdrop: 'static'
                             });
-                            jQuery(x).on('hidden.bs.modal', function (e) {
+                            jx['on']('hidden.bs.modal', function (e) {
                                     x['expando_onSubmit']=null;
                                     x['expando_onSubmitError']=null;
                             });
                         }
-                        jQuery(x)['modal']('show');
+                        jx['modal']('show');
                     };
                     closeStaticModal = optionsModal["closeStaticModal"] = optionsModal["closeStaticModal"] || function (x) {
                         jQuery(x)['modal']('hide'); 

@@ -5,7 +5,7 @@
     var options = ViewData["Options"] as DefaultServerQueryWindowLayoutOptions;
     var id = Html.GenerateIdFromName(options.Name + "_window");
 }
-<div class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="@(id+"_label")">
+<div style="display:none" data-class="modal fade" id="@id" tabindex="-1" role="dialog" aria-labelledby="@(id+"_label")">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
