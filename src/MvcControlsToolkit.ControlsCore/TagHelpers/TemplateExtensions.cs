@@ -10,11 +10,18 @@ using MvcControlsToolkit.Core.Templates;
 using MvcControlsToolkit.Core.Views;
 using System.Text.Encodings.Web;
 using System.Text;
+using System.Reflection;
+using System.Globalization;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
     public static class TemplateExtensions
     {
+        private static KeyValuePair<string, string>[] sortingRypes =
+            { 
+              new KeyValuePair<string, string>("asc", "asc"),
+              new KeyValuePair<string, string>("desc", "desc")
+            };
         public static IEnumerable<Column> ColumnsToRender(this RowType row, QueryDescription query)
         {
             if (query == null) return row.Columns;
@@ -31,11 +38,88 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
 
         }
+        public static Tuple<string, string> GroupSettings(this Column col, QueryDescription query)
+        {
+            if (col.For == null || query == null) return null;
+            var expression = col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
+                 col.ColumnConnection.DisplayProperty :
+                 col.For;
+            return query.GetAggregationOperation(expression.Name);
+
+
+        }
+        private static bool canCount(Type t)
+        {
+            t = Nullable.GetUnderlyingType(t) ?? t;
+            return t == typeof(long) || t == typeof(int);
+        }
+        public static IHtmlContent AggregationOperatorHtml(this Column col, Type destinationType, IStringLocalizer localizer, string selection, string selectCss = null)
+        {
+            if (!col.CanAggregate) return null;
+            var expression = col.ColumnConnection != null  ?
+                 col.ColumnConnection.DisplayProperty :
+                 col.For;
+            Type sourceType = expression.Metadata.ModelType;
+            if (destinationType == null) destinationType = sourceType;
+            else if (!sourceType.GetTypeInfo().IsAssignableFrom(destinationType)) return null;
+            var path = expression.Name;
+            bool simple = path.IndexOf('.') < 0;
+            string countDistinctAlias = null;
+            var operations = QueryAttribute.AllowedAggregationsForType(sourceType, col.Queries.Value);
+            if (!simple) operations = operations & (GroupingOptions.Group );
+            else if((operations & GroupingOptions.CountDistinct) == GroupingOptions.CountDistinct)
+            {
+                var ti = destinationType.GetTypeInfo();
+                var prop = ti.GetProperty(path + "Count");
+                if (prop == null || !canCount(prop.PropertyType)){
+                    prop = ti.GetProperty(path);
+                }
+                if (prop != null && canCount(prop.PropertyType)) countDistinctAlias = prop.Name;
+            }
+            if (countDistinctAlias == null) operations = operations & (~GroupingOptions.CountDistinct);
+            if (operations == GroupingOptions.None) return null;
+            var selections = QueryAttribute.GroupOptionsToEnum(operations);
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<select name ='");
+            sb.Append(path);
+            sb.Append("' ");
+            if (!string.IsNullOrEmpty(selectCss))
+            {
+                sb.Append("css='");
+                sb.Append(selectCss);
+                sb.Append("' ");
+            }
+            if (countDistinctAlias != null)
+            {
+                sb.Append("data-count-distinct='");
+                sb.Append(countDistinctAlias);
+                sb.Append("' ");
+            }
+            sb.Append(">");
+            foreach (var option in selections)
+            {
+                sb.Append("<option value='");
+                sb.Append(HtmlEncoder.Default.Encode(option.Key));
+                sb.Append("' ");
+                if (option.Key == selection)
+                    sb.Append("selected ");
+                sb.Append(">");
+                sb.Append(HtmlEncoder.Default.Encode(localizer[option.Value]));
+                sb.Append("</option>");
+            }
+            sb.Append("</select>");
+            return new HtmlString(sb.ToString());
+        }
         public static Tuple<HtmlString, bool> FilterOperatorHtml(this Column col, int place, IStringLocalizer localizer, string selection, string selectCss=null, string displayCss=null)
         {
-            if (col.FilterClauses == null || place >= col.FilterClauses.Length || place < 0) return new HtmlString(string.Empty);
+            if (col.FilterClauses == null || place >= col.FilterClauses.Length || place < 0) return Tuple.Create(new HtmlString(string.Empty), false);
             if (displayCss == null) displayCss = selectCss;
-            var selections = QueryAttribute.QueryOptionsToEnum(col.FilterClauses[place]);
+            var options = col.FilterClauses[place];
+            if(col.ColumnConnection != null && !col.ColumnConnection.QueryDisplay)
+            {
+                options = options & (QueryOptions.Equal | QueryOptions.NotEqual);
+            }
+            var selections = QueryAttribute.QueryOptionsToEnum(options);
             var name = (col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
                  col.ColumnConnection.DisplayProperty.Name :
                  col.For.Name)+".operator";
@@ -75,6 +159,94 @@ namespace MvcControlsToolkit.Core.TagHelpers
             }
             sb.Append("</select>");
             return Tuple.Create(new HtmlString(sb.ToString()), false);
+        }
+        public static IEnumerable<KeyValuePair<string,string>> FieldsToFilter(this RowType row)
+        {
+            return row.Columns.Where(m => m.CanFilter).
+                Select(m => new KeyValuePair<string, string>(
+                    m.ColumnConnection != null && m.ColumnConnection.QueryDisplay ?
+                        m.ColumnConnection.DisplayProperty.Name : m.For.Name,
+                    m.ColumnTitle));
+        }
+        public static Tuple<string, bool>[] SelectedSorting(this RowType row, QueryDescription query)
+        {
+            if (query == null || query.Sorting == null || query.Sorting.Count == 0) return null;
+            return query.Sorting.Select(m => Tuple.Create(m.Property, m.Down)).ToArray();
+        }
+        public static IHtmlContent SortingFieldHtml(this RowType row,
+            int place,
+            IStringLocalizer localizer,
+            IEnumerable<KeyValuePair<string, string>> selections,
+            Tuple<string, bool>[] selectedSorting,
+            string selectCss)
+        {
+            string selection = null;
+            if (selectedSorting != null && selectedSorting.Length > place) selection = selectedSorting[place].Item1;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<select name ='sorting_");
+            sb.Append(place.ToString(CultureInfo.InvariantCulture));
+            sb.Append("' ");
+            if (!string.IsNullOrEmpty(selectCss))
+            {
+                sb.Append("css='");
+                sb.Append(selectCss);
+                sb.Append("' ");
+            }
+            sb.Append(">");
+            sb.Append("<option value=''>");
+            sb.Append(localizer["none"]);
+            sb.Append("</option>");
+            foreach (var option in selections)
+            {
+                sb.Append("<option value='");
+                sb.Append(HtmlEncoder.Default.Encode(option.Key));
+                sb.Append("' ");
+                if (option.Key == selection)
+                    sb.Append("selected ");
+                sb.Append(">");
+                sb.Append(HtmlEncoder.Default.Encode(localizer[option.Value]));
+                sb.Append("</option>");
+            }
+            sb.Append("</select>");
+            return new HtmlString(sb.ToString());
+        }
+        public static IHtmlContent SortingTypedHtml(this RowType row,
+            int place,
+            IStringLocalizer localizer,
+            Tuple<string, bool>[] selectedSorting,
+            string selectCss)
+        {
+            string selection = null;
+            if (selectedSorting != null && selectedSorting.Length > place) selection = selectedSorting[place].Item2 ?
+                    "desc" : "asc";
+            else selection = "asc";
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<select name ='sorting.type_");
+            sb.Append(place.ToString(CultureInfo.InvariantCulture));
+            sb.Append("' ");
+            if (!string.IsNullOrEmpty(selectCss))
+            {
+                sb.Append("css='");
+                sb.Append(selectCss);
+                sb.Append("' ");
+            }
+            sb.Append(">");
+            sb.Append("<option value=''>");
+            sb.Append(localizer["none"]);
+            sb.Append("</option>");
+            foreach (var option in sortingRypes)
+            {
+                sb.Append("<option value='");
+                sb.Append(HtmlEncoder.Default.Encode(option.Key));
+                sb.Append("' ");
+                if (option.Key == selection)
+                    sb.Append("selected ");
+                sb.Append(">");
+                sb.Append(HtmlEncoder.Default.Encode(localizer[option.Value]));
+                sb.Append("</option>");
+            }
+            sb.Append("</select>");
+            return new HtmlString(sb.ToString());
         }
         public static bool RowToRender(this RowType row, QueryDescription query, Type groupingType)
         {
