@@ -1,0 +1,50 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+    var row = ViewData["Options"] as RowType;
+    var fatherHelpers = ViewData["ContextualizedHelpers"] as ContextualizedHelpers;
+    var helpers = fatherHelpers.CreateChild(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var localizer = row.GetLocalizer(helpers.LocalizerFactory);
+    var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
+}
+@using (ViewContext.FilterRendering())
+{
+    object Model = null;
+
+    foreach (var col in row.Columns.Where(m => m.CanFilter))
+    {
+        for (int i = 0; i < col.FilterClauses.Length; i++)
+        {
+            ViewData.TemplateInfo.HtmlFieldPrefix = i.ToString(CultureInfo.InvariantCulture);
+            var selection = col.FilterSettings(i, query, ref Model);
+            var operations = col.FilterOperatorHtml(i, localizer, selection, "form-control", "filter-operator");
+            <div class="form-group col-xs-12">
+                <label asp-for="@Model" class="control-label">@col.ColumnTitle</label>
+                @if (operations.Item2)
+                {
+                    <span>&nbsp;</span>
+                    @operations.Item1
+                    @(await row.RenderColumn(selection != null ? Model : null, col, false, helpers, true))
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-sm-3 col-xs-12">
+                            @operations.Item1
+                        </div>
+                        <div class="col-sm-9 col-xs-12">
+                            @(await row.RenderColumn(selection != null ? Model : null, col, false, helpers, true))
+                        </div>
+                    </div>
+
+                }
+            </div>
+
+        }
+
+    }
+}

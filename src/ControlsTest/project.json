@@ -22,8 +22,8 @@
             "version": "1.0.0-preview2-final",
             "type": "build"
         },
-        "MvcControlsToolkit.ControlsCore": "1.1.5.22",
-        "MvcControlsToolkit.Core.OData": "0.0.0.20",
+        "MvcControlsToolkit.ControlsCore": "1.1.5.31",
+        "MvcControlsToolkit.Core.OData": "0.0.0.27",
         "BundlerMinifier.Core": "2.2.306",
         "Microsoft.ApplicationInsights.AspNetCore": "1.0.2",
         "Microsoft.AspNetCore.Authentication.Cookies": "1.1.0",

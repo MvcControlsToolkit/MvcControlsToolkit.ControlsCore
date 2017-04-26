@@ -33,7 +33,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             var expression = col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
                  col.ColumnConnection.DisplayProperty :
                  col.For;
-            return query.GetFilterCondition(expression.Metadata.ModelType,
+            return query.GetFilterCondition(expression.Metadata.ContainerType,
                 expression.Name, place, ref filterObject);
 
 
@@ -59,13 +59,14 @@ namespace MvcControlsToolkit.Core.TagHelpers
             var expression = col.ColumnConnection != null  ?
                  col.ColumnConnection.DisplayProperty :
                  col.For;
-            Type sourceType = expression.Metadata.ModelType;
+            Type sourceType = expression.Metadata.ContainerType;
+            Type propertyType = expression.Metadata.ModelType;
             if (destinationType == null) destinationType = sourceType;
             else if (!sourceType.GetTypeInfo().IsAssignableFrom(destinationType)) return null;
             var path = expression.Name;
             bool simple = path.IndexOf('.') < 0;
             string countDistinctAlias = null;
-            var operations = QueryAttribute.AllowedAggregationsForType(sourceType, col.Queries.Value);
+            var operations = QueryAttribute.AllowedAggregationsForType(propertyType, col.Queries.Value);
             if (!simple) operations = operations & (GroupingOptions.Group );
             else if((operations & GroupingOptions.CountDistinct) == GroupingOptions.CountDistinct)
             {
@@ -85,7 +86,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             sb.Append("' ");
             if (!string.IsNullOrEmpty(selectCss))
             {
-                sb.Append("css='");
+                sb.Append("class='");
                 sb.Append(selectCss);
                 sb.Append("' ");
             }
@@ -104,7 +105,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 if (option.Key == selection)
                     sb.Append("selected ");
                 sb.Append(">");
-                sb.Append(HtmlEncoder.Default.Encode(localizer[option.Value]));
+                sb.Append(HtmlEncoder.Default.Encode(localizer == null ? option.Value : localizer[option.Value]));
                 sb.Append("</option>");
             }
             sb.Append("</select>");
@@ -115,24 +116,29 @@ namespace MvcControlsToolkit.Core.TagHelpers
             if (col.FilterClauses == null || place >= col.FilterClauses.Length || place < 0) return Tuple.Create(new HtmlString(string.Empty), false);
             if (displayCss == null) displayCss = selectCss;
             var options = col.FilterClauses[place];
-            if(col.ColumnConnection != null && !col.ColumnConnection.QueryDisplay)
+            bool isBool = false;
+            bool isEnum = false;
+            if ((col.ColumnConnection != null && !col.ColumnConnection.QueryDisplay) ||
+                (isEnum = col.For.Metadata.IsEnum))
             {
                 options = options & (QueryOptions.Equal | QueryOptions.NotEqual);
             }
+            else if (col.For.Metadata.UnderlyingOrModelType == typeof(bool)) isBool = true;
             var selections = QueryAttribute.QueryOptionsToEnum(options);
-            var name = (col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
+            var name =place.ToString(CultureInfo.InvariantCulture) +"."+ 
+                (col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
                  col.ColumnConnection.DisplayProperty.Name :
-                 col.For.Name)+".operator";
-            if (selections.Count() == 1)
+                 col.For.Name)+".Operator";
+            if (selections.Count() == 1 && !isBool && !isEnum)
             {
                 var res = selections.First();
                 if (string.IsNullOrEmpty(displayCss))
                     return Tuple.Create(new HtmlString(string.Format("<span data-name ='{0}' data-value='{1}'>{2}</span>",
-                        name, HtmlEncoder.Default.Encode(res.Key), HtmlEncoder.Default.Encode(localizer[res.Value]))), true);
+                        name, HtmlEncoder.Default.Encode(res.Key), HtmlEncoder.Default.Encode(localizer == null ? res.Value :localizer[res.Value]))), true);
                 else
                     return Tuple.Create(new HtmlString(string.Format("<span data-name ='{0}' data-value='{1}' class='{3}'>{2}</span>",
                         name, HtmlEncoder.Default.Encode(res.Key), 
-                        HtmlEncoder.Default.Encode(localizer[res.Value]),
+                        HtmlEncoder.Default.Encode(localizer == null ? res.Value : localizer[res.Value]),
                         displayCss)), true);
             }
             StringBuilder sb = new StringBuilder();
@@ -141,12 +147,18 @@ namespace MvcControlsToolkit.Core.TagHelpers
             sb.Append("' ");
             if (!string.IsNullOrEmpty(selectCss))
             {
-                sb.Append("css='");
+                sb.Append("class='");
                 sb.Append(selectCss);
                 sb.Append("' ");
             }
             sb.Append(">");
-            foreach(var option in selections)
+            if(isBool || isEnum)
+            {
+                sb.Append("<option value=''>");
+                sb.Append(HtmlEncoder.Default.Encode(localizer == null ? "none" : localizer["none"]));
+                sb.Append("</option>");
+            }
+            foreach (var option in selections)
             {
                 sb.Append("<option value='");
                 sb.Append(HtmlEncoder.Default.Encode(option.Key));
@@ -154,15 +166,15 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 if (option.Key == selection)
                     sb.Append("selected ");
                 sb.Append(">");
-                sb.Append(HtmlEncoder.Default.Encode(localizer[option.Value]));
+                sb.Append(HtmlEncoder.Default.Encode(localizer == null ? option.Value : localizer[option.Value]));
                 sb.Append("</option>");
             }
             sb.Append("</select>");
             return Tuple.Create(new HtmlString(sb.ToString()), false);
         }
-        public static IEnumerable<KeyValuePair<string,string>> FieldsToFilter(this RowType row)
+        public static IEnumerable<KeyValuePair<string,string>> FieldsToSort(this RowType row)
         {
-            return row.Columns.Where(m => m.CanFilter).
+            return row.Columns.Where(m => m.CanSort).
                 Select(m => new KeyValuePair<string, string>(
                     m.ColumnConnection != null && m.ColumnConnection.QueryDisplay ?
                         m.ColumnConnection.DisplayProperty.Name : m.For.Name,
@@ -188,13 +200,13 @@ namespace MvcControlsToolkit.Core.TagHelpers
             sb.Append("' ");
             if (!string.IsNullOrEmpty(selectCss))
             {
-                sb.Append("css='");
+                sb.Append("class='");
                 sb.Append(selectCss);
                 sb.Append("' ");
             }
             sb.Append(">");
             sb.Append("<option value=''>");
-            sb.Append(localizer["none"]);
+            sb.Append(localizer == null ? "none" : localizer["none"]);
             sb.Append("</option>");
             foreach (var option in selections)
             {
@@ -204,7 +216,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 if (option.Key == selection)
                     sb.Append("selected ");
                 sb.Append(">");
-                sb.Append(HtmlEncoder.Default.Encode(localizer[option.Value]));
+                sb.Append(HtmlEncoder.Default.Encode(localizer == null ? option.Value : localizer[option.Value]));
                 sb.Append("</option>");
             }
             sb.Append("</select>");
@@ -226,13 +238,13 @@ namespace MvcControlsToolkit.Core.TagHelpers
             sb.Append("' ");
             if (!string.IsNullOrEmpty(selectCss))
             {
-                sb.Append("css='");
+                sb.Append("class='");
                 sb.Append(selectCss);
                 sb.Append("' ");
             }
             sb.Append(">");
             sb.Append("<option value=''>");
-            sb.Append(localizer["none"]);
+            sb.Append(localizer == null ? "none" : localizer["none"]);
             sb.Append("</option>");
             foreach (var option in sortingRypes)
             {
@@ -242,7 +254,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 if (option.Key == selection)
                     sb.Append("selected ");
                 sb.Append(">");
-                sb.Append(HtmlEncoder.Default.Encode(localizer[option.Value]));
+                sb.Append(HtmlEncoder.Default.Encode(localizer == null ? option.Value : localizer[option.Value]));
                 sb.Append("</option>");
             }
             sb.Append("</select>");

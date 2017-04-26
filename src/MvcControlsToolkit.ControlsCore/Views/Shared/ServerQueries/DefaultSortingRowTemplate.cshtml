@@ -1,0 +1,30 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+    var row = ViewData["Options"] as RowType;
+    var fatherHelpers = ViewData["ContextualizedHelpers"] as ContextualizedHelpers;
+    var helpers = fatherHelpers.CreateChild(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var localizer = row.GetLocalizer(helpers.LocalizerFactory);
+    var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
+
+    var fields = row.FieldsToSort();
+    var selectedSorting = row.SelectedSorting(query);
+    int NClauses = (int)(row.MaxSortingClauses == 0 ? 1 : row.MaxSortingClauses);
+}
+@for (int i = 0; i < NClauses; i++)
+{
+    <div class="form-group col-xs-12">
+        <div class="row">
+            <div class="col-xs-6">
+                @row.SortingFieldHtml(i, localizer, fields, selectedSorting, "form-control")
+            </div>
+            <div class="col-xs-6">
+                @row.SortingTypedHtml(i, localizer, selectedSorting, "form-control")
+            </div>
+        </div>
+    </div>
+}

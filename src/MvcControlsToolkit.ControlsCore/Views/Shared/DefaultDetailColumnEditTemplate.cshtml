@@ -18,9 +18,9 @@
         if (col.ColumnConnection is ColumnConnectionInfosStatic)
         {
             var infos = col.ColumnConnection as ColumnConnectionInfosStatic;
-            <label asp-for="@Model" class="control-label"></label>
+            <label asp-for="@Model" class="control-label">@col.ColumnTitle</label>
             <select asp-for="@Model" asp-items="@(new SelectList(await infos.ItemsSelector(User), infos.ItemsValueProperty, infos.ItemsDisplayProperty))"
-                    class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "form-control")">
+                    class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")">
                 @if (col.PlaceHolder != null)
                 {
                     <option value="">@col.PlaceHolder</option>
@@ -34,7 +34,7 @@
             var tagBuilder = generator.GenerateValidationMessage(ViewContext, col.For.ModelExplorer, col.For.Name, null, "span", null);
             tagBuilder.AddCssClass("text-danger");
             <label for="@TagBuilder.CreateSanitizedId(ViewData.TemplateInfo.GetFullHtmlFieldName(infos.DisplayProperty.Name), IdAttributeDotReplacement)" class="control-label">
-                @infos.DisplayProperty.Metadata.GetDisplayName()
+                @col.ColumnTitle
             </label>
             <autocomplete for-explorer="@ViewData.ModelExplorer.GetExplorerForProperty(col.For.Name)"
                           display-explorer="@ViewData.ModelExplorer.GetExplorerForProperty(infos.DisplayProperty.Name)"
@@ -46,7 +46,7 @@
                           url-token="@infos.UrlToken"
                           dataset-name="@infos.DataSetName"
                           max-results="@infos.MaxResults"
-                          class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "form-control")" />
+                          class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />
 
             tagBuilder.WriteTo(ViewContext.Writer, HtmlEncoder);
         }
@@ -54,8 +54,8 @@
     }
     else if (metaData.UnderlyingOrModelType == typeof(bool))
     {
-        <label asp-for="@Model">@col.For.Metadata.GetDisplayName()</label>
-        <p @Html.Raw("class='" + (col.CheckboxCssClass != null ? col.CheckboxCssClass : "form-control-static") + "'")>
+        <label asp-for="@Model">@col.ColumnTitle</label>
+        <p @Html.Raw("class='" + (col.CheckboxDetailCssClass != null ? col.CheckboxDetailCssClass : "form-control-static") + "'")>
             <input asp-for="@Model" type="checkbox"  />
         </p>
 
@@ -65,8 +65,8 @@
     {
         
         
-        <label asp-for="@Model">@col.For.Metadata.GetDisplayName()</label>
-            <select asp-for="@Model" asp-items="@Html.GetEnumSelectList(metaData.ModelType)" class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "form-control")">
+        <label asp-for="@Model">@col.ColumnTitle</label>
+            <select asp-for="@Model" asp-items="@Html.GetEnumSelectList(metaData.ModelType)" class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")">
                 @if (col.PlaceHolder != null)
                 {
                     <option value="">@col.PlaceHolder</option>
@@ -76,8 +76,8 @@
             }
     else
     {
-    <label asp-for="@Model">@col.For.Metadata.GetDisplayName()</label>
-    <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "form-control")" />
+    <label asp-for="@Model">@col.ColumnTitle</label>
+    <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />
     <span asp-validation-for="@Model" class="text-danger"></span>
     }
 </div>

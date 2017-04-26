@@ -56,6 +56,9 @@ namespace MvcControlsToolkit.Core.TagHelpers
         [HtmlAttributeName("current-query")]
         public ModelExpression Query { get; set; }
 
+        [HtmlAttributeName("collection")]
+        public ModelExpression For { get; set; }
+
         [HtmlAttributeName("total-pages-default")]
         public int? TotalPagesDefault { get; set; }
 
@@ -105,6 +108,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
             if (string.IsNullOrWhiteSpace(SkipUrlToken)) SkipUrlToken="_skip_";
             if (string.IsNullOrWhiteSpace(TakeUrlToken)) TakeUrlToken="_top_";
+            if (Query == null)
+                Query=TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Query);
+            if (For == null)
+                For = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
             if (string.IsNullOrWhiteSpace(UrlDefault) && Url == null && Query == null) new ArgumentNullException("url-default/url/query");
 
             var ctx = new ContextualizedHelpers(ViewContext, html, httpAccessor, component, urlHelperFactory, factory);

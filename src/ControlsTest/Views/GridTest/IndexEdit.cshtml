@@ -1,5 +1,6 @@
 ﻿@model ControlsTest.Models.ProductlistViewModel
 @using ControlsTest.Controllers
+@using System.Collections
 @{
     ViewData["Title"] = "Edit immediate";
     if(Model.Query.AttachedTo == null)
@@ -7,6 +8,7 @@
         Model.Query.AttachEndpoint(Url.Action("IndexEdit", "GridTest"));
 
     }
+    Func<object, Task<IEnumerable>> getTasks = async x => ViewData["AllTypes"] as IEnumerable;
 }
 <style>
     tfoot .pagination, thead .pagination {
@@ -36,76 +38,79 @@
               operations="x => Functionalities.FullInLine | Functionalities.AddBefore | Functionalities.AddAfter"
               class="table table-condensed table-bordered"
               query-for="Query"
-              enable-query="true">
+              sorting-clauses="2"
+              enable-query="true"
+              query-grouping-type="typeof(ProductViewModelGrouping)">
             <column asp-for="Products.Data.Element().TypeId">
                 <external-key-static display-property="Products.Data.Element().TypeName" />
-                @*<external-key-static display-property="Products.Data.Element().TypeName"
-                    items-selector="@getTasks"
-                    items-value-property="Value"
-                    items-display-property="Display"
-                     />*@
+               @*<external-key-static display-property="Products.Data.Element().TypeName"
+    items-selector="@getTasks"
+    query-display="false"
+    items-value-property="Value"
+    items-display-property="Display"
+     />*@
                 <external-key-remote display-property="Products.Data.Element().TypeName"
-                                     items-value-property="Value"
-                                     items-display-property="Display"
-                                     items-url="@(Url.Action("GetTypes", "DetailTest", new { search = "_zzz_" }))"
-                                     dataset-name="product-types"
-                                     url-token="_zzz_"
-                                     max-results="20" />
-            </column> />
-            <column asp-for="Products.Data.Element().Price" colspan="2" />
-            <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Model"
-                      mvc-controller="typeof(GridTestController)"
-                      from-row="0">
-                <column asp-for="Products.Data.Element().Price" colspan="1" />
-                <column asp-for="Products.Data.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
-            </row-type>
-            <toolbar zone-name="@LayoutStandardPlaces.Header">
-                <div class="row">
+    items-value-property="Value"
+    items-display-property="Display"
+    query-display="false"
+    items-url="@(Url.Action("GetTypes", "DetailTest", new { search = "_zzz_" }))"
+    dataset-name="product-types"
+    url-token="_zzz_"
+    max-results="20" />
+                </column> />
+                <column asp-for="Products.Data.Element().Price" colspan="2" />
+                <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Model"
+                          mvc-controller="typeof(GridTestController)"
+                          from-row="0">
+                    <column asp-for="Products.Data.Element().Price" colspan="1" />
+                    <column asp-for="Products.Data.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
+                </row-type>
+                <toolbar zone-name="@LayoutStandardPlaces.Header">
+                    <div class="row">
 
-                    <div class="col-xs-4">
-                        <copy-html name="main-pager">
-                            <pager 
-                                   class="pagination pagination-sm"
-                                   max-pages="4"
-                                   page-size-default="3"
-                                   total-pages="Products.TotalPages"
-                                   current-query="Query"/>
-                        </copy-html>
-                        
+                        <div class="col-xs-4">
+                            <copy-html name="main-pager">
+                                <pager
+                                       class="pagination pagination-sm"
+                                       max-pages="4"
+                                       page-size-default="3"
+                                       total-pages="Products.TotalPages" />
+                            </copy-html>
+
+                        </div>
+                        <div class="col-xs-8">
+
+                            <button type="button" data-operation="add append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
+                            <button type="button" data-operation="add append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
+                            <button type="button" data-operation="add prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
+                            <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
+                        </div>
                     </div>
-                    <div class="col-xs-8">
-                        
-                        <button type="button" data-operation="add append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
-                        <button type="button" data-operation="add append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
-                        <button type="button" data-operation="add prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
-                        <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
-                    </div>
-                </div>
-                <query  type="Filtering" />
-                <query  type="Sorting" />
-                <query  type="Grouping" />
-            </toolbar>
-            <toolbar zone-name="@LayoutStandardPlaces.Footer">
-                <paste-html name="main-pager" />
-            </toolbar>
-        </grid>
-        <div class="form-group col-xs-12">
-            <button type="button" data-operation="add append 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto</button>
-            <button type="button" data-operation="add append 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione</button>
-            <button type="button" data-operation="add prepend 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto (prep)</button>
-            <button type="button" data-operation="add prepend 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione (prep)</button>
-            
-        </div>
-    </form>
+                    <query  type="Filtering" />
+                    <query  type="Sorting" />
+                    <query  type="Grouping"  />
+                </toolbar>
+                <toolbar zone-name="@LayoutStandardPlaces.Footer">
+                    <paste-html name="main-pager" />
+                </toolbar>
+            </grid>
+            <div class="form-group col-xs-12">
+                <button type="button" data-operation="add append 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto</button>
+                <button type="button" data-operation="add append 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione</button>
+                <button type="button" data-operation="add prepend 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto (prep)</button>
+                <button type="button" data-operation="add prepend 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione (prep)</button>
 
-</div>
+            </div>
+        </form>
 
-@section Scripts {
-    @*<link href="~/lib/mvcct-controls-server/modules-bootstrap/typeaheadjs3.css" rel="stylesheet" />
-            @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
-            <script src="~/lib/corejs-typeahead/dist/typeahead.bundle.js"></script>
-        <script src="~/lib/mvcct-controls-server/mvcct.controls.server.js"></script>
-        <script src="~/lib/mvcct-controls-server/modules-bootstrap/mvcct.controls.server.autocomplete.js"></script>*@
+    </div>
+
+    @section Scripts {
+        @*<link href="~/lib/mvcct-controls-server/modules-bootstrap/typeaheadjs3.css" rel="stylesheet" />
+                @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+                <script src="~/lib/corejs-typeahead/dist/typeahead.bundle.js"></script>
+            <script src="~/lib/mvcct-controls-server/mvcct.controls.server.js"></script>
+            <script src="~/lib/mvcct-controls-server/modules-bootstrap/mvcct.controls.server.autocomplete.js"></script>*@
 
     <link href="~/lib/awesomplete/awesomplete.css" rel="stylesheet" />
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }

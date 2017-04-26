@@ -217,6 +217,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
                             
                         }
                     }
+                    else if (Type == QueryWindowType.Grouping && mainRow.GroupingTemplate == null)
+                        mainRow.GroupingTemplate = windowDefaultTemplates.ERowTemplate;
+                    else if (Type == QueryWindowType.Sorting && mainRow.SortingTemplate == null)
+                        mainRow.SortingTemplate = windowDefaultTemplates.ERowTemplate;
                     var res = currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
                         res.Wait();
                         return windowOptions.Result;
@@ -331,6 +335,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
                         }
                     }
+                    else if (Type == QueryWindowType.Grouping && mainRow.GroupingTemplate == null)
+                        mainRow.GroupingTemplate = windowDefaultTemplates.ERowTemplate;
+                    else if (Type == QueryWindowType.Sorting && mainRow.SortingTemplate == null)
+                        mainRow.SortingTemplate = windowDefaultTemplates.ERowTemplate;
                     await currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
                     
                     return windowOptions.Result;

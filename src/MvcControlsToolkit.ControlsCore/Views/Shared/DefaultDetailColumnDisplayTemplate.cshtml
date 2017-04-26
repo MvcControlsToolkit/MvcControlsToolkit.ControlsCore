@@ -28,15 +28,15 @@
 <div class="@col.GetTotalClass(SupportedGridSystems.Bootstrap3, false)">
     @if (metaData.UnderlyingOrModelType == typeof(bool))
     {
-        <label class="control-label" asp-for="@Model">@col.For.Metadata.GetDisplayName()</label>
-        <p @Html.Raw("class='" + (col.InputCssClass != null ? col.CheckboxCssClass : "form-control-static") + "'")>
+        <label class="control-label" asp-for="@Model">@col.ColumnTitle</label>
+        <p @Html.Raw("class='" + (col.CheckboxDetailCssClass != null ? col.CheckboxDetailCssClass : "form-control-static") + "'")>
             <input disabled asp-for="@Model" type="checkbox"   />
         </p>
     }
     else
     {
-    <label asp-for="@Model" class="control-label">@col.For.Metadata.GetDisplayName()</label>
-<p  @Html.Raw("class='" + (col.InputCssClass != null ? col.InputCssClass : "form-control-static") + "'") >
+    <label asp-for="@Model" class="control-label">@col.ColumnTitle</label>
+<p  @Html.Raw("class='" + (col.InputDetailCssClass != null ? col.InputDetailCssClass : "form-control-static") + "'") >
             @if(Model == null)
             {
                 @(col.NullDisplayText??string.Empty)

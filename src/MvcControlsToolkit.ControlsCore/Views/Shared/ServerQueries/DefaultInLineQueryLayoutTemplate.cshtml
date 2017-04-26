@@ -42,7 +42,20 @@
         
         <div class="form-group col-xs-12">
             @currProvider.RenderButton(options.SubmitButton, options.OperationParameters, "btn-primary", helpers, localizer, true, false)
+            <button type="reset" class="btn btn-primary">
+                @if (localizer != null)
+                {
+                    <span>@localizer["reset"]</span>
+
+                }
+                else
+                {
+
+                    <span>reset</span>
+                }
+            </button>
         </div>
+
     }
     <div class="clearfix"></div>
 </form>

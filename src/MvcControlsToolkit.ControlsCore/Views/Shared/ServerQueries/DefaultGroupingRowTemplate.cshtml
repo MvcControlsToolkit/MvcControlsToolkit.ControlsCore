@@ -1,0 +1,27 @@
+﻿@model Object
+@using MvcControlsToolkit.Core.Templates
+@using MvcControlsToolkit.Core.TagHelpers
+@using MvcControlsToolkit.Core.Views
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@{
+    var row = ViewData["Options"] as RowType;
+    var destinationType = ViewData["ExtraData"] as Type ?? row.For.Metadata.ModelType;
+    var fatherHelpers = ViewData["ContextualizedHelpers"] as ContextualizedHelpers;
+    var helpers = fatherHelpers.CreateChild(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
+    var localizer = row.GetLocalizer(helpers.LocalizerFactory);
+    var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
+}
+@foreach (var col in row.Columns.Where(m => m.CanAggregate))
+{
+    var settings = col.GroupSettings(query);
+    var operations = col.AggregationOperatorHtml(destinationType, localizer, settings?.Item1, "form-control");
+    if(operations != null)
+    {
+        <div class="form-group col-xs-12 col-sm-6 col-md-4">
+            <label asp-for="@Model" class="control-label">@col.ColumnTitle</label>
+            @operations
+        </div>
+    }
+}
+

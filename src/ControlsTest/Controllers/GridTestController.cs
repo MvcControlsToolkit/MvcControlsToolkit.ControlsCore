@@ -61,11 +61,13 @@ namespace ControlsTest.Controllers
 
         }
         IWebQueryProvider queryProvider;
+        private readonly ICRUDRepository TypesRepository;
         public GridTestController(Data.ApplicationDbContext db, IStringLocalizerFactory factory, IHttpContextAccessor accessor, IWebQueryProvider queryProvider) :base(factory, accessor)
         {
             //in actual 3 layers applications repository inherit from DefaultCRUDRepository
             //and then it is DI injected
             Repository = DefaultCRUDRepository.Create(db, db.Products);
+            TypesRepository = DefaultCRUDRepository.Create(db, db.ProductTypes);
             this.queryProvider = queryProvider;
         }
         public override string DetailColumnAdjustView
@@ -129,6 +131,7 @@ namespace ControlsTest.Controllers
                 q => q.OrderBy(m => m.Name),
                 pg, 3)
             };
+            ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
             return View(model);
         }
         public async Task<IActionResult> IndexEditDetail(int? page)
