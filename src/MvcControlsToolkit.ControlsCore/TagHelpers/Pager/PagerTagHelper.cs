@@ -106,8 +106,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
 
-            if (string.IsNullOrWhiteSpace(SkipUrlToken)) SkipUrlToken="_skip_";
-            if (string.IsNullOrWhiteSpace(TakeUrlToken)) TakeUrlToken="_top_";
+            if (string.IsNullOrWhiteSpace(SkipUrlToken)) SkipUrlToken="_ skip_";
+            if (string.IsNullOrWhiteSpace(TakeUrlToken)) TakeUrlToken="_ top_";
             if (Query == null)
                 Query=TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Query);
             if (For == null)
