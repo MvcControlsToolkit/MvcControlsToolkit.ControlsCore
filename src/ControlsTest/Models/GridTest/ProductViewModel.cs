@@ -59,6 +59,7 @@ namespace ControlsTest.Models
     public class ProductViewModel: ProductViewModelBase
     {
     }
+    [RunTimeType]
     public class ProductViewModelGrouping: ProductViewModel
     {
         public int ChosenCurrencyCount { get; set; }

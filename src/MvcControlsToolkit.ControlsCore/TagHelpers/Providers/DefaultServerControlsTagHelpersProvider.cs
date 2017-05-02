@@ -227,6 +227,31 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 null,
                 null
                 );
+            allTagProcessors["verify-permission"] = allTagProcessors["query-sort-inline"] =
+                async (tc, to, th, tpo, ctx) =>
+                {
+                    to.TagName = string.Empty;
+                    var tag = th as ControlsCore.TagHelpers.VerifyPermissionTagHelper;
+                    var currentFunctionalities = Functionalities.ReadOnly;
+                    if(tag.UserPermissions != null)
+                    {
+                        var user = ctx.CurrentHttpContext.User;
+                        currentFunctionalities = tag.UserPermissions(user);
+                        if (tag.QueryFor != null && tag.QueryFor.Model != null)
+                        {
+                            var query = tag.QueryFor.Model as QueryDescription;
+                            if (query != null && query.Grouping != null
+                            && query.Grouping.Keys != null && query.Grouping.Keys.Count > 0)
+                                currentFunctionalities = currentFunctionalities
+                                & (Functionalities.ReadOnly | Functionalities.ShowDetail);
+                        }
+                        if ((currentFunctionalities & tag.RequiredPermissions) != tag.RequiredPermissions)
+                        {
+                            to.Content.SetContent(null);
+                        }
+                    }
+                };
+            
             DefineButtonProperies();
             addExtensions();
         }

@@ -262,7 +262,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         }
         public static bool RowToRender(this RowType row, QueryDescription query, Type groupingType)
         {
-            if (query == null || query.Grouping == null || query.Grouping.Keys == null || query.Grouping.Keys.Count ==0) return true;
+            if (query == null || query.Grouping == null || query.Grouping.Keys == null || query.Grouping.Keys.Count ==0)  return row.For.Metadata.ModelType != groupingType;
             return row.For.Metadata.ModelType==groupingType;
         }
         public static Functionalities RequiredFunctionalitiesExt(this RowType row, IPrincipal user, QueryDescription query)

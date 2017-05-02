@@ -10,6 +10,7 @@
     if (col.ColumnConnection.QueryDisplay)
     {
         <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />
+        <span asp-validation-for="@Model" class="text-danger"></span>
 
     }
     else if (col.ColumnConnection is ColumnConnectionInfosStatic)
@@ -22,6 +23,7 @@
                 <option value="">@col.PlaceHolder</option>
             }
         </select>
+        <span asp-validation-for="@Model" class="text-danger"></span>
     }
     else
     {
@@ -55,9 +57,11 @@ else if (metaData.IsEnum)
             <option value="">@col.PlaceHolder</option>
         }
     </select>
+    <span asp-validation-for="@Model" class="text-danger"></span>
 }
 else
 {
     <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />
+    <span asp-validation-for="@Model" class="text-danger"></span>
 }
 

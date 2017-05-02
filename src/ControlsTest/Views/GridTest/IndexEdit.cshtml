@@ -35,7 +35,9 @@
               all-properties="true"
               mvc-controller="typeof(GridTestController)"
               row-id="immediate-example"
-              operations="x => Functionalities.FullInLine | Functionalities.AddBefore | Functionalities.AddAfter"
+              operations="x => Functionalities.FullInLine 
+                        | Functionalities.AddBefore | Functionalities.AddAfter
+                        | Functionalities.Append | Functionalities.Prepend"
               class="table table-condensed table-bordered"
               query-for="Query"
               sorting-clauses="2"
@@ -60,10 +62,15 @@
                 </column> />
                 <column asp-for="Products.Data.Element().Price" colspan="2" />
                 <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Model"
-                          mvc-controller="typeof(GridTestController)"
                           from-row="0">
                     <column asp-for="Products.Data.Element().Price" colspan="1" />
                     <column asp-for="Products.Data.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
+                </row-type>
+                <row-type asp-for="Products.Data.SubInfo<ProductViewModelGrouping>().Model" from-row="0">
+                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().ChosenCurrencyCount"/>
+                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().AvailableCount" />
+                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().DateValidCount" />
+                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().TypeNameCount" />
                 </row-type>
                 <toolbar zone-name="@LayoutStandardPlaces.Header">
                     <div class="row">
@@ -78,13 +85,15 @@
                             </copy-html>
 
                         </div>
-                        <div class="col-xs-8">
+                        <verify-permission required-permissions="@(Functionalities.Append | Functionalities.Prepend)">
+                            <div class="col-xs-8">
 
-                            <button type="button" data-operation="add append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
-                            <button type="button" data-operation="add append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
-                            <button type="button" data-operation="add prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
-                            <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
-                        </div>
+                                <button type="button" data-operation="add append 0" class="btn btn-sm btn-primary">nuovo prodotto</button>
+                                <button type="button" data-operation="add append 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione</button>
+                                <button type="button" data-operation="add prepend 0" class="btn btn-sm btn-primary">nuovo prodotto (prep)</button>
+                                <button type="button" data-operation="add prepend 1" class="btn btn-sm btn-primary">nuovo prodotto con manutenzione (prep)</button>
+                            </div>
+                        </verify-permission>
                     </div>
                     <query  type="Filtering" />
                     <query  type="Sorting" />
@@ -94,6 +103,10 @@
                     <paste-html name="main-pager" />
                 </toolbar>
             </grid>
+        <verify-permission required-permissions="@(Functionalities.Append | Functionalities.Prepend)"
+                           permissions="x => Functionalities.FullInLine 
+                        | Functionalities.AddBefore | Functionalities.AddAfter
+                        | Functionalities.Append | Functionalities.Prepend">
             <div class="form-group col-xs-12">
                 <button type="button" data-operation="add append 0" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto</button>
                 <button type="button" data-operation="add append 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione</button>
@@ -101,7 +114,8 @@
                 <button type="button" data-operation="add prepend 1" class="btn btn-primary" data-target="main_grid" data-control-type="server-immediate-grid">nuovo prodotto con manutenzione (prep)</button>
 
             </div>
-        </form>
+        </verify-permission>
+    </form>
 
     </div>
 

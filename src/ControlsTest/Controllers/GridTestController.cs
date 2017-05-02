@@ -120,16 +120,17 @@ namespace ControlsTest.Controllers
             var query=queryProvider.Parse<ProductViewModel>();
             
             int pg = (int)query.Page;
-            if (query.Filter == null)
-                query.AddFilterCondition(m => m.Name == "antani");
+
+
 
             var model = new ProductlistViewModel
             {
-                Query=query,
+                Query = query,
                 Products = await Repository.GetPage<ProductViewModel>(
-                null,
-                q => q.OrderBy(m => m.Name),
-                pg, 3)
+                query.GetFilterExpression(),
+                query.GetSorting() ?? (q => q.OrderBy(m => m.Name)),
+                pg, 3,
+                query.GetGrouping<ProductViewModelGrouping>())
             };
             ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
             return View(model);
