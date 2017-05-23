@@ -556,6 +556,61 @@
                     }
                 }
                 enhancer["register"](init, true, null, "mvcct event handling");
+
+                //out of the box events
+                function findForm(x) {
+                    for (; x; x = x.parentNode) {
+                        if (!x.getAttribute) return null;
+                        else if (x.tagName == 'FORM') return x;
+                    }
+                    return null;
+                }
+                function riseEvent(el, name){
+                    var ev = document.createEvent("Event");
+                    ev.initEvent(name, true, true);
+                    el.dispatchEvent(ev);
+                }
+                function resetForms(infos)
+                {
+                    var el = infos['target'];
+                    var name = infos['args'];
+                    if(name && name.length>0) name = name[0];
+                    else name = null;
+                    var form = findForm(el);
+                    if(!form) return;
+                    [].forEach.call(form.elements, function(el){
+                        var type = el.type;
+                        var tag = el.tagName;
+                        if (type == 'checkbox' || type == 'radio')
+                        {
+                            if(el.checked)
+                            {
+                                el.checked = false;
+                                if (name) riseEvent(el, name);
+                            }      
+                        }
+                            
+                        else if (tag == 'TEXTAREA' || (tag == 'INPUT' 
+                            && type != 'button' && type != 'reset' && type != 'submit'))
+                            {
+                                if(el.value)
+                                {
+                                    el.value = "";
+                                    if (name) riseEvent(el, name);
+                                }  
+                            }   
+                        else if (tag == 'SELECT')
+                        {
+                                if(el.selectedIndex>0)
+                                {
+                                    el.selectedIndex = 0;
+                                    if (name) riseEvent(el, name);
+                                } 
+                        }
+                            
+                    });
+                }
+                serverControls['addOperation']('reset-form_click', resetForms);
                 //Finish actual code
                 
             })

@@ -227,7 +227,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 null,
                 null
                 );
-            allTagProcessors["verify-permission"] = allTagProcessors["query-sort-inline"] =
+            allTagProcessors["verify-permission"] = 
                 async (tc, to, th, tpo, ctx) =>
                 {
                     to.TagName = string.Empty;
@@ -453,6 +453,13 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                     IconClass = "glyphicon-remove",
                     OperationName = "close",
                     ShowText = "close"
+                });
+            allButtonProperties.Add(StandardButtons.GroupDetail,
+                new ButtonProperties
+                {
+                    IconClass = "glyphicon-th-list",
+                    OperationName = "group-detail",
+                    ShowText = "group detail"
                 });
         }
         public  IHtmlContent RenderButton(StandardButtons buttonType, 

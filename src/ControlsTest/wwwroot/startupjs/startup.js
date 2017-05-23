@@ -9,12 +9,12 @@
     options.browserSupport = {
         cookie: "_browser_basic_capabilities",
         forms: null,
-        fallbacks: {/*
+        fallbacks: {
             number: {
                 force: true
             },
             range: {
-                force: false
+                force: true
             },
             time: {
                 force: true
@@ -23,7 +23,7 @@
                 force: true
             },
             datetime: {
-                force: false
+                force: true
             },
             month: {
                 force: true
@@ -34,7 +34,7 @@
             color: {
                 force: true
             }
-        */},
+        },
         handlers: {
             enhance: {
                 //datetime: undefined

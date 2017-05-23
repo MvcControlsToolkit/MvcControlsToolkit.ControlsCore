@@ -17,7 +17,7 @@
         }(
 
             (function (serverControls, enhancer, Awesomplete) {
-
+                var expando = "_companion_display_";
                 //Start actual code
                 var options;
                 function processOptions(o) {
@@ -50,10 +50,13 @@
                     var hidden;
                     for (hidden = el.nextSibling; hidden && hidden.nodeType != 1; hidden = hidden.nextSibling);
                     if (!hidden) return;
+                    
                     el.setAttribute("data-last-value", el.value);
                     hidden.setAttribute("data-last-value", hidden.value);
                     el.value = "";
-                    var defaultEmpty = args[5] == "true";
+                    var tolerate = args[5] == "tolerate";
+                    if(tolerate) el[expando] = hidden;
+                    var defaultEmpty = tolerate || (rgs[5] == "true");
                     var tOptions = typeof options === 'function' ? options(target) : options;
                     var lastData;
                     var removeDiacritics=
@@ -129,7 +132,7 @@
                         
                         var emptysearch;
                         var update = (emptysearch = defaultEmpty || !el.value) ?
-                            function () { el.value = ''; } :
+                            function () { if(!tolerate) el.value = ''; } :
                             function () { el.value = el.getAttribute("data-last-value"); };
                         update();
                         oldVal = hidden.value;

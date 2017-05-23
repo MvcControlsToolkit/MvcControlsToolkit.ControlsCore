@@ -20,7 +20,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
     public class QueryTagHelperBase : TagHelper
     {
         protected const string ForAttributeName = "asp-for";
-        protected const string CollectionForAttributeName = "query-for";
+        protected const string CollectionForAttributeName = "collection-for";
         protected const string GroupingOutputName = "grouping-type";
         protected const string ClientCustomProcessorForAttributeName = "client-custom-processor-for";
         protected const string TypeAttributeName = "type";
@@ -144,8 +144,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             if (For == null) return;
 
             if (!typeof(QueryDescription).GetTypeInfo().IsAssignableFrom(For.Metadata.ModelType)) throw new ArgumentException(ForAttributeName);
-
-            CollectionFor = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
+            if(CollectionFor == null)
+                CollectionFor = TagContextHelper.GetBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
             if (CollectionFor == null) throw new ArgumentNullException(CollectionForAttributeName);
             if (Type == QueryWindowType.Grouping)
             {
@@ -284,26 +284,26 @@ namespace MvcControlsToolkit.Core.TagHelpers
             IList<KeyValuePair<string, string>> toolbars = string.IsNullOrEmpty(RowCollection) ?
                 null :
                 RowType.GetToolbarsCollection(RowCollection);
-            if(rows == null || toolbars == null)
+            if(rows == null && !string.IsNullOrEmpty(RowCollection))
             {
-                var nc = new Core.OptionsParsing.ReductionContext(Core.OptionsParsing.TagTokens.RowContainer, 0, windowDefaultTemplates, rows != null);
+                object orows;
+                httpAccessor.HttpContext.Items.TryGetValue("_request_cache_" + RowCollection, out orows);
+                rows = orows as IList<RowType>;
+            }
+            if(toolbars == null)
+            {
+                var nc = new Core.OptionsParsing.ReductionContext(Core.OptionsParsing.TagTokens.RowContainer, 0, windowDefaultTemplates, true);
                 context.SetChildrenReductionContext(nc);
                 
                 await output.GetChildContentAsync();
                 var collector = new Core.OptionsParsing.RowContainerCollector(nc);
                 var res = collector.Process(this, windowDefaultTemplates) as Tuple<IList<Core.Templates.RowType>, IList<KeyValuePair<string, string>>>;
-                if (rows == null)
-                {
-                    rows = res.Item1;
-                    if (!string.IsNullOrEmpty(RowCollection))
-                        RowType.CacheRowGroup(RowCollection, rows, httpAccessor.HttpContext);
-                }
-                if (toolbars == null)
-                {
-                    toolbars = res.Item2;
-                    if (!string.IsNullOrEmpty(RowCollection))
+                
+                
+                toolbars = res.Item2;
+                if (!string.IsNullOrEmpty(RowCollection))
                         RowType.CacheToolbarGroup(RowCollection, toolbars, httpAccessor.HttpContext);
-                }
+                
             }
             var windowOptions = new QueryWindowOptions(rows, toolbars)
             {
@@ -343,8 +343,11 @@ namespace MvcControlsToolkit.Core.TagHelpers
                     
                     return windowOptions.Result;
                 };
+            TagContextHelper.OpenBindingContext(httpAccessor.HttpContext, BindingContextNames.Query, For);
             output.TagName = string.Empty;
             output.Content.SetHtmlContent(await toExecute(new Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>(rows, toolbars)));
+            TagContextHelper.CloseBindingContext(httpAccessor.HttpContext, BindingContextNames.Query);
+
         }
     }
 }

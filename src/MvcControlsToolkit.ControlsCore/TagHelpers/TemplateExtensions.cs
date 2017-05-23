@@ -12,12 +12,14 @@ using System.Text.Encodings.Web;
 using System.Text;
 using System.Reflection;
 using System.Globalization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using MvcControlsToolkit.Core.Types;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
     public static class TemplateExtensions
     {
-        private static KeyValuePair<string, string>[] sortingRypes =
+        private static KeyValuePair<string, string>[] sortingTypes =
             { 
               new KeyValuePair<string, string>("asc", "asc"),
               new KeyValuePair<string, string>("desc", "desc")
@@ -33,18 +35,31 @@ namespace MvcControlsToolkit.Core.TagHelpers
             var expression = col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
                  col.ColumnConnection.DisplayProperty :
                  col.For;
+            if (col.ColumnConnection != null && (col.ColumnConnection is ColumnConnectionInfosOnLine)  && !col.ColumnConnection.QueryDisplay)
+            {
+                var displayExpression = col.ColumnConnection.DisplayProperty;
+                var op = query.GetFilterCondition(displayExpression.Metadata.ContainerType,
+                    displayExpression.Name, place, ref filterObject);
+                var mop = query.GetFilterCondition(expression.Metadata.ContainerType,
+                expression.Name, place, ref filterObject);
+                if (mop == null) return op == null ? null : (op == "startswith" ? "eq" : "ne");
+                else return mop;
+            }
+                
+
             return query.GetFilterCondition(expression.Metadata.ContainerType,
                 expression.Name, place, ref filterObject);
 
 
         }
+        
         public static Tuple<string, string> GroupSettings(this Column col, QueryDescription query)
         {
             if (col.For == null || query == null) return null;
-            var expression = col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
-                 col.ColumnConnection.DisplayProperty :
-                 col.For;
-            return query.GetAggregationOperation(expression.Name);
+            //var expression = col.ColumnConnection != null && col.ColumnConnection.QueryDisplay ?
+            //     col.ColumnConnection.DisplayProperty :
+            //     col.For;
+            return query.GetAggregationOperation(col.For.Name);
 
 
         }
@@ -56,8 +71,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public static IHtmlContent AggregationOperatorHtml(this Column col, Type destinationType, IStringLocalizer localizer, string selection, string selectCss = null)
         {
             if (!col.CanAggregate) return null;
-            var expression = col.ColumnConnection != null  ?
-                 col.ColumnConnection.DisplayProperty :
+            var expression = 
                  col.For;
             Type sourceType = expression.Metadata.ContainerType;
             Type propertyType = expression.Metadata.ModelType;
@@ -67,8 +81,14 @@ namespace MvcControlsToolkit.Core.TagHelpers
             bool simple = path.IndexOf('.') < 0;
             string countDistinctAlias = null;
             var operations = QueryAttribute.AllowedAggregationsForType(propertyType, col.Queries.Value);
+            string displayName = null;
             if (!simple) operations = operations & (GroupingOptions.Group );
-            else if((operations & GroupingOptions.CountDistinct) == GroupingOptions.CountDistinct)
+            else if (col.ColumnConnection != null)
+            {
+                operations = operations & (GroupingOptions.Group | GroupingOptions.CountDistinct);
+                displayName = col.ColumnConnection.DisplayProperty.Name; 
+            }
+            if((operations & GroupingOptions.CountDistinct) == GroupingOptions.CountDistinct)
             {
                 var ti = destinationType.GetTypeInfo();
                 var prop = ti.GetProperty(path + "Count");
@@ -84,6 +104,12 @@ namespace MvcControlsToolkit.Core.TagHelpers
             sb.Append("<select name ='");
             sb.Append(path);
             sb.Append("' ");
+            if(displayName != null)
+            {
+                sb.Append("data-display-name='");
+                sb.Append(displayName);
+                sb.Append("' ");
+            }
             if (!string.IsNullOrEmpty(selectCss))
             {
                 sb.Append("class='");
@@ -111,6 +137,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             sb.Append("</select>");
             return new HtmlString(sb.ToString());
         }
+        
         public static Tuple<HtmlString, bool> FilterOperatorHtml(this Column col, int place, IStringLocalizer localizer, string selection, string selectCss=null, string displayCss=null)
         {
             if (col.FilterClauses == null || place >= col.FilterClauses.Length || place < 0) return Tuple.Create(new HtmlString(string.Empty), false);
@@ -243,10 +270,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 sb.Append("' ");
             }
             sb.Append(">");
-            sb.Append("<option value=''>");
-            sb.Append(localizer == null ? "none" : localizer["none"]);
-            sb.Append("</option>");
-            foreach (var option in sortingRypes)
+            
+            foreach (var option in sortingTypes)
             {
                 sb.Append("<option value='");
                 sb.Append(HtmlEncoder.Default.Encode(option.Key));
@@ -268,12 +293,13 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public static Functionalities RequiredFunctionalitiesExt(this RowType row, IPrincipal user, QueryDescription query)
         {
             var res = row.RequiredFunctionalities(user);
-            if (query == null || query.Grouping == null || query.Grouping.Keys == null || query.Grouping.Keys.Count == 0) return res;
-            return res & Functionalities.ShowDetail;
+            if (query == null || query.Grouping == null || query.Grouping.Keys == null || query.Grouping.Keys.Count == 0) return res &(~Functionalities.GroupDetail) ;
+            return res & (Functionalities.ShowDetail | Functionalities.GroupDetail) ;
         }
         public static bool MustAddButtonColumn(this RowType row, ContextualizedHelpers helpers, QueryDescription query, bool editOnly = false)
         {
-            return !row.CustomButtons && ((row.RequiredFunctionalities(helpers.User) & (editOnly ? Functionalities.EditOnlyHasRowButtons : Functionalities.HasRowButtons)) != 0);
+            var userPermissions = row.RequiredFunctionalitiesExt(helpers.User, query);
+            return !row.CustomButtons && ((userPermissions & (editOnly ? Functionalities.EditOnlyHasRowButtons : Functionalities.HasRowButtons)) != 0);
         }
         public static int VisibleColumns(this RowType row, ContextualizedHelpers helpers, QueryDescription query, bool editOnly = false)
         {

@@ -125,7 +125,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
             {
                 rows = res.Item1;
                 if (!string.IsNullOrEmpty(RowsCacheKey))
+                {
                     RowType.CacheRowGroup(RowsCacheKey, rows, httpAccessor.HttpContext);
+                    httpAccessor.HttpContext.Items["_request_cache_" + RowsCacheKey] = rows;
+                }
                 foreach(var row in rows)
                 {
                     if(row.ControllerType != null)

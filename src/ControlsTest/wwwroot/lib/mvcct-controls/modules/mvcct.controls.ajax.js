@@ -242,6 +242,7 @@
                     proc.onstart ? proc.onstart(el) : null;
                     ajax.send();
                 }
+                serverControls['attachHtml'] = attachHtml;
                 var endpoints = {};
                 var addEndpoint = function (name, success, router, errorMessageF, error, start, completed, progress, bearerToken)
                 {

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using MvcControlsToolkit.Core.Templates;
+using MvcControlsToolkit.Core.Transformations;
+using MvcControlsToolkit.Core.Views;
 
 namespace MvcControlsToolkit.Core.TagHelpers
 {
@@ -18,7 +20,11 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public string SubmitBarName { get; protected set; }
         public string Name { get; protected set; }
         public string ControlType { get; protected set; }
+        private static string combinePrefixes(string p1, string p2)
+        {
+            return (string.IsNullOrEmpty(p1) ? p2 : (string.IsNullOrEmpty(p2) ? p1 : p1 + "." + p2));
 
+        }
         public DefaultServerQueryWindowLayoutOptions(
             IList<RowType> rows, 
             IList<KeyValuePair<string, string>> 
@@ -31,7 +37,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             OperationParameters = operationParameters;
             Header = header;
             GroupingOutput = groupingOutput;
-            
+            if (Toolbars == null) Toolbars = new List<KeyValuePair<string, string>>();
 
         }
         public void SetParameters(IHtmlContent content,
@@ -49,6 +55,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
             FooterBarName = footerBarName;
             SubmitButton = submitButton;
             Name = name;
+            OperationParameters = combinePrefixes(OperationParameters, TransformationsRegister.GetPrefix<JsonTransformation<QueryDescription>>());
         }
     }
 }

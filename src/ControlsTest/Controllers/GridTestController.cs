@@ -37,7 +37,18 @@ namespace ControlsTest.Controllers
 
                 );
             DefaultCRUDRepository<ApplicationDbContext, Product>
-                .DeclareProjection<ProductViewModelDetail>(
+               .DeclareQueryProjection(
+                 m =>
+                   new ProductViewModel()
+                   {
+                       DateValid = m.DateValid.HasValue ? Month.FromDateTime(m.DateValid.Value) as Month? : null
+
+                   },
+                   m => m.Id
+
+               );
+            DefaultCRUDRepository<ApplicationDbContext, Product>
+                .DeclareProjection(
                     m => m.Maintenance != null ?
                     new ProductMaintenanceViewModelDetail
                     {
@@ -60,6 +71,9 @@ namespace ControlsTest.Controllers
                     });
 
         }
+
+        
+
         IWebQueryProvider queryProvider;
         private readonly ICRUDRepository TypesRepository;
         public GridTestController(Data.ApplicationDbContext db, IStringLocalizerFactory factory, IHttpContextAccessor accessor, IWebQueryProvider queryProvider) :base(factory, accessor)
@@ -120,19 +134,30 @@ namespace ControlsTest.Controllers
             var query=queryProvider.Parse<ProductViewModel>();
             
             int pg = (int)query.Page;
+            var grouping = query.GetGrouping<ProductViewModelGrouping>();
 
-
-
-            var model = new ProductlistViewModel
-            {
+            ProductlistViewModel model = new ProductlistViewModel
+                {
                 Query = query,
-                Products = await Repository.GetPage<ProductViewModel>(
-                query.GetFilterExpression(),
-                query.GetSorting() ?? (q => q.OrderBy(m => m.Name)),
-                pg, 3,
-                query.GetGrouping<ProductViewModelGrouping>())
-            };
+                Products =
+                    grouping == null ?
+                        await Repository.GetPage(
+                            query.GetFilterExpression(),
+                            query.GetSorting() ??
+                                (q => q.OrderBy(m => m.Name)),
+                            pg, 3)
+                        :
+                        await Repository.GetPageExtended(
+                            query.GetFilterExpression(),
+                            query.GetSorting<ProductViewModelGrouping>() ?? 
+                                (q => q.OrderBy(m => m.Name)),
+                            pg, 3,
+                            query.GetGrouping<ProductViewModelGrouping>())
+                };
+
+
             ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
+
             return View(model);
         }
         public async Task<IActionResult> IndexEditDetail(int? page)

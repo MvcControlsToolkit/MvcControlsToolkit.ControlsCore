@@ -12,6 +12,7 @@
     var localizer = row.GetLocalizer(helpers.LocalizerFactory);
     bool maibarFound = false;
     var id = Html.GenerateIdFromName(options.Name);
+    
 }
 <form data-control-type="@options.ControlType" id="@id">
     <div data-valmsg-ajax="true" asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -42,7 +43,7 @@
         
         <div class="form-group col-xs-12">
             @currProvider.RenderButton(options.SubmitButton, options.OperationParameters, "btn-primary", helpers, localizer, true, false)
-            <button type="reset" class="btn btn-primary">
+            <button type="button" data-operation="reset-form" class="btn btn-primary">
                 @if (localizer != null)
                 {
                     <span>@localizer["reset"]</span>
@@ -59,3 +60,6 @@
     }
     <div class="clearfix"></div>
 </form>
+<only-once asp-for="@Model">
+    <store-model asp-for="@Model" />
+</only-once>

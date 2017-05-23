@@ -48,6 +48,12 @@
             {
                 @currProvider.RenderButton(StandardButtons.Delete, null, "btn-default btn-xs", helpers, localizer)
             }
+            @if ((buttons & Functionalities.GroupDetail) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.GroupDetail, query.GetGroupDetailUrl(row.For.Metadata.ModelType, Model) +
+                    query.AttachedTo?.AjaxId == null ? string.Empty : " " + query.AttachedTo.AjaxId,
+                        "btn-default btn-xs", helpers, localizer)
+            }
         </td>
     }
     @foreach(var col in row.ColumnsToRender(query))

@@ -37,15 +37,17 @@
               row-id="immediate-example"
               operations="x => Functionalities.FullInLine 
                         | Functionalities.AddBefore | Functionalities.AddAfter
-                        | Functionalities.Append | Functionalities.Prepend"
+                        | Functionalities.Append | Functionalities.Prepend
+                        | Functionalities.GroupDetail"
               class="table table-condensed table-bordered"
               query-for="Query"
               sorting-clauses="2"
               enable-query="true"
+              rows-cache-key ="myTest"
               query-grouping-type="typeof(ProductViewModelGrouping)">
             <column asp-for="Products.Data.Element().TypeId">
-                <external-key-static display-property="Products.Data.Element().TypeName" />
-               @*<external-key-static display-property="Products.Data.Element().TypeName"
+                @*
+               <external-key-static display-property="Products.Data.Element().TypeName"
     items-selector="@getTasks"
     query-display="false"
     items-value-property="Value"
@@ -70,7 +72,7 @@
                     <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().ChosenCurrencyCount"/>
                     <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().AvailableCount" />
                     <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().DateValidCount" />
-                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().TypeNameCount" />
+                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().TypeIdCount" />
                 </row-type>
                 <toolbar zone-name="@LayoutStandardPlaces.Header">
                     <div class="row">
@@ -95,15 +97,15 @@
                             </div>
                         </verify-permission>
                     </div>
-                    <query  type="Filtering" />
+                    @*<query  type="Filtering" />
                     <query  type="Sorting" />
-                    <query  type="Grouping"  />
+                    <query  type="Grouping"  />*@
                 </toolbar>
                 <toolbar zone-name="@LayoutStandardPlaces.Footer">
                     <paste-html name="main-pager" />
                 </toolbar>
             </grid>
-        <verify-permission required-permissions="@(Functionalities.Append | Functionalities.Prepend)"
+        <verify-permission query-for="Query" required-permissions="@(Functionalities.Append | Functionalities.Prepend)"
                            permissions="x => Functionalities.FullInLine 
                         | Functionalities.AddBefore | Functionalities.AddAfter
                         | Functionalities.Append | Functionalities.Prepend">
@@ -116,7 +118,14 @@
             </div>
         </verify-permission>
     </form>
-
+    
+    <query-inline   type="Filtering" asp-for="Query" collection-for="Products.Data" row-collection-name="myTest">
+    
+    </query-inline>
+    <query-inline type="Sorting" asp-for="Query" collection-for="Products.Data" row-collection-name="myTest" />
+    <query-inline type="Grouping" asp-for="Query" collection-for="Products.Data" 
+                  grouping-type="@typeof(ProductViewModelGrouping)" row-collection-name="myTest" />
+      
     </div>
 
     @section Scripts {
@@ -133,5 +142,6 @@
     <script src="~/lib/mvcct-controls/modules/mvcct.controls.autocomplete.min.js"></script>
     <script src="~/lib/mvcct-controls/modules/mvcct.controls.ajax.min.js"></script>
     <script src="~/lib/mvcct-controls/modules/mvcct.controls.serverGrid.min.js"></script>
+    <script src="~/lib/mvcct-odata/dest/global/mvcct.odata.js"></script>
     <script src="~/lib/mvcct-controls/modules/mvcct.controls.query.min.js"></script>
 }

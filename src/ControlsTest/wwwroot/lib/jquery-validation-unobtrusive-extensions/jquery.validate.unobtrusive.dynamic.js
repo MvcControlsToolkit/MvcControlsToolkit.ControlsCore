@@ -61,5 +61,5 @@
             }
             else $.validator.unobtrusive.parseDynamic(node);
         }, 
-        true, null, "unobtrusive validation");
+        true, null, "unobtrusive validation", undefined, 'unobtrusive-validation');
 })(jQuery);

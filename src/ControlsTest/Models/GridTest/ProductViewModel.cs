@@ -63,7 +63,7 @@ namespace ControlsTest.Models
     public class ProductViewModelGrouping: ProductViewModel
     {
         public int ChosenCurrencyCount { get; set; }
-        public int TypeNameCount { get; set; }
+        public int TypeIdCount { get; set; }
         public int AvailableCount { get; set; }
         public int DateValidCount { get; set; }
     }

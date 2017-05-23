@@ -5,7 +5,7 @@
         (function (factory) {
             if (typeof define === 'function' && define['amd']) {
                 // [1] AMD anonymous module
-                define(["../mvcct.enhancer"], factory);
+                define(["../mvcct.enhancer.min"], factory);
             } else if (typeof exports === 'object' && typeof module === 'object') {
                 // [2] CommonJS/Node.js
                 module["exports"] = factory(require("mvcct-enhancer"));  // module.exports is for Node.js
@@ -252,12 +252,12 @@
                          if(!val ) return null;
                          var parser = (invariant ? dictI : dict)[type];
                          if(parser) return parser(val);
-                         else return parser;
+                         else return val;
                      } 
                             
                 }
                 Enhancer["addBasicInput"]=function(Globalize){
-                    Enhancer["register"](null, false, initializeOptions, "html5 globalized fallback", function(x) {initialize(x, Globalize);});
+                    Enhancer["register"](null, false, initializeOptions, "html5 globalized fallback", function(x) {initialize(x, Globalize);}, 'html5-input');
                 }
 
                 //Finish actual code

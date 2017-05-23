@@ -361,6 +361,6 @@
             });
         };
         adapters.addDRange("drange", "drange", "dmins", "dminds", "dmaxs", "dmaxds");
-        enhancer["register"](null, false, initialize, "html5 globalized fallback");
+        enhancer["register"](null, false, initialize, "html5 globalized fallback", undefined, 'unobtrusive-validation');
     }
 })(jQuery);

@@ -13,6 +13,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
         QueryWindowOptions options;
         ContextualizedHelpers helpers;
         DefaultServerQueryWindowLayoutOptions layoutOptions;
+        
         public DefaultServerQueryWindowProcessor(QueryWindowOptions options, ContextualizedHelpers helpers)
         {
             this.options = options;
@@ -21,7 +22,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 options.Rows,
                 options.Toolbars,
                 options.LayoutTemplate,
-                helpers.Context.ViewData.GetFullHtmlFieldName(options.For.Name),
+                helpers.Context.ViewData.GetFullHtmlFieldName(options.For.Name),//name of query input
                 options.Header,
                 options.GroupingOutput
                 );

@@ -13,10 +13,10 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
 {
     public class DefaultServerAutocompleteProcessor
     {
-        private static IDictionary<string, object> hiddenAttributes = new Dictionary<string, object>()
-        {
-            {"id", null }
-        };
+        //private static IDictionary<string, object> hiddenAttributes = new Dictionary<string, object>()
+        //{
+        //    {"id", null }
+        //};
         private TagHelperContext context;
         private TagHelperOutput output;
         private AutocompleteOptions options;
@@ -45,12 +45,16 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 tag.DataSetName,
                 tag.MaxResults.ToString(CultureInfo.InvariantCulture),
                 tag.MinChars.ToString(CultureInfo.InvariantCulture),
-                tag.DefaultToempty ? "true" : "false"
+                tag.PartialSelection ? "tolerate" : (tag.DefaultToempty ? "true" : "false")
                 ));
             infos.Add("autocomplete", "off");
+            IDictionary<string, object> hiddenAttributes = new Dictionary<string, object>();
+            if (options.NoId) hiddenAttributes.Add("id", null);
+            var hiddenExplorer = tag.ForPropertyExplorer ?? tag.For.ModelExplorer;
+            hiddenAttributes.Add("data-original-type", ClientSideHelpers.getClientType(hiddenExplorer?.Metadata));
             var hidden = options.Generator.GenerateHidden(
                 tag.ViewContext,
-                tag.ForPropertyExplorer??tag.For.ModelExplorer,
+                hiddenExplorer,
                 tag.ForExpressionOverride ?? tag.For.Name,
                 tag.ForPropertyExplorer != null ? tag.ForPropertyExplorer.Model : tag.For.Model,
                 false,

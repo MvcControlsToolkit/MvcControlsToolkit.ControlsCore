@@ -47,6 +47,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public uint MinChars { get; set; }
         [HtmlAttributeName("default-to-empty")]
         public bool DefaultToempty { get; set; }
+        [HtmlAttributeName("partial-selection")]
+        public bool PartialSelection { get; set; }
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }

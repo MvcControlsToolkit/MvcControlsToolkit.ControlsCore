@@ -4,13 +4,14 @@
 @{
     var metaData = ViewData.ModelMetadata;
     var col = ViewData["Options"] as Column;
+    var modelName = ViewData.TemplateInfo.HtmlFieldPrefix;
 }
 @if (col.ColumnConnection != null)
 {
     if (col.ColumnConnection.QueryDisplay)
     {
         <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />
-        <span asp-validation-for="@Model" class="text-danger"></span>
+        <span data-valmsg-for="@modelName" data-valmsg-replace="true" class="text-danger"></span>
 
     }
     else if (col.ColumnConnection is ColumnConnectionInfosStatic)
@@ -23,7 +24,7 @@
                 <option value="">@col.PlaceHolder</option>
             }
         </select>
-        <span asp-validation-for="@Model" class="text-danger"></span>
+        <span data-valmsg-for="@modelName" data-valmsg-replace="true" class="text-danger"></span>
     }
     else
     {
@@ -39,6 +40,7 @@
                       url-token="@infos.UrlToken"
                       dataset-name="@infos.DataSetName"
                       max-results="@infos.MaxResults"
+                      partial-selection="true"
                       class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />
     }
 
@@ -57,11 +59,11 @@ else if (metaData.IsEnum)
             <option value="">@col.PlaceHolder</option>
         }
     </select>
-    <span asp-validation-for="@Model" class="text-danger"></span>
+    <span data-valmsg-for="@modelName" data-valmsg-replace="true" class="text-danger"></span>
 }
 else
 {
     <input asp-for="@Model" placeholder="@col.PlaceHolder" class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />
-    <span asp-validation-for="@Model" class="text-danger"></span>
+    <span data-valmsg-for="@modelName" data-valmsg-replace="true" class="text-danger"></span>
 }
 

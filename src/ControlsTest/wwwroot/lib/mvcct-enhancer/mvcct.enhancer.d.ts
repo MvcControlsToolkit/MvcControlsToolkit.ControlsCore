@@ -118,8 +118,9 @@
             initialize: boolean,
             processOptions: (options: Options) => void,
             name: string,
-            preProcessOptions: (options: Options) => void): void;
-        export function transform(node: HTMLElement): void;
+            preProcessOptions: (options: Options) => void,
+            type?: string): void;
+        export function transform(node: HTMLElement, types?: any): void;
         export function dependency(name: string,
             sourceNode: HTMLElement,
             targetNode: HTMLElement,

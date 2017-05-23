@@ -8,15 +8,16 @@
     var row = ViewData["Options"] as RowType;
     var helpers = new ContextualizedHelpers(ViewContext, Html, User, Component, Url, ViewData["LocalizerFactory"] as IStringLocalizerFactory);
     var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
+
 }
 <tr @row.RenderRowAttributes(Model)>
-    @if(row.MustAddButtonColumn(helpers, query))
+    @if (row.MustAddButtonColumn(helpers, query))
     {
-        var buttons=row.RequiredFunctionalitiesExt(User, query);
+        var buttons = row.RequiredFunctionalitiesExt(User, query);
         var currProvider = ViewContext.TagHelperProvider();
         var localizer = row.GetLocalizer(helpers.LocalizerFactory);
         <td class="grid-buttons">
-            @if ((buttons & Functionalities.ShowDetail) > 0 )
+            @if ((buttons & Functionalities.ShowDetail) > 0)
             {
                 @currProvider.RenderButton(StandardButtons.ShowDetail, null, "btn-default btn-xs", helpers, localizer)
             }
@@ -47,6 +48,12 @@
             @if ((buttons & Functionalities.Delete) > 0)
             {
                 @currProvider.RenderButton(StandardButtons.Delete, null, "btn-default btn-xs", helpers, localizer)
+            }
+            @if ((buttons & Functionalities.GroupDetail) > 0)
+            {
+                @currProvider.RenderButton(StandardButtons.GroupDetail, query.GetGroupDetailUrl(row.For.Metadata.ModelType, Model) +
+                    (query.AttachedTo?.AjaxId == null ? string.Empty : " "+ query.AttachedTo.AjaxId),
+                        "btn-default btn-xs", helpers, localizer)
             }
         </td>
     }
