@@ -23,6 +23,8 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             this.context = context; this.output = output; this.tag = tag;
             this.options = options; this.helpers = helpers;
             basePrefix = tag.For.Name;
+            if (basePrefix == "Model")
+                basePrefix = string.Empty;
             AdjustColumns();
         }
         protected void AdjustColumns()

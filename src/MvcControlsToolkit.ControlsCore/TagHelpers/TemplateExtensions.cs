@@ -293,8 +293,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
         public static Functionalities RequiredFunctionalitiesExt(this RowType row, IPrincipal user, QueryDescription query)
         {
             var res = row.RequiredFunctionalities(user);
-            if (query == null || query.Grouping == null || query.Grouping.Keys == null || query.Grouping.Keys.Count == 0) return res &(~Functionalities.GroupDetail) ;
-            return res & (Functionalities.ShowDetail | Functionalities.GroupDetail) ;
+            if (query == null || query.Grouping == null || query.Grouping.Keys == null || query.Grouping.Keys.Count == 0) return res &(~(Functionalities.GroupDetail | Functionalities.GroupDetailNew)) ;
+            return res & (Functionalities.ShowDetail | Functionalities.GroupDetail | Functionalities.GroupDetailNew) ;
         }
         public static bool MustAddButtonColumn(this RowType row, ContextualizedHelpers helpers, QueryDescription query, bool editOnly = false)
         {

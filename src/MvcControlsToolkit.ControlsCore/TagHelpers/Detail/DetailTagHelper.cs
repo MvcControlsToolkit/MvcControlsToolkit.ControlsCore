@@ -95,7 +95,10 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 throw new ArgumentException(ModeName, string.Format(Resources.MustBeBool, ModeName));
             if (ModelNullRow != null && Mode.Metadata.UnderlyingOrModelType != typeof(int))
                 throw new ArgumentException(ModelNullRowName, string.Format(Resources.MustBeInt, ModelNullRowName));
-            string fullName = ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(For.Name);
+            var basePrefix = For.Name;
+            if (basePrefix == "Model")
+                basePrefix = string.Empty; ;
+            string fullName = ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(basePrefix);
             string id = OverrideId ?? TagBuilder.CreateSanitizedId(fullName, IdAttributeDotReplacement);
             var currProvider = ViewContext.TagHelperProvider();
             var defaultTemplates = currProvider.GetDefaultTemplates(TagName);

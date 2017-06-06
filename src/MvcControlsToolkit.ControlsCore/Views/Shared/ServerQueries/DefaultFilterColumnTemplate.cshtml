@@ -48,7 +48,16 @@
 else if (metaData.UnderlyingOrModelType == typeof(bool))
 {
     <p @Html.Raw("class='" + (col.CheckboxDetailCssClass != null ? col.CheckboxDetailCssClass : "form-control-static") + "'")>
-        <input asp-for="@Model" type="checkbox" />
+        @if (Model != null && ((bool)Model))
+        {
+            <input name="@modelName" checked="checked" type="checkbox" />
+        }
+        else
+        {
+
+            <input name="@modelName"  type="checkbox" />
+        }
+
     </p>
 }
 else if (metaData.IsEnum)
