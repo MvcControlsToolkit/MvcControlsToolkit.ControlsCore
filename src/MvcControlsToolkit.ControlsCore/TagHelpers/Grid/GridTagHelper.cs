@@ -165,6 +165,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
             }
             TagContextHelperAdvanced.ClosePermissionBindingContext(httpAccessor.HttpContext);
             TagContextHelper.CloseBindingContext(httpAccessor.HttpContext, BindingContextNames.Collection);
+            if(!ViewContext.FormContext.CanRenderAtEndOfForm)
+                TagContextHelper.CloseFormContext(httpAccessor.HttpContext, output);
         }
     }
 }

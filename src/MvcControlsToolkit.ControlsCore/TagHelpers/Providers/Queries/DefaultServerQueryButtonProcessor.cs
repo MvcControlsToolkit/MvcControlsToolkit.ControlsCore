@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using MvcControlsToolkit.Core.Templates;
+using MvcControlsToolkit.Core.Transformations;
 using MvcControlsToolkit.Core.Views;
 
 namespace MvcControlsToolkit.Core.TagHelpers.Providers
@@ -19,14 +20,23 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             this.options = options;
             this.helpers = helpers;
         }
+        private static string combinePrefixes(string p1, string p2)
+        {
+            return (string.IsNullOrEmpty(p1) ? p2 : (string.IsNullOrEmpty(p2) ? p1 : p1 + "." + p2));
+
+        }
         private IHtmlContent buttonAttributes()
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("data-operation='");
             sb.Append(
             options.Type == QueryWindowType.Filtering ? "query-filtering " :
-                (options.Type == QueryWindowType.Sorting ? "query-sorting " : "query-grouping "));
-            sb.Append(helpers.Html.GenerateIdFromName(helpers.Context.ViewData.GetFullHtmlFieldName(this.options.For.Name)));
+                (options.Type == QueryWindowType.Sorting ? "query-sorting " : 
+                 (options.Type == QueryWindowType.Grouping ? "query-grouping " : "query-back ")));
+            var queryName = helpers.Html.GenerateIdFromName(helpers.Context.ViewData.GetFullHtmlFieldName(this.options.For.Name));
+            if(options.Type == QueryWindowType.Back) queryName =
+                    combinePrefixes(queryName, TransformationsRegister.GetPrefix<JsonTransformation<QueryDescription>>());
+            sb.Append(queryName);
             if(options.Url != null)
             {
                 sb.Append(" ");

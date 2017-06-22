@@ -89,7 +89,8 @@ namespace MvcControlsToolkit.Core.TagHelpers
         protected string defaultTitle()
         {
             return Type == QueryWindowType.Filtering ? "filter" :
-                (Type == QueryWindowType.Sorting ? "sorting" : "grouping");
+                (Type == QueryWindowType.Sorting ? "sorting" : 
+                (Type == QueryWindowType.Grouping? "grouping" : "undo"));
         }
         protected string defaultHeader()
         {
@@ -181,6 +182,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 ButtonCss = ButtonCss
             };
             await currProvider.GetTagProcessor(buttonTag)(context, output, this, buttonOptions, ctx);
+            if (Type == QueryWindowType.Back) return;
             IList<RowType> rows = string.IsNullOrEmpty(RowCollection) ?
                 null :
                 RowType.GetRowsCollection(RowCollection);
@@ -202,33 +204,36 @@ namespace MvcControlsToolkit.Core.TagHelpers
             Func<Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>, IHtmlContent> toExecute =
                 group =>
                 {
-                    if (windowOptions.Rows == null && group != null) windowOptions.UpdateRows(group.Item1, group.Item2);
-                    if (windowOptions.Rows == null) return new HtmlString(string.Empty);
-                    var mainRow = windowOptions.Rows.FirstOrDefault();
-                    if (mainRow == null) return new HtmlString(string.Empty);
-
-                    windowOptions.Header = localizeWindow(mainRow, windowOptions.Header);
-                    if (Type == QueryWindowType.Filtering && mainRow.FilterTemplate == null)
+                    using (new DisabledPostFormContent(httpAccessor.HttpContext))
                     {
-                        mainRow.FilterTemplate = windowDefaultTemplates.ERowTemplate;
-                        foreach (var col in mainRow.Columns)
+                        if (windowOptions.Rows == null && group != null) windowOptions.UpdateRows(group.Item1, group.Item2);
+                        if (windowOptions.Rows == null) return new HtmlString(string.Empty);
+                        var mainRow = windowOptions.Rows.FirstOrDefault();
+                        if (mainRow == null) return new HtmlString(string.Empty);
+
+                        windowOptions.Header = localizeWindow(mainRow, windowOptions.Header);
+                        if (Type == QueryWindowType.Filtering && mainRow.FilterTemplate == null)
                         {
-                            col.FilterTemplate = windowDefaultTemplates.EColumnTemplate;
-                            
+                            mainRow.FilterTemplate = windowDefaultTemplates.ERowTemplate;
+                            foreach (var col in mainRow.Columns)
+                            {
+                                col.FilterTemplate = windowDefaultTemplates.EColumnTemplate;
+
+                            }
                         }
-                    }
-                    else if (Type == QueryWindowType.Grouping && mainRow.GroupingTemplate == null)
-                        mainRow.GroupingTemplate = windowDefaultTemplates.ERowTemplate;
-                    else if (Type == QueryWindowType.Sorting && mainRow.SortingTemplate == null)
-                        mainRow.SortingTemplate = windowDefaultTemplates.ERowTemplate;
-                    var res = currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
+                        else if (Type == QueryWindowType.Grouping && mainRow.GroupingTemplate == null)
+                            mainRow.GroupingTemplate = windowDefaultTemplates.ERowTemplate;
+                        else if (Type == QueryWindowType.Sorting && mainRow.SortingTemplate == null)
+                            mainRow.SortingTemplate = windowDefaultTemplates.ERowTemplate;
+                        var res = currProvider.GetTagProcessor(windowTag)(null, null, this, windowOptions, ctx);
                         res.Wait();
                         return windowOptions.Result;
+                    }
                 };
             if (rows != null)
-                TagContextHelper.EndOfBodyHtml(httpAccessor.HttpContext, toExecute(new Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>(rows, toolbars)));
+                TagContextHelper.EndOfFormHtml(httpAccessor.HttpContext, toExecute(new Tuple<IList<RowType>, IList<KeyValuePair<string, string>>>(rows, toolbars)));
             else
-                TagContextHelper.RegisterDefaultToolWindow(httpAccessor.HttpContext, toExecute);
+                TagContextHelper.RegisterDefaultFormToolWindow(httpAccessor.HttpContext, toExecute);
             
         }
     }

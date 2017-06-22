@@ -6,7 +6,8 @@
     var options = ViewData["Options"] as DefaultServerQueryButtonLayoutOptions;
     string btnCss = options.ButtonCss ?? "btn btn-sm btn-default";
     string btnIcon = options.ButtonIcon?? (options.Type == QueryWindowType.Filtering ? "glyphicon glyphicon-filter" :
-                (options.Type == QueryWindowType.Sorting ? "glyphicon glyphicon-list-alt" : "glyphicon glyphicon-th"));
+                (options.Type == QueryWindowType.Sorting ? "glyphicon glyphicon-list-alt" : 
+                (options.Type == QueryWindowType.Grouping ? "glyphicon glyphicon-th" : "glyphicon glyphicon-step-backward")));
 }
 <button class="@btnCss" type="button" @Html.Raw(options.OperationAttributes) title="@options.ButtonTitle">
     <span class='@btnIcon' aria-hidden='true'></span>

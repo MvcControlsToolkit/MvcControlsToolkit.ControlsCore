@@ -121,6 +121,12 @@ namespace MvcControlsToolkit.Core.TagHelpers
 
             var currProvider = ViewContext.TagHelperProvider();
             string operation = null;
+            if(AjaxId == null && Query?.Model != null)
+            {
+                QueryDescription q = Query?.Model as QueryDescription;
+                if (!string.IsNullOrWhiteSpace(q.AttachedTo?.AjaxId))
+                    AjaxId = q.AttachedTo.AjaxId;
+            }
             if(AjaxId!= null )
                 operation = "data-operation='ajax-html "+ AjaxId + "'";
             else if(AjaxEndpoint != null)

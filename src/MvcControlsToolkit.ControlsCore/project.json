@@ -2,7 +2,7 @@
     "title": " Mvc Controls Toolkit controls definitions",
     "copyright": "Mvc Controls Toolkit Team",
     "description": "Core code for Mvc Controls Toolkit controls definitions",
-    "version": "1.2.1",
+    "version": "1.2.4-beta8",
     "authors": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
     "buildOptions": {
         "embed": "Views/**",
@@ -39,7 +39,7 @@
     },
     "dependencies": {
         "Microsoft.Extensions.FileProviders.Embedded": "1.1.0",
-        "MvcControlsToolkit.Core": "1.2.0",
+        "MvcControlsToolkit.Core": "1.2.4-beta5",
         "MvcControlsToolkit.Core.OData": "1.0.1"
     },
     "scripts": {
