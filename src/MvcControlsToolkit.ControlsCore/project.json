@@ -2,7 +2,7 @@
     "title": " Mvc Controls Toolkit controls definitions",
     "copyright": "Mvc Controls Toolkit Team",
     "description": "Core code for Mvc Controls Toolkit controls definitions",
-    "version": "1.2.4-beta8",
+    "version": "1.2.5",
     "authors": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
     "buildOptions": {
         "embed": "Views/**",
@@ -11,7 +11,7 @@
     "packOptions": {
         "projectUrl": "https://github.com/MvcControlsToolkit/MvcControlsToolkit.Core",
         "requireLicenseAcceptance": true,
-        "releaseNotes": "Fixed minor bugs, DeafultTagHelperProvider now accepts extensions, moved to asp.net 1.1",
+        "releaseNotes": "Added default animation to Html links/queries, added full ajax support to OData queries",
         "iconUrl": "https://avatars2.githubusercontent.com/u/15634526?v=3&s=200",
         "owners": [ "Francesco Abbruzzese", "Mvc Controls Toolkit Team" ],
         "licenseUrl": "https://github.com/MvcControlsToolkit/Home/blob/master/LICENSE.txt",
@@ -39,7 +39,7 @@
     },
     "dependencies": {
         "Microsoft.Extensions.FileProviders.Embedded": "1.1.0",
-        "MvcControlsToolkit.Core": "1.2.4-beta5",
+        "MvcControlsToolkit.Core": "1.2.5",
         "MvcControlsToolkit.Core.OData": "1.0.1"
     },
     "scripts": {

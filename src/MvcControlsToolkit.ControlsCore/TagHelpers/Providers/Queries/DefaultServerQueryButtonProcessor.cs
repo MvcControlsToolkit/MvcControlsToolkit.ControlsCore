@@ -33,9 +33,11 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             options.Type == QueryWindowType.Filtering ? "query-filtering " :
                 (options.Type == QueryWindowType.Sorting ? "query-sorting " : 
                  (options.Type == QueryWindowType.Grouping ? "query-grouping " : "query-back ")));
-            var queryName = helpers.Html.GenerateIdFromName(helpers.Context.ViewData.GetFullHtmlFieldName(this.options.For.Name));
-            if(options.Type == QueryWindowType.Back) queryName =
-                    combinePrefixes(queryName, TransformationsRegister.GetPrefix<JsonTransformation<QueryDescription>>());
+            string queryName = null;  
+            if(options.Type == QueryWindowType.Back)
+                queryName = combinePrefixes(helpers.Context.ViewData.GetFullHtmlFieldName(this.options.For.Name), TransformationsRegister.GetPrefix<JsonTransformation<QueryDescription>>());
+            else
+                queryName = helpers.Html.GenerateIdFromName(helpers.Context.ViewData.GetFullHtmlFieldName(this.options.For.Name));
             sb.Append(queryName);
             if(options.Url != null)
             {
