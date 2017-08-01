@@ -10,10 +10,12 @@
 <detail-form asp-for="@Model.SubInfo<ProductViewModelDetail>().Model"
              all-properties="true"
              edit-mode-default="true"
+             key="Name"
              form-method="POST"
              form-action="@Url.Action("Create", "DetailTest")"
              model-null-row-default="ViewBag.DefaultRow"
              >
+    <column asp-for="Name"></column>
     <column asp-for="TypeId">
         @*<external-key-static display-property="TypeName"
             items-selector="@getTasks"

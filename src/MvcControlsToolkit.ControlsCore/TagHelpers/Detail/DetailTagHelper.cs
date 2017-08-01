@@ -76,7 +76,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
            IHtmlHelper html,
            IHttpContextAccessor httpAccessor, IViewComponentHelper component,
            IUrlHelperFactory urlHelperFactory,
-           IStringLocalizerFactory factory)
+           IStringLocalizerFactory factory):base(factory)
         {
             IdAttributeDotReplacement = optionsAccessor.Value.HtmlHelperOptions.IdAttributeDotReplacement;
             this.html = html;

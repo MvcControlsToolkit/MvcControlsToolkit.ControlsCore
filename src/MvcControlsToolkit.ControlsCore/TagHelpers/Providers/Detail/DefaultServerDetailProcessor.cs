@@ -33,10 +33,10 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             var typeInfos = tag.For.Metadata.ModelType.GetTypeInfo();
             foreach (var row in options.Rows)
             {
-                foreach (var col in row.Columns)
+                foreach (var col in row.VisibleAndHiddenColumns)
                 {
                     if (col.AdditionalPrefix != null) continue;
-                    if (typeInfos.GetProperty(col.For.Metadata.PropertyName) == null)
+                    if (col.For !=null && typeInfos.GetProperty(col.For.Metadata.PropertyName) == null)
                     {
                         col.AdditionalPrefix = DerivedClassesRegister.GetCodeFromType(row.For.Metadata.ModelType);
                     }

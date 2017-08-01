@@ -43,7 +43,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
                 foreach (var col in columns)
                 {
                     var o = col.For.Metadata.PropertyGetter(rowModel);
-                    helpers.Html.Hidden(col.For.Name, o??string.Empty, null).WriteTo(sb, HtmlEncoder.Default);
+                    helpers.Html.Hidden(combinePrefixes(col.AdditionalPrefix, col.For.Name), o??string.Empty, null).WriteTo(sb, HtmlEncoder.Default);
                 }
                 var rowPrefix = helpers.Context.ViewData.TemplateInfo.HtmlFieldPrefix;
                 if(rowPrefix.Length>0 && rowPrefix[rowPrefix.Length - 1] == ']')
@@ -73,7 +73,7 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             var typeInfos=tag.For.Metadata.ElementType.GetTypeInfo();
             foreach (var row in options.Rows)
             {
-                foreach(var col in row.Columns)
+                foreach(var col in row.VisibleAndHiddenColumns)
                 {
                     if (col.AdditionalPrefix != null) continue;
                     if (typeInfos.GetProperty(col.For.Metadata.PropertyName) == null)
