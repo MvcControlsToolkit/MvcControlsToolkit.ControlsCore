@@ -11,7 +11,7 @@
     var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
     
 }
-<tr @row.RenderRowAttributes(Model)>
+<tr aria-selected="true" tabindex="-1" @row.RenderRowAttributes(Model)>
     @if(row.MustAddButtonColumn(helpers, query))
     {
         var buttons=row.RequiredFunctionalitiesExt(User, query);

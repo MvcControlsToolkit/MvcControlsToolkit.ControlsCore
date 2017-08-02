@@ -10,7 +10,7 @@
     bool hiddensToRender = true;
     var query = TagContextHelper.GetBindingContext(ViewContext.HttpContext, BindingContextNames.Query)?.Model as QueryDescription;
 }
-<tr @row.RenderRowAttributes(Model)>
+<tr tabindex="-1" @row.RenderRowAttributes(Model)>
     @if (row.MustAddButtonColumn(helpers, query, true))
     {
         var buttons = row.RequiredFunctionalitiesExt(User, query);
