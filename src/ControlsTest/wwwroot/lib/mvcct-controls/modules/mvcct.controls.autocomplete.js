@@ -56,7 +56,7 @@
                     el.value = "";
                     var tolerate = args[5] == "tolerate";
                     if(tolerate) el[expando] = hidden;
-                    var defaultEmpty = tolerate || (rgs[5] == "true");
+                    var defaultEmpty = tolerate || (args[5] == "true");
                     var tOptions = typeof options === 'function' ? options(target) : options;
                     var lastData;
                     var removeDiacritics=

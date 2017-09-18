@@ -19,6 +19,7 @@
             (function (serverControls, enhancer) {
                 jQuery = window["jQuery"];
                 //Start actual code
+                var defaultHtmlEndpoint = "_default_html_endpoint_";
                 var options;
                 var empty;
                 var validateForm;
@@ -133,6 +134,10 @@
                             jx['on']('hidden.bs.modal', function (e) {
                                     x['expando_onSubmit']=null;
                                     x['expando_onSubmitError']=null;
+                                    if (x['expando_onHidden']) {
+                                        x['expando_onHidden']();
+                                        x['expando_onHidden'] = null;
+                                    }
                             });
                         }
                         jx['modal']('show');
@@ -210,36 +215,68 @@
                     }
                     return null;
                 }
-                
+                serverControls['standardLoading'] = function (origin, el) {
+                    var rect = el.getBoundingClientRect();
+                    var width = rect.width;
+                    var height = rect.height;
+                    var cover=document.createElement("div");
+                    cover.className = "standard-loading";
+                    cover.style.left = 0;
+                    cover.style.top = 0;
+                    
+                    cover.style.position = "absolute";
+                    cover.style.opacity=0.5;
+                    cover.style.backgroundColor = "white";
+                    cover.style.zIndex = 10000;
+                    el['_old_postion'] = el.style.position;
+                    el.style.position = "relative";
+                    if (el.childNodes.length)
+                    {
+                        el.insertBefore(cover, el.firstChild);
+                    } 
+                    else el.appendChild(cover);
+                    cover.appendChild(document.createTextNode(" "));
+                    cover.style.width = width+'px';
+                    cover.style.height = height+'px';
+                }
+                serverControls['standardUnloading'] = function(origin, el){
+                    if (el.firstChild && el.firstChild.className == "standard-loading") {
+                        el.firstChild.remove(); 
+                    }
+                    el.style.position = el['_old_postion'];
+                }
+                serverControls['standardError'] = function(str){
+                    if (str) alert(str);
+                }
                 function attachHtml(infos) {
                     var href = infos["href"];
                     var el = infos['target'];
                     var args = infos['args'];
                     var arg = args[0];
-                    var proc = infos["proc"] || args.length > 1 ? endpoints(args[1]) : {};
+                    var proc = infos["proc"] || args.length > 1 ? endpoints[args[1]] : endpoints[defaultHtmlEndpoint];
                     var ajax = new XMLHttpRequest();
-
+                    var target = document.getElementById(arg);
                     ajax.open("GET", href||el.getAttribute('href'), true);
                     ajax.onload = function () {
                         if (ajax.responseText && ajax.responseText.charAt(0) == '#')
                         {
-                            proc.completed ? proc.completed(el) : null;
+                            proc.oncompleted ? proc.oncompleted(el, target) : null;
                             proc.onerror ? proc.onerror(ajax.responseText.substring(1)) : null;
                             return;
                         }
                         else if (ajax.status != 200) {
-                            proc.completed ? proc.completed(el) : null;
+                            proc.oncompleted ? proc.oncompleted(el, target) : null;
                             proc.onerror ? proc.onerror(el.getAttribute('data-error-message') || "") : null;
                             return;
                         }
-                        el = document.getElementById(arg);
-                        empty(el);
-                        el.innerHTML = ajax.responseText;
-                        enhancer["transform"](el);
-                        proc.completed ? proc.completed(el) : null;
+                        
+                        empty(target);
+                        target.innerHTML = ajax.responseText;
+                        enhancer["transform"](target);
+                        proc.oncompleted ? proc.oncompleted(el, target) : null;
                     };
-                    ajax.onerror = function (e) { proc.completed ? proc.completed(el) : null; proc.onerror ? proc.onerror(el.getAttribute('data-error-message') || "") : null; }
-                    proc.onstart ? proc.onstart(el) : null;
+                    ajax.onerror = function (e) { proc.oncompleted ? proc.oncompleted(el, target) : null; proc.onerror ? proc.onerror(el.getAttribute('data-error-message') || "") : null; }
+                    proc.onstart ? proc.onstart(el, target) : null;
                     ajax.send();
                 }
                 serverControls['attachHtml'] = attachHtml;
@@ -270,6 +307,12 @@
                 serverControls['removeEndpoint'] = function(name){
                     delete endpoints[name];
                 };
+                serverControls['addHtmlEndpoint'](defaultHtmlEndpoint, 
+                    serverControls['standardLoading'], 
+                    serverControls['standardUnloading'],
+                    null,
+                    serverControls['standardError']
+                    );
                 function addHeaders(headers, ajax){
                     if(headers && typeof headers === 'object')
                         for (var property in headers) {

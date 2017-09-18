@@ -1,18 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{216F1109-0592-4C64-91D3-4735583E700F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69DA04CD-CB73-4015-BA0C-0B2BFF8D438A}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MvcControlsToolkit.ControlsCore", "src\MvcControlsToolkit.ControlsCore\MvcControlsToolkit.ControlsCore.xproj", "{2BC99965-5E56-4126-A0E1-E8B486F5C0DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcControlsToolkit.ControlsCore", "src\MvcControlsToolkit.ControlsCore\MvcControlsToolkit.ControlsCore.csproj", "{2BC99965-5E56-4126-A0E1-E8B486F5C0DA}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ControlsTest", "src\ControlsTest\ControlsTest.xproj", "{DEDEF178-AC0A-44D0-95F6-5072A79633F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlsTest", "src\ControlsTest\ControlsTest.csproj", "{DEDEF178-AC0A-44D0-95F6-5072A79633F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,5 +32,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{2BC99965-5E56-4126-A0E1-E8B486F5C0DA} = {216F1109-0592-4C64-91D3-4735583E700F}
 		{DEDEF178-AC0A-44D0-95F6-5072A79633F9} = {216F1109-0592-4C64-91D3-4735583E700F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8497910-A4A8-4429-BC42-D01DD11CFFC5}
 	EndGlobalSection
 EndGlobal

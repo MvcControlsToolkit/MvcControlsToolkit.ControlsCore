@@ -190,6 +190,7 @@
                     var editRow = row[expandoAlternateRow];
                     if (editRow) {
                         goEdit(row, editRow);
+                        editRow.focus();
                         return;
                     }
                     onStart(row);
@@ -205,6 +206,7 @@
                             if (newRow) {
                                 goEdit(row, newRow);
                                 enhancer["transform"](newRow);
+                                newRow.focus();
                             }
                         },
                         function () { return failure; },
@@ -289,6 +291,7 @@
                                     undoEdit(tRoot[expandoAlternateRow]);
                                     tRoot[expandoAlternateRow] = newRow;
                                 }
+                                newRow.focus();
                             }
                         },
                         function () { return failure; },

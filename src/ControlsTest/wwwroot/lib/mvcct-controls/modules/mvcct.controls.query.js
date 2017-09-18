@@ -17,16 +17,20 @@
         }(
 
             (function (serverControls, ajaxServerControls, enhancer, odata) {
-                 var openStaticModal, closeStaticModal;
+                 var openStaticModal, closeStaticModal, maxStack;
                  var expando = 'query_expando';
+                 var stackExpando = 'stack_expando';
                  var operatorSuffix = '.Operator';
                  var expandoCompanion = '_companion_display_';
                 function processOptions(o) {
-                    options = o["ajax"] = o["ajax"] || {};
+                    var options = o["ajax"] = o["ajax"] || {};
                     var serverWidgetsOptions  = o["serverWidgets"] || {};
                     var optionsModal = serverWidgetsOptions["modal"] || {};
                     openStaticModal= optionsModal["openStaticModal"];
                     closeStaticModal = optionsModal["closeStaticModal"];
+                    options = o["query"] = o["query"] || {};
+                    maxStack = options["maxStack"] = options["maxStack"] || 10;
+                     
                 }
                 function findForm(x) {
                     for (; x; x = x.parentNode) {
@@ -39,7 +43,7 @@
                 {
                     var args = infos['args'];
                     var windowArgs = {};
-                    windowArgs['form']=findForm(infos['control']);
+                    windowArgs['form']=findForm(infos['target']);
                     if(args.len>1) windowArgs['url'] = args[1];
                     if(args.len>2) windowArgs['ajaxId'] = args[2];
                     var el = document.getElementById(args[0]+"_"+postfix+"_window");
@@ -56,12 +60,14 @@
                     queryInput[expando]=model;
                     return model;
                 }
-                function goToQueryUrl (query, url, id){
+                function queryUrl(query, url)
+                {
                     var endPoint=query['attachedTo'] || {};
                     url = url || endPoint['baseUrl'];
-                    id = id || endPoint['ajaxId'];
-
-                    url = query['addToUrl'](url);
+                    return query['addToUrl'](url);
+                }
+                function goToQueryUrl (query, url, id, force){
+                    if(!force) url = queryUrl(query, url, id);
                     if(!id) window.location.href = url;
                     else{
                         id = id.split(' ');
@@ -82,7 +88,7 @@
                 function prepareFilter(form)
                 {
                     //collects information
-                    fieldsIndex={};
+                    var fieldsIndex={};
                     [].filter.call(form.elements, function (el) {
                         return (el.type != "radio" && el.type != 'button' 
                         && el.type != 'reset' && el.type != 'submit' && el.tagName != 'BUTTON') || el.checked;
@@ -127,6 +133,7 @@
                             else{
                                 condition["jsValue"] = enhancer["parse"](type, value, trueType == "hidden" || trueType == "radio" || el.tagName == "SELECT");
                                 condition["jsUtc"] = el.getAttribute('data-is-utc')=='true';
+                                if(!condition["jsValue"] && trueType=="hidden") condition["property"] = null;
                             }
                             var companion = el[expandoCompanion];
                             if (companion) condition['takeFrom'] = companion.name;
@@ -214,7 +221,7 @@
                 }
                 function prepareSorting(form)
                 {
-                    fieldsIndex={};
+                    var fieldsIndex=[];
                     [].filter.call(form.elements, function (el) {
                         return (el.type != "radio" && el.type != "checkbox" && el.type != 'button' 
                         && el.type != 'reset' && el.type != 'submit' && el.tagName != 'BUTTON') || el.checked;
@@ -231,17 +238,20 @@
                             isType=true;
                             index = el.name.substr(13);
                         }
+                        index=parseInt(index);
                         var clause = fieldsIndex[index];
                         if(!clause) fieldsIndex[index] = clause = {};
                         if(isType) clause['down'] = el.value == 'desc';
                         else clause['property'] = el.value;
                     });
                     var res = [];
-                    for (var index in fieldsIndex) {
-                        if (fieldsIndex.hasOwnProperty(index)) {
+                    var duplicates = {};
+                    for (var index=0; index<fieldsIndex.length; index++) {
                             var clause = fieldsIndex[index];
-                            if(clause['property']) res.push(new odata['QuerySortingCondition'](clause));
-                        }
+                            if(!clause) continue;
+                            if(clause['property'] && !
+                                duplicates[clause['property']]) res.push(new odata['QuerySortingCondition'](clause));
+                            duplicates[clause['property']] = true;
                     }
                     if (res.length) return res;
                     else return null;
@@ -277,11 +287,25 @@
                     var arg = infos['args'][0];
                     if(!serverControls['validateForm'](form)) return;
                     var extraData = form[expando] || {};
-                    var oForm = extraData ? extraData['form'] : null;
+                    var oForm = extraData['form'];
                     var queryInput = undefined;
                     if(oForm) queryInput= oForm.elements.namedItem(arg);
                     else queryInput = document.getElementsByName(arg)[0];
                     var query = getQueryModel (queryInput);
+                    var endPoint=query['attachedTo'] || {};
+                    var ajaxId=extraData['ajaxId'] || endPoint['ajaxId'];;
+                    
+                    var stack=null;
+                    if(ajaxId){
+                        var ajaxInfos = ajaxId.split(' ');
+                        var ajaxTarget = document.getElementById(ajaxInfos[0]);
+                        if(!ajaxTarget) return;
+                        stack = ajaxTarget[stackExpando] = ajaxTarget[stackExpando] || {'stack':[]};
+
+                        stack['stack'].push(new odata['QueryDescription'](query));
+                        stack['curr'] = query;
+                        if (stack['stack'].length>maxStack) stack['stack'].shift();  
+                    }
                     if(type == 'filter')
                         query['filter'] = prepareFilter(form);
                     else if(type == 'sorting')
@@ -290,21 +314,64 @@
                         query['grouping'] = prepareGrouping(form);
                     query['take'] = 0;
                     query['skip'] = null;
-                    goToQueryUrl (query, extraData['url'], extraData['ajaxId']);
+                    var modal = document.getElementById(form.id + "_window");
+                    if (modal) {
+                        modal['expando_onHidden'] = function () {
+                            goToQueryUrl(query, extraData['url'], ajaxId);
+                        };
+                        closeStaticModal(modal);
+                    }
+                    else goToQueryUrl (query, extraData['url'], ajaxId);
                 }
                 function groupDetail(infos)
                 {
                     var args = infos['args'];
                     if(!args.length) return;
                     if(args.length == 1) window.location.href = args[0];
+                    else if(args[1] == '#') window.open(args[0]);
                     else{
+                        var ajaxInfos = args.length == 2 ? [args[1]] : [args[1], args[2]];
+                        var ajaxTarget = document.getElementById(ajaxInfos[0]);
+                        if(!ajaxTarget) return;
+                        stack = ajaxTarget[stackExpando] = ajaxTarget[stackExpando] || {'stack':[]};
+                        var query = stack['curr'];
+                        if(query){
+                            stack['stack'].push(new odata['QueryDescription'](query));
+                            if (stack['stack'].length>maxStack) stack['stack'].shift();
+                        }
                         serverControls['attachHtml']({
                             'href': args[0],
-                            'args': agrs.length == 2 ? [args[1]] : [args[1], args[2]]
+                            'args': ajaxInfos 
                         });
                     }
                 }
+                function serverQueryBack(infos)
+                {
+                    var args = infos['args'];
+                    var form =findForm(infos['target']);
+                    var ajaxId, url;
+                    if(args.len>1) url = url[2];
+                    if(args.len>2) ajaxId = args[2];
+
+                    var queryInput;
+                    if(form )queryInput= form.elements.namedItem(args[0]);
+                    else queryInput = document.getElementsByName(args[0])[0];
+                    var query = getQueryModel (queryInput);
+                    var endPoint=query['attachedTo'] || {};
+                    var ajaxId=ajaxId || endPoint['ajaxId'];;
+                    if(!ajaxId) return;
+                    var ajaxInfos = ajaxId.split(' ');
+                    var ajaxTarget = document.getElementById(ajaxInfos[0]);
+                    if(!ajaxTarget) return;
+                    var stack = ajaxTarget[stackExpando] = ajaxTarget[stackExpando] || {'stack':[]};
+                    if(stack['stack'].length)
+                    {
+                         query=stack['curr']=queryInput[expando]=stack['stack'].pop();
+                         goToQueryUrl (query, url, ajaxId);
+                    }
+                }
                 enhancer["register"](null, null, processOptions, "ajax", null);
+                /*
                 serverControls['addOperation']('query-filtering_click', function (infos) { serverQueryOpen(infos, 'filter'); }, 'server-immediate-grid');
                 serverControls['addOperation']('query-filtering_click', function (infos) { serverQueryOpen(infos, 'filter'); }, 'server-batch-grid');
 
@@ -314,8 +381,22 @@
                 serverControls['addOperation']('query-grouping_click', function (infos) { serverQueryOpen(infos, 'grouping'); }, 'server-immediate-grid');
                 serverControls['addOperation']('query-grouping_click', function (infos) { serverQueryOpen(infos, 'grouping'); }, 'server-batch-grid');
 
-                serverControls['addOperation']('group-detail_click', function (infos) { groupDetail(infos); }, 'server-immediate-grid');
-                serverControls['addOperation']('group-detail_click', function (infos) { groupDetail(infos); }, 'server-batch-grid');
+                serverControls['addOperation']('query-back_click', function (infos) { serverQuery(infos); }, 'server-immediate-grid');
+                serverControls['addOperation']('query-back_click', function (infos) { serverQuery(infos); }, 'server-batch-grid');
+
+                serverControls['addOperation']('group-detail_click', function (infos) { groupDetail(infos, 'back'); }, 'server-immediate-grid');
+                serverControls['addOperation']('group-detail_click', function (infos) { groupDetail(infos, 'back'); }, 'server-batch-grid');
+                */
+
+                serverControls['addOperation']('query-filtering_click', function (infos) { serverQueryOpen(infos, 'filter'); } );
+
+                serverControls['addOperation']('query-sorting_click', function (infos) { serverQueryOpen(infos, 'sorting'); } );
+
+                serverControls['addOperation']('query-grouping_click', function (infos) { serverQueryOpen(infos, 'grouping'); });
+
+                serverControls['addOperation']('query-back_click', serverQueryBack);
+
+                serverControls['addOperation']('group-detail_click', function (infos) { groupDetail(infos, 'back'); });
 
                 serverControls['addOperation']('filter-window-submit_click', function (infos) { serverQuery(infos, 'filter'); }, 'server-query-filter');
                 serverControls['addOperation']('sort-window-submit_click', function (infos) { serverQuery(infos, 'sorting'); }, 'server-query-sorting');
