@@ -7,7 +7,7 @@
 }
 <h2>@ViewData["Title"].</h2>
 
-<detail-form asp-for="@Model.SubInfo<ProductViewModelDetail>().Model"
+<detail-form asp-for="@(Model.SubInfo<ProductViewModelDetail>().Model)"
              all-properties="true"
              edit-mode-default="true"
              key="Name"
@@ -30,7 +30,7 @@
                              url-token="_zzz_"
                              max-results="20" />
     </column>
-    <row-type asp-for="@Model.SubInfo<ProductMaintenanceViewModelDetail>().Model" from-row="0">
+    <row-type asp-for="@(Model.SubInfo<ProductMaintenanceViewModelDetail>().Model)" from-row="0">
         <column asp-for="Price" detail-widths="new decimal[] {30, 15 }" />
         <column asp-for="@((Model as ProductMaintenanceViewModelDetail).MaintenanceYearlyRate)" />
     </row-type>

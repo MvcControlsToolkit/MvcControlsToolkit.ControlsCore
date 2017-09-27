@@ -25,13 +25,13 @@ namespace ControlsTest.Controllers
                     
                     new ProductViewModel
                     {
-                        
+                        DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value)
 
                     } :
 
                     new ProductMaintenanceViewModel
                     {
-                        
+                        DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value),
                         MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate
                     }
 
@@ -41,7 +41,7 @@ namespace ControlsTest.Controllers
                  m =>
                    new ProductViewModel()
                    {
-                       DateValid = m.DateValid.HasValue ? Month.FromDateTime(m.DateValid.Value) as Month? : null
+                       DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value)
 
                    },
                    m => m.Id
@@ -52,12 +52,12 @@ namespace ControlsTest.Controllers
                     m => m.Maintenance != null ?
                     new ProductMaintenanceViewModelDetail
                     {
-
+                        DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value),
                         MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate
                     } :
                     new ProductViewModelDetail
                     {
-
+                        DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value)
 
                     }
 
@@ -245,12 +245,13 @@ namespace ControlsTest.Controllers
                     m => m.Maintenance != null ?
                     new ProductMaintenanceViewModelDetail
                     {
-                        
-                        MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate
-                    }:
+                        //DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value),
+                        MaintenanceYearlyRate = (decimal)m.Maintenance.YearlyRate,
+                        DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value)
+                    } :
                     new ProductViewModelDetail
                     {
-                        
+                        DateValid = m.DateValid == null ? null : (Month?)Month.FromDateTime(m.DateValid.Value)
 
                     }
 

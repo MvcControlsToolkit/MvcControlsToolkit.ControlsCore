@@ -32,12 +32,12 @@ namespace ControlsTest.Data
                 .HasOne(m => m.Type)
                 .WithMany(m => m.Products)
                 .HasForeignKey(m => m.TypeId)
-                .OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.SetNull);
             builder.Entity<Product>()
                 .HasOne(m => m.Maintenance)
                 .WithOne(m => m.Base)
                 .HasForeignKey<ProductWithMaintenance>(m => m.ProductId)
-                .OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);
                 
         }
     }
