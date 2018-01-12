@@ -2,13 +2,13 @@
 @using ControlsTest.Controllers
 @using System.Collections
 @{
-    ViewData["Title"] = "Edit immediate";
+    ViewData["Title"] = "Edit immediate with data annotations";
     if(Model.Query.AttachedTo == null)
     {
-        Model.Query.AttachEndpoint(Url.Action("IndexEdit", "GridTest"));
+        Model.Query.AttachEndpoint(Url.Action("IndexEditDA", "GridTest"));
 
     }
-    Func<object, Task<IEnumerable>> getTasks = async x => ViewData["AllTypes"] as IEnumerable;
+    
 }
 <style>
     tfoot .pagination, thead .pagination {
@@ -34,7 +34,7 @@
               type="Immediate"
               all-properties="true"
               mvc-controller="typeof(GridTestController)"
-              row-id="immediate-example"
+              row-id="immediate-example-da"
               operations="x => Functionalities.FullInLine 
                         | Functionalities.AddBefore | Functionalities.AddAfter
                         | Functionalities.Append | Functionalities.Prepend
@@ -43,25 +43,9 @@
               query-for="Query"
               sorting-clauses="2"
               enable-query="true"
-              rows-cache-key ="myTest"
+              rows-cache-key ="myTestDA"
               query-grouping-type="typeof(ProductViewModelGrouping)">
-            <column asp-for="Products.Data.Element().TypeId">
-                @*
-               <external-key-static display-property="Products.Data.Element().TypeName"
-    items-selector="@getTasks"
-    query-display="false"
-    items-value-property="Value"
-    items-display-property="Display"
-     />*@
-                <external-key-remote display-property="Products.Data.Element().TypeName"
-    items-value-property="Value"
-    items-display-property="Display"
-    query-display="false"
-    items-url="@(Url.Action("GetTypes", "DetailTest", new { search = "_zzz_" }))"
-    dataset-name="product-types"
-    url-token="_zzz_"
-    max-results="20" />
-  </column> 
+                
                 <column asp-for="Products.Data.Element().Price" colspan="2" />
                 <row-type asp-for="Products.Data.SubInfo<ProductMaintenanceViewModel>().Model"
                           from-row="0">
@@ -69,7 +53,7 @@
                     <column asp-for="Products.Data.SubElement<ProductMaintenanceViewModel>().MaintenanceYearlyRate" />
                 </row-type>
                 <row-type asp-for="Products.Data.SubInfo<ProductViewModelGrouping>().Model" from-row="0">
-                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().ChosenCurrencyCount"/>
+                    <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().ChosenCurrencyCount" />
                     <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().AvailableCount" />
                     <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().DateValidCount" />
                     <column asp-for="Products.Data.SubElement<ProductViewModelGrouping>().TypeIdCount" />
@@ -79,8 +63,7 @@
 
                         <div class="col-xs-4">
                             <copy-html name="main-pager">
-                                <pager
-                                       class="pagination pagination-sm"
+                                <pager class="pagination pagination-sm"
                                        max-pages="4"
                                        page-size-default="3"
                                        total-pages="Products.TotalPages" />
@@ -97,14 +80,14 @@
                             </div>
                         </verify-permission>
                     </div>
-                    <query  type="Filtering" />
-                    <query  type="Sorting" />
-                    <query  type="Grouping"  />
+                    <query type="Filtering" />
+                    <query type="Sorting" />
+                    <query type="Grouping" />
                 </toolbar>
                 <toolbar zone-name="@LayoutStandardPlaces.Footer">
                     <paste-html name="main-pager" />
                 </toolbar>
-            </grid>
+</grid>
         <verify-permission query-for="Query" required-permissions="@(Functionalities.Append | Functionalities.Prepend)"
                            permissions="x => Functionalities.FullInLine 
                         | Functionalities.AddBefore | Functionalities.AddAfter

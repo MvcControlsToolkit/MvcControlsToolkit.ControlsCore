@@ -10,7 +10,8 @@
     if (col.ColumnConnection is ColumnConnectionInfosStatic)
     {
         var infos = col.ColumnConnection as ColumnConnectionInfosStatic;
-        <select asp-for="@Model" asp-items="@(new SelectList(await infos.ItemsSelector(User), infos.ItemsValueProperty, infos.ItemsDisplayProperty))"
+        var items = await infos.GetItems(Context.RequestServices, User);
+        <select asp-for="@Model" asp-items="@(new SelectList(items, infos.ItemsValueProperty, infos.ItemsDisplayProperty))"
                 class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "full-cell")">
             @if (col.PlaceHolder != null)
             {
@@ -21,15 +22,15 @@
     else
     {
         var infos = col.ColumnConnection as ColumnConnectionInfosOnLine;
-        
+        var provider = infos.SuggestionsProvider(Context.RequestServices); 
         <autocomplete for-explorer="@ViewData.ModelExplorer.GetExplorerForProperty(col.For.Name)"
                           display-explorer="@ViewData.ModelExplorer.GetExplorerForProperty(infos.DisplayProperty.Name)"
                         for-expression-override="@col.For.Name"
                         display-expression-override="@infos.DisplayProperty.Name"
                         items-display-property="@infos.ItemsDisplayProperty"
                         items-value-property="@infos.ItemsValueProperty"
-                        items-url="@infos.ItemsUrl"
-                        url-token="@infos.UrlToken"
+                        items-url="@provider.GetDisplayValueSuggestionsUrl(Url)"
+                        url-token="@provider.DisplayValueSuggestionsUrlToken"
                         dataset-name="@infos.DataSetName"
                         max-results="@infos.MaxResults"
                         class="@(!string.IsNullOrEmpty(col.InputCssClass) ? col.InputCssClass : "full-cell")" />

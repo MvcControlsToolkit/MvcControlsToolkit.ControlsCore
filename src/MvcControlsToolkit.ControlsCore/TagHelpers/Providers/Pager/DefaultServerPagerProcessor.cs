@@ -39,10 +39,10 @@ namespace MvcControlsToolkit.Core.TagHelpers.Providers
             if (tag.PageSize?.Model != null && tag.PageSize.Metadata.ModelType == typeof(int))
                 pageSize = (int)tag.PageSize.Model;
             
-            int totalPages = tag.TotalPagesDefault.HasValue? tag.TotalPagesDefault.Value: int.MaxValue;
-            if (tag.TotalPages?.Model != null && tag.TotalPages.Metadata.ModelType == typeof(int))
+            int totalPages = tag.TotalPagesDefault.HasValue ? tag.TotalPagesDefault.Value: int.MaxValue;
+            if (tag.TotalPages?.Model != null )
                 totalPages = (int)tag.TotalPages.Model;
-
+            if (totalPages < 0) totalPages = int.MaxValue;
             QueryDescription query = tag.Query?.Model as QueryDescription;
             int page = tag.CurrentPageDefault;
             if (query != null && query.Page > 0) page = (int)query.Page;

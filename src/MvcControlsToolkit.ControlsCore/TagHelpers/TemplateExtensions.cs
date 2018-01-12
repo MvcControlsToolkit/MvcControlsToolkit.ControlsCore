@@ -145,10 +145,12 @@ namespace MvcControlsToolkit.Core.TagHelpers
             var options = col.FilterClauses[place];
             bool isBool = false;
             bool isEnum = false;
+            bool isChoice = false;
             if ((col.ColumnConnection != null && !col.ColumnConnection.QueryDisplay) ||
                 (isEnum = col.For.Metadata.IsEnum))
             {
                 options = options & (QueryOptions.Equal | QueryOptions.NotEqual);
+                isChoice = col.ColumnConnection is ColumnConnectionInfosStatic;
             }
             else if (col.For.Metadata.UnderlyingOrModelType == typeof(bool)) isBool = true;
             var selections = QueryAttribute.QueryOptionsToEnum(options);
@@ -179,7 +181,7 @@ namespace MvcControlsToolkit.Core.TagHelpers
                 sb.Append("' ");
             }
             sb.Append(">");
-            if(isBool || isEnum)
+            if(isBool || isEnum || isChoice)
             {
                 sb.Append("<option value=''>");
                 sb.Append(HtmlEncoder.Default.Encode(localizer == null ? "none" : localizer["none"]));

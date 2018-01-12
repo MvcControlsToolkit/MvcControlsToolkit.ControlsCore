@@ -76,11 +76,18 @@ namespace ControlsTest.Controllers
 
         IWebQueryProvider queryProvider;
         private readonly ICRUDRepository TypesRepository;
-        public GridTestController(Data.ApplicationDbContext db, IStringLocalizerFactory factory, IHttpContextAccessor accessor, IWebQueryProvider queryProvider) :base(factory, accessor)
+        private IWebQueryable oDataRepository;
+        public GridTestController(
+            Data.ApplicationDbContext db, 
+            IStringLocalizerFactory factory, 
+            IHttpContextAccessor accessor, 
+            IWebQueryProvider queryProvider) :base(factory, accessor)
         {
-            //in actual 3 layers applications repository inherit from DefaultCRUDRepository
+            //in actual 3 layers applications repository inherit 
+            //from DefaultCRUDRepository
             //and then it is DI injected
             Repository = DefaultCRUDRepository.Create(db, db.Products);
+            oDataRepository = new DefaultWebQueryRepository(Repository);
             TypesRepository = DefaultCRUDRepository.Create(db, db.ProductTypes);
             this.queryProvider = queryProvider;
         }
@@ -154,6 +161,28 @@ namespace ControlsTest.Controllers
                             pg, 3,
                             query.GetGrouping<ProductViewModelGrouping>())
                 };
+
+
+            ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;
+
+            return View(model);
+        }
+        public async Task<IActionResult> IndexEditDA()
+        {
+            queryProvider.OrderBy =
+                queryProvider.OrderBy ?? "Name asc";
+            queryProvider.Top = 
+                queryProvider.Top??"3";
+            var query = queryProvider.Parse<ProductViewModel>();
+
+            ProductlistViewModel model = new ProductlistViewModel
+            {
+                Query = query,
+                Products = await oDataRepository
+                    .ExecuteQuery<ProductViewModel, ProductViewModelGrouping>
+                        (queryProvider)
+                   
+            };
 
 
             ViewBag.AllTypes = (await TypesRepository.GetPage<DisplayValue>(null, m => m.OrderBy(n => n.Display), 1, 1000)).Data;

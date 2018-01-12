@@ -18,8 +18,9 @@
         if (col.ColumnConnection is ColumnConnectionInfosStatic)
         {
             var infos = col.ColumnConnection as ColumnConnectionInfosStatic;
+            var items = await infos.GetItems(Context.RequestServices, User);
             <label asp-for="@Model" class="control-label">@col.ColumnTitle</label>
-            <select asp-for="@Model" asp-items="@(new SelectList(await infos.ItemsSelector(User), infos.ItemsValueProperty, infos.ItemsDisplayProperty))"
+            <select asp-for="@Model" asp-items="@(new SelectList(items, infos.ItemsValueProperty, infos.ItemsDisplayProperty))"
                     class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")">
                 @if (col.PlaceHolder != null)
                 {
@@ -31,6 +32,7 @@
         else
         {
             var infos = col.ColumnConnection as ColumnConnectionInfosOnLine;
+            var provider = infos.SuggestionsProvider(Context.RequestServices);
             var tagBuilder = generator.GenerateValidationMessage(ViewContext, col.For.ModelExplorer, col.For.Name, null, "span", null);
             tagBuilder.AddCssClass("text-danger");
             <label for="@TagBuilder.CreateSanitizedId(ViewData.TemplateInfo.GetFullHtmlFieldName(infos.DisplayProperty.Name), IdAttributeDotReplacement)" class="control-label">
@@ -42,8 +44,8 @@
                           display-expression-override="@infos.DisplayProperty.Name"
                           items-display-property="@infos.ItemsDisplayProperty"
                           items-value-property="@infos.ItemsValueProperty"
-                          items-url="@infos.ItemsUrl"
-                          url-token="@infos.UrlToken"
+                          items-url="@provider.GetDisplayValueSuggestionsUrl(Url)"
+                          url-token="@provider.DisplayValueSuggestionsUrlToken"
                           dataset-name="@infos.DataSetName"
                           max-results="@infos.MaxResults"
                           class="@(!string.IsNullOrEmpty(col.InputDetailCssClass) ? col.InputDetailCssClass : "form-control")" />

@@ -10,6 +10,7 @@ using System.Security.Claims;
 using System.Collections;
 using MvcControlsToolkit.Core.Business;
 using MvcControlsToolkit.Core.Types;
+using ControlsTest.Services;
 
 namespace ControlsTest.Models
 {
@@ -46,16 +47,16 @@ namespace ControlsTest.Models
         public bool Available { get; set; }
         [Display(Name = "Type", Order = 250)]
         [Query]
-        public string TypeName { get; set; }
-        [Display(Name = "Type", Order = 250)]
-        [ColumnLayout(DetailWidthsAsString = "70")]
-        [Query]
-        public int? TypeId { get; set; }
-        [Display(Name = "Valid till", Order = 50)]
-        [ColumnLayout(DetailWidthsAsString = "100")]
-        [Query]
-        public Month? DateValid { get; set; }
-    }
+public string TypeName { get; set; }
+
+    [ColumnConnection("TypeName", "Display", "Value", 
+        typeof(ProductTypesProvider))]
+    public int? TypeId { get; set; }
+            [Display(Name = "Valid till", Order = 50)]
+            [ColumnLayout(DetailWidthsAsString = "100")]
+            [Query]
+            public Month? DateValid { get; set; }
+        }
     public class ProductViewModel: ProductViewModelBase
     {
     }
