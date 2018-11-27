@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcControlsToolkit.Controls
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlsTest", "src\ControlsTest\ControlsTest.csproj", "{DEDEF178-AC0A-44D0-95F6-5072A79633F9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcControlsToolkit.CoreTemplates.Bootstrap3", "MvcControlsToolkit.CoreViews.Bootstrap3\MvcControlsToolkit.CoreTemplates.Bootstrap3.csproj", "{DBD5D812-BEF4-4342-A70C-B193F01A73C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{DEDEF178-AC0A-44D0-95F6-5072A79633F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DEDEF178-AC0A-44D0-95F6-5072A79633F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DEDEF178-AC0A-44D0-95F6-5072A79633F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBD5D812-BEF4-4342-A70C-B193F01A73C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBD5D812-BEF4-4342-A70C-B193F01A73C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBD5D812-BEF4-4342-A70C-B193F01A73C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBD5D812-BEF4-4342-A70C-B193F01A73C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{2BC99965-5E56-4126-A0E1-E8B486F5C0DA} = {216F1109-0592-4C64-91D3-4735583E700F}
 		{DEDEF178-AC0A-44D0-95F6-5072A79633F9} = {216F1109-0592-4C64-91D3-4735583E700F}
+		{DBD5D812-BEF4-4342-A70C-B193F01A73C4} = {216F1109-0592-4C64-91D3-4735583E700F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E8497910-A4A8-4429-BC42-D01DD11CFFC5}
